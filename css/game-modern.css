@@ -1065,3 +1065,51 @@ body {
         bottom: 100px;
     }
 }
+
+
+/* AI思考动画 */
+.thinking {
+    position: relative;
+}
+
+.thinking::after {
+    content: '...';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    color: var(--color-primary);
+    font-weight: bold;
+    animation: thinking-dots 1.5s infinite;
+}
+
+@keyframes thinking-dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+    100% { content: '.'; }
+}
+
+/* AI手牌区思考效果 */
+.player-hand.thinking {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    animation: thinking-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes thinking-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+}
