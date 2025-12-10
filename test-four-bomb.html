@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4张3炸弹测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .cards-display {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .card {
+            width: 60px;
+            height: 90px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card.selected {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: translateY(-10px);
+        }
+        .card.red {
+            color: red;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>4张3炸弹测试</h1>
+        <p>测试选择4个相同点数的牌（包括重复花色）是否能正确出牌</p>
+
+        <div class="cards-display" id="cardsContainer"></div>
+
+        <div>
+            <button onclick="testSelection()">测试选择</button>
+            <button onclick="validateCards()">验证牌型</button>
+            <button onclick="clearSelection()">清空选择</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script src="js/components/RuleEngine.js"></script>
+    <script>
+        let selectedCards = [];
+        let ruleEngine;
+
+        // 模拟4张3（其中有两张相同的花色）
+        const cards = [
+            { id: 'card_0', suit: '♦', rank: '3', value: 3, isRed: true },
+            { id: 'card_1', suit: '♣', rank: '3', value: 3, isRed: false },
+            { id: 'card_2', suit: '♥', rank: '3', value: 3, isRed: true },
+            { id: 'card_3', suit: '♦', rank: '3', value: 3, isRed: true }, // 来自第二副牌的方块3
+        ];
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<div class="result ${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        function init() {
+            // 初始化规则引擎
+            ruleEngine = new RuleEngine(null);
+
+            // 渲染牌
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.isRed ? 'red' : ''}`;
+                cardElement.textContent = `${card.rank}${card.suit}`;
+                cardElement.title = `ID: ${card.id}\n来自第${card.deckId || '未知'}副牌`;
+                cardElement.onclick = () => selectCard(card, cardElement);
+                container.appendChild(cardElement);
+            });
+
+            log('初始化完成。请尝试选择4张3。');
+            log('注意：有两张都是♦️3，它们来自不同的副牌，有不同的ID。');
+        }
+
+        function selectCard(card, element) {
+            // 使用ID查找，避免重复牌的问题
+            const index = selectedCards.findIndex(c => c.id === card.id);
+
+            if (index === -1) {
+                // 选中
+                selectedCards.push(card);
+                element.classList.add('selected');
+                log(`选中: ${card.rank}${card.suit} (ID: ${card.id})`);
+            } else {
+                // 取消选中
+                selectedCards.splice(index, 1);
+                element.classList.remove('selected');
+                log(`取消选中: ${card.rank}${card.suit} (ID: ${card.id})`);
+            }
+        }
+
+        function testSelection() {
+            log('\n=== 测试选择行为 ===');
+
+            // 清空选择
+            clearSelection();
+
+            // 模拟第一次点击♦️3（第一张）
+            const firstDiamond = cards[0];
+            const firstElement = document.querySelectorAll('.card')[0];
+            selectCard(firstDiamond, firstElement);
+
+            // 模拟第二次点击第二张♦️3
+            const secondDiamond = cards[3];
+            const secondElement = document.querySelectorAll('.card')[3];
+            selectCard(secondDiamond, secondElement);
+
+            // 检查是否选中了两张不同的牌
+            if (selectedCards.length === 2 && selectedCards[0].id !== selectedCards[1].id) {
+                log('✓ 成功选中了两张不同的♦️3', 'success');
+            } else {
+                log('✗ 选择逻辑有问题', 'error');
+            }
+        }
+
+        function validateCards() {
+            log('\n=== 验证牌型 ===');
+
+            if (selectedCards.length !== 4) {
+                log(`当前选择了${selectedCards.length}张牌，请选择4张`, 'error');
+                return;
+            }
+
+            log(`选择的牌: ${selectedCards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+            log(`牌的ID: ${selectedCards.map(c => c.id).join(', ')}`);
+
+            // 检查是否都是3
+            const allAreThree = selectedCards.every(c => c.rank === '3');
+            if (allAreThree) {
+                log('✓ 所有牌都是3', 'success');
+            } else {
+                log('✗ 不是所有牌都是3', 'error');
+            }
+
+            // 使用规则引擎验证
+            const cardType = ruleEngine.getCardType(selectedCards);
+
+            if (cardType) {
+                log(`规则引擎识别结果:`, 'success');
+                log(`  - 类型: ${cardType.type}`);
+                log(`  - 子类型: ${cardType.subtype || '无'}`);
+                log(`  - 家族: ${cardType.family}`);
+                log(`  - 张数: ${cardType.count || cardType.length || '未知'}`);
+
+                if (cardType.type === 'bomb') {
+                    log('✓ 成功识别为炸弹！', 'success');
+                } else {
+                    log('✗ 未识别为炸弹', 'error');
+                }
+            } else {
+                log('✗ 规则引擎无法识别此牌型', 'error');
+            }
+        }
+
+        function clearSelection() {
+            selectedCards = [];
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            log('已清空选择');
+        }
+
+        // 初始化
+        window.onload = init;
+    </script>
+</body>
+</html>

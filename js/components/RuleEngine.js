@@ -10,8 +10,8 @@ class RuleEngine {
 
         // 牌型权重定义
         this.cardWeights = {
-            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-            'J': 11, 'Q': 12, 'K': 13, 'A': 14,
+            '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15,  // 注意：2大于A
             // 级牌权重
             'level': 101,
             // 王牌权重
@@ -99,13 +99,19 @@ class RuleEngine {
         if (count >= 4 && count <= 8) {
             if (this.isNormalBomb(cards)) {
                 const mainRank = this.getMainRank(cards);
+                // 炸弹专用权重：A=14, K=13, Q=12, J=11, 10=10, 9=9, 8=8, 7=7, 6=6, 5=5, 4=4, 3=3, 2=2
+                // 注意：在炸弹中2是最小的！
+                const bombRankWeights = {
+                    '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+                    'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 2
+                };
                 return {
                     type: 'bomb',
                     subtype: 'normalBomb',
                     family: 'bomb',
                     rank: mainRank,
                     count: count,
-                    weight: this.bombWeights[count] + this.getCardWeight({rank: mainRank})
+                    weight: this.bombWeights[count] + (bombRankWeights[mainRank] || 0)
                 };
             }
         }
@@ -139,6 +145,19 @@ class RuleEngine {
         // 对子
         if (count === 2) {
             if (this.isPair(cards)) {
+                // 特殊处理：王对（大王+小王）
+                const isKingPair = cards.some(c => c.rank === '大王') &&
+                                 cards.some(c => c.rank === '小王');
+
+                if (isKingPair) {
+                    return {
+                        type: 'pair',
+                        family: 'normal',
+                        rank: '王对',
+                        weight: 20 + 103  // 王对的权重基于大王（103）
+                    };
+                }
+
                 return {
                     type: 'pair',
                     family: 'normal',
@@ -247,6 +266,15 @@ class RuleEngine {
      */
     isPair(cards) {
         if (cards.length !== 2) return false;
+
+        // 特殊处理：大王+小王组成王对
+        const isKingPair = cards.some(c => c.rank === '大王') &&
+                          cards.some(c => c.rank === '小王');
+        if (isKingPair) {
+            return true;
+        }
+
+        // 普通对子：点数必须相同
         return cards[0].rank === cards[1].rank;
     }
 
@@ -293,15 +321,26 @@ class RuleEngine {
         // 排序
         const sorted = [...cards].sort((a, b) => this.getCardWeight(a) - this.getCardWeight(b));
 
+        // 检查所有牌是否符合顺子要求
+        for (let i = 0; i < sorted.length; i++) {
+            const card = sorted[i];
+            const weight = this.getCardWeight(card);
+
+            // 2、王牌和级牌不能参与顺子
+            if (card.suit === 'joker' || this.isLevelCard(card) || card.rank === '2') {
+                return null;
+            }
+
+            // 顺子只能使用3-A的牌
+            if (weight < 3 || weight > 14) {
+                return null;
+            }
+        }
+
         // 检查连续性
         for (let i = 1; i < sorted.length; i++) {
             const prevWeight = this.getCardWeight(sorted[i - 1]);
             const currWeight = this.getCardWeight(sorted[i]);
-
-            // 王牌和级牌不能参与顺子
-            if (sorted[i].suit === 'joker' || this.isLevelCard(sorted[i])) {
-                return null;
-            }
 
             if (currWeight !== prevWeight + 1) {
                 return null;
@@ -328,12 +367,25 @@ class RuleEngine {
             rankGroups[card.rank].push(card);
         });
 
-        // 检查每组的数量
+        // 检查每组的数量和牌的合法性
         const pairs = [];
         for (let rank in rankGroups) {
             if (rankGroups[rank].length !== 2) {
                 return null;
             }
+
+            // 检查是否为非法牌（2、王牌、级牌）
+            const card = rankGroups[rank][0];
+            if (card.suit === 'joker' || this.isLevelCard(card) || card.rank === '2') {
+                return null;
+            }
+
+            // 连对只能使用3-A的牌
+            const weight = this.getCardWeight(card);
+            if (weight < 3 || weight > 14) {
+                return null;
+            }
+
             pairs.push(rank);
         }
 
@@ -369,12 +421,25 @@ class RuleEngine {
             rankGroups[card.rank].push(card);
         });
 
-        // 检查每组的数量
+        // 检查每组的数量和牌的合法性
         const triples = [];
         for (let rank in rankGroups) {
             if (rankGroups[rank].length !== 3) {
                 return null;
             }
+
+            // 检查是否为非法牌（2、王牌、级牌）
+            const card = rankGroups[rank][0];
+            if (card.suit === 'joker' || this.isLevelCard(card) || card.rank === '2') {
+                return null;
+            }
+
+            // 钢板只能使用3-A的牌
+            const weight = this.getCardWeight(card);
+            if (weight < 3 || weight > 14) {
+                return null;
+            }
+
             triples.push(rank);
         }
 
@@ -423,6 +488,10 @@ class RuleEngine {
             return false;
         }
 
+        console.log(`[canBeat] 比较: ${cards1.map(c => c.rank + c.suit).join(',')} vs ${cards2.map(c => c.rank + c.suit).join(',')}`);
+        console.log(`[canBeat] 类型: ${type1.type} vs ${type2.type}`);
+        console.log(`[canBeat] 权重: ${type1.weight} vs ${type2.weight}`);
+
         // 炸弹可以打任何非炸弹牌型
         if (type1.family === 'bomb' && type2.family !== 'bomb') {
             return true;
@@ -433,34 +502,56 @@ class RuleEngine {
             return false;
         }
 
-        // 必须是相同牌型
-        if (type1.type !== type2.type) {
-            return false;
-        }
+        // 注意：这一行被移除，因为炸弹可以打任何非炸弹牌型
+        // 炸弹vs非炸弹的逻辑在上面已经处理
 
         // 相同牌型比大小
         if (type1.family === 'bomb') {
             // 天王炸弹最大
-            if (type1.subtype === 'kingBomb') return true;
-            if (type2.subtype === 'kingBomb') return false;
+            if (type1.subtype === 'kingBomb') {
+                console.log(`[canBeat] 天王炸弹最大`);
+                return true;
+            }
+            if (type2.subtype === 'kingBomb') {
+                console.log(`[canBeat] 对方是天王炸弹`);
+                return false;
+            }
 
             // 同花顺 vs 普通炸弹
             if (type1.subtype === 'straightFlush' && type2.subtype !== 'straightFlush') {
                 // 同花顺 > 5炸 和 4炸，但 < 6炸及以上
+                console.log(`[canBeat] 同花顺 vs 普通炸弹: ${type2.count <= 5 ? '胜' : '败'}`);
                 return type2.count <= 5;
             }
             if (type2.subtype === 'straightFlush' && type1.subtype !== 'straightFlush') {
-                return type1.count <= 5;
+                // 普通炸弹 vs 同花顺
+                console.log(`[canBeat] 普通炸弹 vs 同花顺: ${type1.count > 5 ? '胜' : '败'}`);
+                return type1.count > 5;  // 6炸及以上才能打同花顺
             }
 
             // 普通炸弹之间比较
             if (type1.count !== type2.count) {
+                console.log(`[canBeat] 炸弹张数比较: ${type1.count} vs ${type2.count}, ${type1.count > type2.count ? '胜' : '败'}`);
                 return type1.count > type2.count;
             }
             // 张数相同比点数
+            console.log(`[canBeat] 炸弹点数比较: ${type1.weight} vs ${type2.weight}, ${type1.weight > type2.weight ? '胜' : '败'}`);
             return type1.weight > type2.weight;
         } else {
-            // 普通牌型比较
+            // 普通牌型比较：必须相同类型才能比较
+            if (type1.type !== type2.type) {
+                return false;
+            }
+
+            // 相同类型比大小，但需要特殊处理某些牌型
+            if (type1.type === 'straight' || type1.type === 'pairStraight' || type1.type === 'tripleStraight') {
+                // 顺子、连对、钢板必须长度相同才能比较
+                if (type1.length !== type2.length) {
+                    return false;
+                }
+            }
+
+            // 相同类型且长度允许，比较权重
             return type1.weight > type2.weight;
         }
     }
@@ -468,7 +559,7 @@ class RuleEngine {
     /**
      * 验证出牌是否合法
      */
-    validatePlay(cards, lastPlay) {
+    validatePlay(cards, lastPlay, playerHand) {
         if (!cards || cards.length === 0) {
             return { valid: false, message: '请选择要出的牌' };
         }
@@ -478,18 +569,28 @@ class RuleEngine {
             return { valid: false, message: '无效的牌型' };
         }
 
+        // 处理lastPlay参数格式
+        let lastCards = null;
+        if (lastPlay) {
+            if (Array.isArray(lastPlay)) {
+                lastCards = lastPlay;
+            } else if (lastPlay.cards) {
+                lastCards = lastPlay.cards;
+            }
+        }
+
         // 如果是第一手牌，任何有效牌型都可以
-        if (!lastPlay || !lastPlay.cards || lastPlay.cards.length === 0) {
+        if (!lastCards || lastCards.length === 0) {
             return { valid: true, type: currentType };
         }
 
-        const lastType = this.getCardType(lastPlay.cards);
+        const lastType = this.getCardType(lastCards);
         if (!lastType) {
             return { valid: false, message: '上家出牌无效' };
         }
 
         // 使用canBeat方法判断
-        if (this.canBeat(cards, lastPlay.cards)) {
+        if (this.canBeat(cards, lastCards)) {
             return { valid: true, type: currentType };
         }
 

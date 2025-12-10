@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炸弹比较调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>炸弹比较调试</h1>
+        <p>测试4个J vs 4个Q的比较逻辑</p>
+        <button onclick="runTest()">运行测试</button>
+        <div id="output"></div>
+    </div>
+
+    <script src="js/components/RuleEngine.js"></script>
+    <script>
+        let output = document.getElementById('output');
+        let ruleEngine;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<div class="result ${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        function runTest() {
+            output.innerHTML = '';
+            log('开始炸弹比较测试...\n');
+
+            // 初始化规则引擎
+            ruleEngine = new RuleEngine(null);
+
+            // 创建4个J
+            const bombJ = [
+                { id: 'card_1', suit: '♠', rank: 'J', value: 11, isRed: false },
+                { id: 'card_2', suit: '♥', rank: 'J', value: 11, isRed: true },
+                { id: 'card_3', suit: '♣', rank: 'J', value: 11, isRed: false },
+                { id: 'card_4', suit: '♦', rank: 'J', value: 11, isRed: true }
+            ];
+
+            // 创建4个Q
+            const bombQ = [
+                { id: 'card_5', suit: '♠', rank: 'Q', value: 12, isRed: false },
+                { id: 'card_6', suit: '♥', rank: 'Q', value: 12, isRed: true },
+                { id: 'card_7', suit: '♣', rank: 'Q', value: 12, isRed: false },
+                { id: 'card_8', suit: '♦', rank: 'Q', value: 12, isRed: true }
+            ];
+
+            log('测试牌组：');
+            log(`  炸弹1: 4个J (J♠, J♥, J♣, J♦)`);
+            log(`  炸弹2: 4个Q (Q♠, Q♥, Q♣, Q♦)\n`);
+
+            // 识别牌型
+            const typeJ = ruleEngine.getCardType(bombJ);
+            const typeQ = ruleEngine.getCardType(bombQ);
+
+            log('牌型识别结果：');
+            if (typeJ) {
+                log(`  4个J: ${typeJ.type} (子类型: ${typeJ.subtype || '无'}, 权重: ${typeJ.weight})`, 'success');
+            } else {
+                log(`  4个J: 识别失败！`, 'error');
+            }
+
+            if (typeQ) {
+                log(`  4个Q: ${typeQ.type} (子类型: ${typeQ.subtype || '无'}, 权重: ${typeQ.weight})`, 'success');
+            } else {
+                log(`  4个Q: 识别失败！`, 'error');
+            }
+
+            // 测试比较
+            if (typeJ && typeQ) {
+                log('\n比较结果：');
+
+                // Q能否打J
+                const canQBeatJ = ruleEngine.canBeat(bombQ, bombJ);
+                log(`  4个Q 能否打 4个J: ${canQBeatJ ? '是' : '否'}`, canQBeatJ ? 'success' : 'error');
+
+                // J能否打Q（应该为否）
+                const canJBeatQ = ruleEngine.canBeat(bombJ, bombQ);
+                log(`  4个J 能否打 4个Q: ${canJBeatQ ? '是' : '否'}`, !canJBeatQ ? 'success' : 'error');
+
+                // 测试validatePlay
+                log('\n使用validatePlay验证：');
+                const validation = ruleEngine.validatePlay(bombQ, bombJ, []);
+                if (validation.valid) {
+                    log(`  4个Q 可以打 4个J`, 'success');
+                } else {
+                    log(`  4个Q 不能打 4个J: ${validation.message}`, 'error');
+                }
+            }
+
+            // 测试具体的权重值
+            log('\n权重计算详情：');
+            log(`  J的权重: ${ruleEngine.getCardWeight({rank: 'J'})}`);
+            log(`  Q的权重: ${ruleEngine.getCardWeight({rank: 'Q'})}`);
+            log(`  4炸的基础权重: ${ruleEngine.bombWeights[4]}`);
+        }
+
+        window.onload = function() {
+            log('炸弹比较调试工具已就绪');
+            log('点击"运行测试"按钮开始测试\n');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掼蛋游戏测试套件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status.idle {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .output-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .output-header {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .output-header h3 {
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .clear-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .clear-btn:hover {
+            background: #f57c00;
+        }
+
+        .test-output {
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            background: #f8f9fa;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .test-output:empty::before {
+            content: "点击上方按钮运行测试";
+            color: #999;
+            font-style: italic;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .summary-card h4 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .summary-card.success .value {
+            color: #4CAF50;
+        }
+
+        .summary-card.error .value {
+            color: #f44336;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                justify-content: center;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 掼蛋游戏测试套件</h1>
+            <p>验证游戏规则实现的正确性</p>
+        </div>
+
+        <div class="summary-cards" id="summaryCards" style="display: none;">
+            <div class="summary-card">
+                <h4>测试套件</h4>
+                <div class="value" id="totalSuites">0</div>
+            </div>
+            <div class="summary-card">
+                <h4>总测试数</h4>
+                <div class="value" id="totalTests">0</div>
+            </div>
+            <div class="summary-card success">
+                <h4>通过</h4>
+                <div class="value" id="passedTests">0</div>
+            </div>
+            <div class="summary-card error">
+                <h4>失败</h4>
+                <div class="value" id="failedTests">0</div>
+            </div>
+            <div class="summary-card">
+                <h4>成功率</h4>
+                <div class="value" id="successRate">0%</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="runAllBtn" onclick="runAllTests()">
+                运行所有测试
+            </button>
+            <button class="btn btn-secondary" id="runSuiteBtn" onclick="showSuiteSelector()">
+                运行特定测试
+            </button>
+            <button class="btn btn-secondary" onclick="clearOutput()">
+                清空输出
+            </button>
+            <button class="btn btn-danger" id="saveReportBtn" onclick="saveTestReport()" disabled>
+                保存报告
+            </button>
+            <div class="status idle" id="status">就绪</div>
+        </div>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill">0%</div>
+        </div>
+
+        <div class="output-container">
+            <div class="output-header">
+                <h3>测试输出</h3>
+                <button class="clear-btn" onclick="clearOutput()">清空</button>
+            </div>
+            <div class="test-output" id="testOutput"></div>
+        </div>
+    </div>
+
+    <!-- 引入依赖 -->
+    <script src="js/components/RuleEngine.js"></script>
+    <script src="js/test/TestSuite.js"></script>
+    <script src="js/test/TestRunner.js"></script>
+    <script src="js/test/tests/CardTypeTests.js"></script>
+    <script src="js/test/tests/ComparisonTests.js"></script>
+    <script src="js/test/tests/RoundTests.js"></script>
+    <script src="js/test/tests/AITests.js"></script>
+
+    <script>
+        let testRunner = null;
+        let isRunning = false;
+        let currentOutput = '';
+
+        // 更新状态显示
+        function updateStatus(text, type = 'idle') {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = `status ${type}`;
+        }
+
+        // 更新进度条
+        function updateProgress(current, total) {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+
+            progressBar.classList.add('active');
+            const percent = Math.round((current / total) * 100);
+            progressFill.style.width = percent + '%';
+            progressFill.textContent = percent + '%';
+        }
+
+        // 添加输出
+        function appendOutput(text) {
+            const output = document.getElementById('testOutput');
+            output.textContent += text + '\n';
+            output.scrollTop = output.scrollHeight;
+            currentOutput += text + '\n';
+        }
+
+        // 清空输出
+        function clearOutput() {
+            document.getElementById('testOutput').textContent = '';
+            currentOutput = '';
+        }
+
+        // 运行所有测试
+        async function runAllTests() {
+            if (isRunning) return;
+
+            isRunning = true;
+            updateStatus('运行中...', 'running');
+            document.getElementById('runAllBtn').disabled = true;
+
+            // 捕获控制台输出
+            const originalLog = console.log;
+            const originalError = console.error;
+            let testOutput = '';
+
+            console.log = function(...args) {
+                const message = args.join(' ');
+                testOutput += message + '\n';
+                appendOutput(message);
+                originalLog.apply(console, args);
+            };
+
+            console.error = function(...args) {
+                const message = '❌ ' + args.join(' ');
+                testOutput += message + '\n';
+                appendOutput(message);
+                originalError.apply(console, args);
+            };
+
+            try {
+                appendOutput('\n🧪 开始运行掼蛋游戏测试套件...');
+                appendOutput('=====================================\n');
+
+                // 创建测试运行器
+                testRunner = new TestRunner();
+
+                // 创建规则引擎实例
+                const testRuleEngine = new RuleEngine(null);
+
+                // 添加所有测试套件
+                testRunner.addSuite(createCardTypeTests(testRuleEngine));
+                testRunner.addSuite(createComparisonTests(testRuleEngine));
+                testRunner.addSuite(createRoundTests());
+                testRunner.addSuite(createAITests(testRuleEngine));
+
+                // 运行测试
+                const results = await testRunner.runAllTests();
+
+                // 显示汇总
+                showSummary(results);
+
+                // 启用保存报告按钮
+                document.getElementById('saveReportBtn').disabled = false;
+
+                if (results.totalFailed === 0) {
+                    updateStatus('全部通过', 'success');
+                    appendOutput('\n✅ 所有测试通过！');
+                } else {
+                    updateStatus('存在失败', 'error');
+                    appendOutput(`\n❌ 存在 ${results.totalFailed} 个失败测试`);
+                }
+
+            } catch (error) {
+                appendOutput(`\n💥 测试运行出错: ${error.message}`);
+                console.error(error);
+                updateStatus('运行出错', 'error');
+            } finally {
+                // 恢复控制台
+                console.log = originalLog;
+                console.error = originalError;
+
+                // 隐藏进度条
+                document.getElementById('progressBar').classList.remove('active');
+
+                isRunning = false;
+                document.getElementById('runAllBtn').disabled = false;
+            }
+        }
+
+        // 显示测试套件选择器
+        function showSuiteSelector() {
+            if (isRunning) return;
+
+            const suites = ['牌型识别测试', '比大小规则测试', '轮次管理测试', 'AI出牌逻辑测试'];
+            const choice = prompt(`请选择测试套件:\n${suites.map((n, i) => `${i + 1}. ${n}`).join('\n')}\n\n输入数字 (1-${suites.length})`);
+
+            if (choice && !isNaN(choice)) {
+                const index = parseInt(choice) - 1;
+                if (index >= 0 && index < suites.length) {
+                    runSpecificSuite(suites[index]);
+                }
+            }
+        }
+
+        // 运行特定测试套件
+        async function runSpecificSuite(suiteName) {
+            if (isRunning) return;
+
+            isRunning = true;
+            updateStatus(`运行 ${suiteName}...`, 'running');
+            document.getElementById('runSuiteBtn').disabled = true;
+
+            try {
+                appendOutput(`\n🎯 运行测试套件: ${suiteName}`);
+                appendOutput('=====================================\n');
+
+                if (!testRunner) {
+                    testRunner = new TestRunner();
+                    const testRuleEngine = new RuleEngine(null);
+                    testRunner.addSuite(createCardTypeTests(testRuleEngine));
+                    testRunner.addSuite(createComparisonTests(testRuleEngine));
+                    testRunner.addSuite(createRoundTests());
+                    testRunner.addSuite(createAITests(testRuleEngine));
+                }
+
+                const results = await testRunner.runSpecificSuite(suiteName);
+
+                appendOutput(`\n测试完成: ${results.passed}/${results.total} 通过`);
+
+            } catch (error) {
+                appendOutput(`\n💥 运行测试套件出错: ${error.message}`);
+                updateStatus('运行出错', 'error');
+            } finally {
+                isRunning = false;
+                document.getElementById('runSuiteBtn').disabled = false;
+            }
+        }
+
+        // 显示测试汇总
+        function showSummary(results) {
+            document.getElementById('summaryCards').style.display = 'grid';
+            document.getElementById('totalSuites').textContent = results.totalSuites;
+            document.getElementById('totalTests').textContent = results.totalTests;
+            document.getElementById('passedTests').textContent = results.totalPassed;
+            document.getElementById('failedTests').textContent = results.totalFailed;
+
+            const successRate = results.totalTests > 0
+                ? Math.round((results.totalPassed / results.totalTests) * 100)
+                : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+        }
+
+        // 保存测试报告
+        function saveTestReport() {
+            if (!testRunner) {
+                alert('请先运行测试');
+                return;
+            }
+
+            testRunner.saveHTMLReport('guandan-test-report.html');
+            alert('测试报告已保存为 guandan-test-report.html');
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            appendOutput('掼蛋游戏测试套件已就绪');
+            appendOutput('点击"运行所有测试"开始测试');
+            appendOutput('');
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                runAllTests();
+            } else if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveTestReport();
+            } else if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                clearOutput();
+            }
+        });
+    </script>
+</body>
+</html>

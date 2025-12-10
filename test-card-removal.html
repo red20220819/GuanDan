@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手牌选择移除测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .test-result.pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-result.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>手牌选择移除Bug测试</h1>
+        <p>测试修复后的手牌选择和移除逻辑是否正确处理重复牌</p>
+
+        <button onclick="runTests()">运行所有测试</button>
+        <button onclick="testCreateDeck()">测试牌组创建</button>
+        <button onclick="testDuplicateCards()">测试重复牌处理</button>
+        <button onclick="clearOutput()">清空输出</button>
+
+        <h3>测试输出：</h3>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        let outputDiv = document.getElementById('output');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '[ERROR]' : type === 'pass' ? '[PASS]' : '[INFO]';
+            outputDiv.textContent += `${timestamp} ${prefix} ${message}\n`;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function clearOutput() {
+            outputDiv.textContent = '';
+        }
+
+        // 模拟游戏对象的createDeck方法
+        function createTestDeck() {
+            const suits = ['♠', '♥', '♦', '♣'];
+            const ranks = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
+            const deck = [];
+            let cardIdCounter = 0;
+
+            // 创建两副牌（掼蛋使用两副牌）
+            for (let deckCount = 0; deckCount < 2; deckCount++) {
+                for (let suit = 0; suit < 4; suit++) {
+                    for (let rank = 0; rank < 13; rank++) {
+                        deck.push({
+                            id: `card_${cardIdCounter++}`,
+                            suit: suits[suit],
+                            rank: ranks[rank],
+                            value: rank + 3,
+                            isRed: suit === 1 || suit === 2,
+                            deckId: deckCount + 1
+                        });
+                    }
+                }
+            }
+
+            // 添加大小王
+            deck.push({
+                id: `card_${cardIdCounter++}`,
+                suit: 'joker',
+                rank: '小王',
+                value: 16,
+                isRed: true,
+                deckId: 1
+            });
+            deck.push({
+                id: `card_${cardIdCounter++}`,
+                suit: 'joker',
+                rank: '小王',
+                value: 16,
+                isRed: true,
+                deckId: 2
+            });
+            deck.push({
+                id: `card_${cardIdCounter++}`,
+                suit: 'joker',
+                rank: '大王',
+                value: 17,
+                isRed: true,
+                deckId: 1
+            });
+            deck.push({
+                id: `card_${cardIdCounter++}`,
+                suit: 'joker',
+                rank: '大王',
+                value: 17,
+                isRed: true,
+                deckId: 2
+            });
+
+            return deck;
+        }
+
+        // 测试牌组创建
+        function testCreateDeck() {
+            log('\n=== 测试牌组创建 ===');
+
+            const deck = createTestDeck();
+
+            // 检查总数
+            if (deck.length !== 108) {
+                log(`测试失败：牌组总数应为108，实际为${deck.length}`, 'error');
+                return false;
+            }
+            log(`✓ 牌组总数正确：${deck.length}张`, 'pass');
+
+            // 检查每张牌是否有唯一ID
+            const ids = new Set();
+            let hasDuplicate = false;
+            deck.forEach(card => {
+                if (!card.id) {
+                    log(`测试失败：发现没有ID的牌：${card.rank}${card.suit || ''}`, 'error');
+                    hasDuplicate = true;
+                } else if (ids.has(card.id)) {
+                    log(`测试失败：发现重复ID：${card.id}`, 'error');
+                    hasDuplicate = true;
+                } else {
+                    ids.add(card.id);
+                }
+            });
+
+            if (!hasDuplicate) {
+                log(`✓ 所有牌都有唯一ID`, 'pass');
+            }
+
+            // 检查重复牌数量
+            const cardMap = new Map();
+            deck.forEach(card => {
+                if (card.suit !== 'joker') {
+                    const key = `${card.suit}${card.rank}`;
+                    cardMap.set(key, (cardMap.get(key) || 0) + 1);
+                }
+            });
+
+            let duplicateCount = 0;
+            cardMap.forEach((count, key) => {
+                if (count === 2) {
+                    duplicateCount++;
+                }
+            });
+
+            log(`✓ 共有${duplicateCount}种普通牌各2张（应为52种）`, duplicateCount === 52 ? 'pass' : 'error');
+
+            return true;
+        }
+
+        // 测试重复牌处理
+        function testDuplicateCards() {
+            log('\n=== 测试重复牌处理 ===');
+
+            const deck = createTestDeck();
+
+            // 找出所有的K
+            const allKings = deck.filter(card => card.rank === 'K');
+            log(`找到${allKings.length}张K：`);
+            allKings.forEach(king => {
+                log(`  - ${king.rank}${king.suit} (ID: ${king.id}, 来自第${king.deckId}副牌)`);
+            });
+
+            if (allKings.length !== 8) {
+                log(`测试失败：应该有8张K，实际找到${allKings.length}张`, 'error');
+                return false;
+            }
+            log(`✓ K的数量正确：8张`, 'pass');
+
+            // 模拟手牌中有5个K的情况
+            const hand = allKings.slice(0, 5);
+            log(`\n模拟手牌（5张K）：`);
+            hand.forEach(card => {
+                log(`  - ${card.rank}${card.suit} (ID: ${card.id})`);
+            });
+
+            // 测试移除逻辑
+            const cardsToRemove = [hand[0], hand[2], hand[4]]; // 移除第1、3、5张
+
+            log(`\n要移除的牌：`);
+            cardsToRemove.forEach(card => {
+                log(`  - ${card.rank}${card.suit} (ID: ${card.id})`);
+            });
+
+            // 使用新的移除逻辑
+            const originalLength = hand.length;
+            cardsToRemove.forEach(card => {
+                let index = -1;
+                if (card.id) {
+                    index = hand.findIndex(c => c.id === card.id);
+                }
+
+                if (index !== -1) {
+                    log(`成功移除：${card.rank}${card.suit} (原位置：${index})`, 'pass');
+                    hand.splice(index, 1);
+                } else {
+                    log(`移除失败：找不到牌 ${card.rank}${card.suit}`, 'error');
+                }
+            });
+
+            log(`\n移除后手牌：${hand.length}张`);
+            hand.forEach(card => {
+                log(`  - ${card.rank}${card.suit} (ID: ${card.id})`);
+            });
+
+            // 验证结果
+            const expectedLength = originalLength - cardsToRemove.length;
+            if (hand.length === expectedLength) {
+                log(`✓ 移除逻辑正确：从${originalLength}张减到${hand.length}张`, 'pass');
+                return true;
+            } else {
+                log(`测试失败：应该剩余${expectedLength}张，实际剩余${hand.length}张`, 'error');
+                return false;
+            }
+        }
+
+        // 运行所有测试
+        function runTests() {
+            clearOutput();
+            log('开始运行手牌选择移除Bug测试...\n');
+
+            const results = [];
+            results.push(testCreateDeck());
+            results.push(testDuplicateCards());
+
+            const passed = results.filter(r => r).length;
+            const total = results.length;
+
+            log('\n=== 测试总结 ===');
+            if (passed === total) {
+                log(`✓ 所有测试通过！(${passed}/${total})`, 'pass');
+            } else {
+                log(`✗ 部分测试失败 (${passed}/${total})`, 'error');
+            }
+        }
+
+        // 页面加载时显示说明
+        window.onload = function() {
+            log('手牌选择移除Bug测试工具已就绪');
+            log('问题：手牌显示有5个K，但实际出牌只打了4个');
+            log('原因：使用suit+rank作为标识，无法区分重复牌');
+            log('修复：为每张牌添加唯一ID，移除时使用ID匹配\n');
+        };
+    </script>
+</body>
+</html>
