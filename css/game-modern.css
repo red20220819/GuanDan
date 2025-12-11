@@ -1056,7 +1056,30 @@ body {
         width: 350px;  /* 从300px增加到350px */
         height: 200px; /* 保持200px */
     }
+}
 
+/* 排序按钮样式 */
+.btn-sort {
+    background: linear-gradient(135deg,
+        #3498db 0%,
+        #5dade2 50%,
+        #2c3e50 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-sort:hover:not(:disabled) {
+    background: linear-gradient(135deg,
+        #5dade2 0%,
+        #3498db 50%,
+        #2c3e50 100%);
+}
+
+.btn-sort:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
     .player-north {
         top: 100px;
     }

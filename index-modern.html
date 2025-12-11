@@ -237,6 +237,9 @@
                     <button class="btn btn-pass" id="passBtn" onclick="passTurn()" disabled>
                         ✋ 不要
                     </button>
+                    <button class="btn btn-sort" id="sortBtn" onclick="toggleSortMode()" title="切换排序方式">
+                        🔀 点数
+                    </button>
                     <button class="btn btn-report" id="reportBtn" onclick="reportCards()">
                         📊 报牌
                     </button>
@@ -276,6 +279,9 @@
                     north: { id: 'player4', name: '北家AI', cards: [], team: 'B', isAI: true }
                 };
 
+                // 排序模式
+                this.sortMode = localStorage.getItem('guandan_sortMode') || 'rank'; // 'rank' 或 'pattern'
+
                 // 首局通过翻牌决定首出玩家
                 this.isFirstGame = true;
                 this.currentPlayer = null; // 将在initializeGame中设置
@@ -300,6 +306,11 @@
                 this.roundStartPlayer = null;
                 // 记录本轮已经过牌的玩家
                 this.roundPassedPlayers = new Set();
+
+                // 游戏结束相关
+                this.gameRankings = []; // 玩家排名 [头游, 二游, 三游, 末游]
+                this.gameEnded = false;  // 游戏是否结束
+                this.finishedPlayers = []; // 已完成游戏的玩家（按完成顺序）
 
                 // 升级机制
                 this.teamAScore = 0;
@@ -345,6 +356,18 @@
                 this.currentPlayer = this.determineFirstPlayer();
                 console.log(`游戏初始化完成，首出玩家：${this.currentPlayer}`);
 
+                // 初始化排序按钮显示
+                const sortBtn = document.getElementById('sortBtn');
+                if (sortBtn) {
+                    if (this.sortMode === 'pattern') {
+                        sortBtn.innerHTML = '🎯 牌型';
+                        sortBtn.title = '切换到点数排序';
+                    } else {
+                        sortBtn.innerHTML = '🔀 点数';
+                        sortBtn.title = '切换到牌型排序';
+                    }
+                }
+
                 this.updateUI();
                 this.gameState = 'playing';
 
@@ -369,6 +392,9 @@
                 // 验证总牌数
                 const totalCards = Object.values(this.players).reduce((sum, p) => sum + p.cards.length, 0);
                 console.log(`总共分配 ${totalCards} 张牌`);
+
+                // 对手牌进行排序（只对人类玩家）
+                this.sortPlayerCards('south');
             }
 
             createDeck() {
@@ -520,6 +546,340 @@
                 if (southCountElement) {
                     southCountElement.textContent = southCards.length;
                 }
+            }
+
+            // ========== 排序相关方法 ==========
+
+            /**
+             * 切换排序模式
+             */
+            toggleSortMode() {
+                // 切换排序模式
+                this.sortMode = this.sortMode === 'rank' ? 'pattern' : 'rank';
+                localStorage.setItem('guandan_sortMode', this.sortMode);
+
+                // 保存已选中的牌
+                const selectedCards = [...this.selectedCards];
+                const selectedCardIds = selectedCards.map(card => card.rank + card.suit);
+
+                // 重新排序手牌
+                this.sortPlayerCards('south');
+
+                // 恢复选中状态
+                this.selectedCards = [];
+                this.players.south.cards.forEach(card => {
+                    const cardId = card.rank + card.suit;
+                    if (selectedCardIds.includes(cardId)) {
+                        this.selectedCards.push(card);
+                    }
+                });
+
+                // 更新UI
+                this.updateUI();
+
+                // 更新按钮显示
+                const sortBtn = document.getElementById('sortBtn');
+                if (sortBtn) {
+                    if (this.sortMode === 'pattern') {
+                        sortBtn.innerHTML = '🎯 牌型';
+                        sortBtn.title = '切换到点数排序';
+                    } else {
+                        sortBtn.innerHTML = '🔀 点数';
+                        sortBtn.title = '切换到牌型排序';
+                    }
+                }
+
+                // 显示提示
+                const modeText = this.sortMode === 'pattern' ? '牌型' : '点数';
+                this.showMessage(`已切换到${modeText}排序`, 'info');
+            }
+
+            /**
+             * 排序玩家手牌
+             * @param {string} playerId - 玩家ID
+             */
+            sortPlayerCards(playerId) {
+                const player = this.players[playerId];
+                if (!player || player.isAI) return;
+
+                if (this.sortMode === 'pattern') {
+                    // 按牌型排序
+                    player.cards = this.sortCardsByPattern(player.cards);
+                } else {
+                    // 按点数排序（默认）
+                    player.cards.sort((a, b) => this.getRankValue(b.rank) - this.getRankValue(a.rank));
+                }
+            }
+
+            /**
+             * 按牌型排序手牌
+             * @param {Array} cards - 手牌数组
+             * @returns {Array} 排序后的手牌
+             */
+            sortCardsByPattern(cards) {
+                // 牌型优先级（数值越大优先级越高）
+                const patternPriority = {
+                    'king_bomb': 12,      // 天王炸（4张王）
+                    'bomb_8': 11,         // 8炸
+                    'bomb_7': 10,         // 7炸
+                    'bomb_6': 9,          // 6炸
+                    'straight_flush': 8,  // 同花顺
+                    'bomb_5': 7,          // 5炸
+                    'bomb_4': 6,          // 4炸
+                    'airplane': 5,        // 钢板（连三）
+                    'consecutive_pairs': 4, // 连对
+                    'straight': 3,        // 顺子
+                    'three_with_pair': 2, // 三带二
+                    'triple': 1,          // 三张
+                    'pair': 0,            // 对子
+                    'single': -1          // 单张
+                };
+
+                // 按牌值分组
+                const rankGroups = {};
+                cards.forEach(card => {
+                    if (!rankGroups[card.rank]) {
+                        rankGroups[card.rank] = [];
+                    }
+                    rankGroups[card.rank].push(card);
+                });
+
+                const groups = {
+                    king_bomb: [],
+                    bomb_8: [],
+                    bomb_7: [],
+                    bomb_6: [],
+                    straight_flush: [],
+                    bomb_5: [],
+                    bomb_4: [],
+                    airplane: [],
+                    consecutive_pairs: [],
+                    straight: [],
+                    three_with_pair: [],
+                    triple: [],
+                    pair: [],
+                    single: []
+                };
+
+                const usedCards = new Set();
+
+                // 1. 识别天王炸（4张王）
+                const jokers = cards.filter(card => card.suit === 'joker');
+                if (jokers.length === 4) {
+                    groups.king_bomb.push(jokers);
+                    jokers.forEach(card => usedCards.add(card));
+                }
+
+                // 2. 识别炸弹（4张及以上同点数）
+                for (let rank in rankGroups) {
+                    const count = rankGroups[rank].length;
+                    if (count >= 4 && rank !== '小王' && rank !== '大王') {
+                        const bomb = rankGroups[rank].slice(0, count);
+
+                        // 根据张数分类
+                        if (count >= 8) {
+                            groups.bomb_8.push(bomb);
+                        } else if (count >= 7) {
+                            groups.bomb_7.push(bomb);
+                        } else if (count >= 6) {
+                            groups.bomb_6.push(bomb);
+                        } else if (count >= 5) {
+                            groups.bomb_5.push(bomb);
+                        } else {
+                            groups.bomb_4.push(bomb);
+                        }
+
+                        bomb.forEach(card => usedCards.add(card));
+                    }
+                }
+
+                // 3. 识别同花顺（5张以上同花色连续）
+                const suitGroups = {};
+                cards.forEach(card => {
+                    if (!usedCards.has(card) && card.suit !== 'joker' && card.rank !== '2') {
+                        if (!suitGroups[card.suit]) {
+                            suitGroups[card.suit] = [];
+                        }
+                        suitGroups[card.suit].push(card);
+                    }
+                });
+
+                for (let suit in suitGroups) {
+                    const suitCards = suitGroups[suit];
+                    suitCards.sort((a, b) => this.getRankValue(a.rank) - this.getRankValue(b.rank));
+
+                    // 查找所有可能的同花顺
+                    for (let i = 0; i <= suitCards.length - 5; i++) {
+                        for (let length = 5; length <= suitCards.length - i; length++) {
+                            const straight = suitCards.slice(i, i + length);
+                            let isConsecutive = true;
+
+                            for (let j = 1; j < straight.length; j++) {
+                                if (this.getRankValue(straight[j].rank) !== this.getRankValue(straight[j-1].rank) + 1) {
+                                    isConsecutive = false;
+                                    break;
+                                }
+                            }
+
+                            if (isConsecutive && !straight.some(card => usedCards.has(card))) {
+                                groups.straight_flush.push(straight);
+                                straight.forEach(card => usedCards.add(card));
+                                break; // 只取最长的同花顺
+                            }
+                        }
+                    }
+                }
+
+                // 4. 识别连对（3对及以上连续对子）
+                const pairs = [];
+                for (let rank in rankGroups) {
+                    if (rankGroups[rank].length >= 2) {
+                        const availableCards = rankGroups[rank].filter(card => !usedCards.has(card));
+                        if (availableCards.length >= 2) {
+                            pairs.push({
+                                rank: rank,
+                                value: this.getRankValue(rank),
+                                cards: availableCards.slice(0, 2)
+                            });
+                        }
+                    }
+                }
+                pairs.sort((a, b) => b.value - a.value);
+
+                // 查找连续的对子
+                for (let i = 0; i <= pairs.length - 3; i++) {
+                    let consecutivePairs = [pairs[i]];
+                    let j = i + 1;
+
+                    while (j < pairs.length && pairs[j].value === pairs[j-1].value - 1) {
+                        consecutivePairs.push(pairs[j]);
+                        j++;
+                    }
+
+                    if (consecutivePairs.length >= 3) {
+                        const allPairs = consecutivePairs.flatMap(p => p.cards);
+                        groups.consecutive_pairs.push(allPairs);
+                        allPairs.forEach(card => usedCards.add(card));
+                    }
+                }
+
+                // 5. 识别钢板（连三/飞机）
+                const triples = [];
+                for (let rank in rankGroups) {
+                    if (rankGroups[rank].length >= 3) {
+                        const availableCards = rankGroups[rank].filter(card => !usedCards.has(card));
+                        if (availableCards.length >= 3) {
+                            triples.push({
+                                rank: rank,
+                                value: this.getRankValue(rank),
+                                cards: availableCards.slice(0, 3)
+                            });
+                        }
+                    }
+                }
+                triples.sort((a, b) => b.value - a.value);
+
+                // 查找连续的三张
+                for (let i = 0; i <= triples.length - 2; i++) {
+                    let consecutiveTriples = [triples[i]];
+                    let j = i + 1;
+
+                    while (j < triples.length && triples[j].value === triples[j-1].value - 1) {
+                        consecutiveTriples.push(triples[j]);
+                        j++;
+                    }
+
+                    if (consecutiveTriples.length >= 2) {
+                        const allTriples = consecutiveTriples.flatMap(t => t.cards);
+                        groups.airplane.push(allTriples);
+                        allTriples.forEach(card => usedCards.add(card));
+                    }
+                }
+
+                // 6. 识别顺子（5张及以上连续单牌）
+                const nonJokerCards = cards.filter(card =>
+                    !usedCards.has(card) &&
+                    card.suit !== 'joker' &&
+                    card.rank !== '2'
+                );
+                nonJokerCards.sort((a, b) => this.getRankValue(a.rank) - this.getRankValue(b.rank));
+
+                for (let i = 0; i <= nonJokerCards.length - 5; i++) {
+                    for (let length = 5; length <= nonJokerCards.length - i; length++) {
+                        const straight = nonJokerCards.slice(i, i + length);
+                        let isConsecutive = true;
+
+                        for (let j = 1; j < straight.length; j++) {
+                            if (this.getRankValue(straight[j].rank) !== this.getRankValue(straight[j-1].rank) + 1) {
+                                isConsecutive = false;
+                                break;
+                            }
+                        }
+
+                        if (isConsecutive && !straight.some(card => usedCards.has(card))) {
+                            groups.straight.push(straight);
+                            straight.forEach(card => usedCards.add(card));
+                            break;
+                        }
+                    }
+                }
+
+                // 7. 识别剩余的牌型
+                for (let rank in rankGroups) {
+                    const cards = rankGroups[rank];
+                    const availableCards = cards.filter(card => !usedCards.has(card));
+
+                    // 三带二
+                    if (availableCards.length >= 3) {
+                        const triple = availableCards.slice(0, 3);
+
+                        // 查找其他牌作为带牌
+                        const otherCards = availableCards.slice(3);
+                        if (otherCards.length >= 2) {
+                            const threeWithPair = [...triple, ...otherCards.slice(0, 2)];
+                            groups.three_with_pair.push(threeWithPair);
+                            triple.forEach(card => usedCards.add(card));
+                            otherCards.slice(0, 2).forEach(card => usedCards.add(card));
+                            continue;
+                        }
+                    }
+
+                    // 三张
+                    if (availableCards.length >= 3) {
+                        groups.triple.push(availableCards.slice(0, 3));
+                        availableCards.slice(0, 3).forEach(card => usedCards.add(card));
+                    } else if (availableCards.length >= 2) {
+                        groups.pair.push(availableCards.slice(0, 2));
+                        availableCards.slice(0, 2).forEach(card => usedCards.add(card));
+                    } else if (availableCards.length >= 1) {
+                        groups.single.push(availableCards[0]);
+                        usedCards.add(availableCards[0]);
+                    }
+                }
+
+                // 按优先级排序并从大到小排列
+                const sortedCards = [];
+                const sortedTypes = Object.keys(groups).sort((a, b) => patternPriority[b] - patternPriority[a]);
+
+                sortedTypes.forEach(type => {
+                    // 同牌型内按点数从大到小排序
+                    groups[type].sort((a, b) => {
+                        const aValue = Array.isArray(a) ? this.getRankValue(a[0].rank) : this.getRankValue(a.rank);
+                        const bValue = Array.isArray(b) ? this.getRankValue(b[0].rank) : this.getRankValue(b.rank);
+                        return bValue - aValue;
+                    });
+
+                    // 展开所有牌
+                    groups[type].forEach(cards => {
+                        if (Array.isArray(cards)) {
+                            sortedCards.push(...cards);
+                        } else {
+                            sortedCards.push(cards);
+                        }
+                    });
+                });
+
+                return sortedCards;
             }
 
             updatePlayArea() {
@@ -786,20 +1146,36 @@
                 const order = ['south', 'west', 'north', 'east'];
                 const currentIndex = order.indexOf(this.currentPlayer);
 
+                // 检查当前玩家是否手牌为0，如果是则自动过牌
+                if (this.players[this.currentPlayer].cards.length === 0) {
+                    console.log(`[switchToNextPlayer] ${this.currentPlayer} 手牌为0，自动过牌`);
+                    this.roundPassedPlayers.add(this.currentPlayer);
+                }
+
+                // 如果所有其他玩家都过牌了，清理桌面
+                const activePlayers = order.filter(p => this.players[p].cards.length > 0);
+                const passedActivePlayers = activePlayers.filter(p => this.roundPassedPlayers.has(p));
+
+                if (passedActivePlayers.length >= activePlayers.length - 1 && activePlayers.length > 0) {
+                    console.log('[轮次结束] 所有其他活跃玩家都过牌，轮次结束');
+                    this.processRoundEnd();
+                    return;
+                }
+
                 // 找到下一个可以出牌的玩家
                 let nextPlayer = null;
                 for (let i = 1; i <= 4; i++) {
                     const candidate = order[(currentIndex + i) % 4];
-                    // 如果该玩家没有过牌，则可以作为下一个玩家
-                    if (!this.roundPassedPlayers.has(candidate)) {
+                    // 如果该玩家没有过牌且还有手牌，则可以作为下一个玩家
+                    if (!this.roundPassedPlayers.has(candidate) && this.players[candidate].cards.length > 0) {
                         nextPlayer = candidate;
                         break;
                     }
                 }
 
-                // 如果所有其他玩家都过牌了，清理桌面
-                if (this.roundPassedPlayers.size >= 3) {
-                    console.log('[轮次结束] 所有其他玩家都过牌，轮次结束');
+                // 防止死循环
+                if (!nextPlayer) {
+                    console.error('[switchToNextPlayer] 错误：找不到下一个玩家，强制清理桌面');
                     this.processRoundEnd();
                     return;
                 }
@@ -867,7 +1243,8 @@
 
                     // 检查该玩家是否pass
                     const playerPlay = playersAfter.find(p => p.player === nextPlayer);
-                    if (!playerPlay || (playerPlay.cards && playerPlay.cards.length > 0)) {
+                    // 修复：检查action是否为pass，或者cards为空数组
+                    if (!playerPlay || (!playerPlay.action && playerPlay.cards && playerPlay.cards.length > 0)) {
                         console.log(`[shouldClearTable] 玩家 ${nextPlayer} 没有pass或出了牌，不清桌`);
                         return false; // 该玩家没有pass或出了牌
                     } else {
@@ -1062,104 +1439,192 @@
 
             // 统一处理轮次结束逻辑
             processRoundEnd() {
-                // 检查是否应该清理桌面（连续三家pass或四家都出牌）
-                if (this.shouldClearTable()) {
-                    console.log('[轮次结束] 清理桌面');
+                console.log('[轮次结束] 清理桌面');
 
-                    // 获取最后出牌的玩家，他将获得下一轮的首出权
-                    const lastPlayer = this.getLastPlayPlayer();
+                // 获取最后出牌的玩家，他将获得下一轮的首出权
+                const lastPlayer = this.getLastPlayPlayer();
 
-                    // 清理桌面
-                    this.currentRoundCards = [];
-                    this.lastPlayer = null;
+                // 清理桌面
+                this.currentRoundCards = [];
+                this.lastPlayer = null;
 
-                    // 清理过牌记录，开始新一轮
-                    this.roundPassedPlayers.clear();
-                    this.roundPlayers.clear();
+                // 清理过牌记录，开始新一轮
+                this.roundPassedPlayers.clear();
+                this.roundPlayers.clear();
 
-                    // 更新出牌区域显示
-                    const plays = ['northPlays', 'eastPlays', 'southPlays', 'westPlays'];
-                    plays.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) element.innerHTML = '';
-                    });
+                // 更新出牌区域显示
+                const plays = ['northPlays', 'eastPlays', 'southPlays', 'westPlays'];
+                plays.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.innerHTML = '';
+                });
 
-                    // 设置下一轮的首出玩家
-                    if (lastPlayer) {
-                        this.currentPlayer = lastPlayer;
-                        console.log(`[新轮] ${lastPlayer} 获得首出权`);
+                // 设置下一轮的首出玩家
+                if (lastPlayer) {
+                    this.currentPlayer = lastPlayer;
+                    console.log(`[新轮] ${lastPlayer} 获得首出权`);
 
-                        // 如果是AI玩家，给思考时间后自动出牌
-                        if (this.players[this.currentPlayer].isAI) {
-                            const thinkingTime = this.getRandomThinkingTime();
-                            this.showAIThinking(this.currentPlayer);
-                            setTimeout(() => this.aiAutoPlay(), thinkingTime);
-                        }
+                    // 如果是AI玩家，给思考时间后自动出牌
+                    if (this.players[this.currentPlayer].isAI) {
+                        const thinkingTime = this.getRandomThinkingTime();
+                        this.showAIThinking(this.currentPlayer);
+                        setTimeout(() => this.aiAutoPlay(), thinkingTime);
                     }
+                } else {
+                    // 如果找不到最后出牌的玩家，保持当前玩家
+                    console.log(`[新轮] 保持当前玩家: ${this.currentPlayer}`);
                 }
             }
 
-            // 检查游戏是否结束
+            // 检查是否有玩家完成游戏（手牌为0）
             checkGameEnd() {
-                // 检查是否有玩家手牌为0（上游）
+                // 检查是否有玩家手牌为0
                 for (let position in this.players) {
                     if (this.players[position].cards.length === 0) {
-                        console.log(`${position} 手牌为0，游戏结束！`);
-                        // 游戏结束，记录结果
-                        this.endGame(position);
-                        return true;
+                        // 记录完成游戏的玩家
+                        if (!this.finishedPlayers.includes(position)) {
+                            this.finishedPlayers.push(position);
+                            console.log(`${position} 完成游戏，当前排名: ${this.finishedPlayers.join(', ')}`);
+                        }
                     }
                 }
+
+                // 检查是否头游产生（第一个完成的人）
+                if (this.finishedPlayers.length === 1 && !this.gameEnded) {
+                    const firstPlace = this.finishedPlayers[0];
+                    console.log(`${firstPlace} 获得头游！`);
+                    this.showMessage(`${this.players[firstPlace].name} 获得头游！`, 'info');
+
+                    // 头游产生后，继续游戏直到确定二游
+                    return false;
+                }
+
+                // 检查是否所有玩家都完成游戏
+                if (this.finishedPlayers.length === 4) {
+                    console.log('所有玩家完成游戏，游戏结束！');
+                    this.gameEnded = true;
+                    this.endGame();
+                    return true;
+                }
+
                 return false;
             }
 
             // 游戏结束处理
-            endGame(winnerPosition) {
+            endGame() {
                 this.gameState = 'ended';
 
-                // 确定排名
-                const rankings = this.determineRankings(winnerPosition);
+                // 确定最终排名
+                this.gameRankings = [...this.finishedPlayers]; // [头游, 二游, 三游, 末游]
 
-                // 记录末游玩家（第四名）
-                this.lastGameLoser = rankings[3]; // 第四名是末游
+                // 判定胜负
+                const result = this.determineGameResult();
 
                 // 显示结果
-                const winnerName = this.players[winnerPosition].name;
-                const loserName = this.players[this.lastGameLoser].name;
-
-                this.showMessage(`游戏结束！${winnerName}获胜，${loserName}是末游`, 'success');
+                this.showGameResult(result);
 
                 // 询问是否开始新游戏
                 setTimeout(() => {
-                    if (confirm('游戏结束！是否开始新的一局？')) {
+                    if (confirm(`游戏结束！\n${result.description}\n是否开始新的一局？`)) {
                         this.startNewGame();
                     }
                 }, 2000);
             }
 
-            // 确定玩家排名
-            determineRankings(firstPlace) {
-                // 根据剩余手牌数量确定排名
-                const playersWithCards = [];
-                for (let pos in this.players) {
-                    playersWithCards.push({
-                        position: pos,
-                        cardCount: this.players[pos].cards.length
-                    });
+            // 判定游戏结果
+            determineGameResult() {
+                const [first, second, third, fourth] = this.gameRankings;
+
+                // 确定队伍
+                const firstTeam = this.players[first].team;
+                const secondTeam = this.players[second].team;
+
+                // 判定胜负
+                if (firstTeam === secondTeam) {
+                    // 头游和二游同队
+                    const winnerTeam = firstTeam === 'A' ? '己方（A队）' : '对方（B队）';
+                    const levelsUp = 3;
+                    return {
+                        winner: winnerTeam,
+                        type: '头游+二游',
+                        levelsUp: levelsUp,
+                        description: `${winnerTeam}获胜！\n头游+二游，升${levelsUp}级`,
+                        rankings: this.gameRankings
+                    };
+                } else {
+                    // 找出三游的队伍
+                    const thirdTeam = this.players[third].team;
+                    if (firstTeam === thirdTeam) {
+                        // 头游和三游同队
+                        const winnerTeam = firstTeam === 'A' ? '己方（A队）' : '对方（B队）';
+                        const levelsUp = 2;
+                        return {
+                            winner: winnerTeam,
+                            type: '头游+三游',
+                            levelsUp: levelsUp,
+                            description: `${winnerTeam}获胜！\n头游+三游，升${levelsUp}级`,
+                            rankings: this.gameRankings
+                        };
+                    } else {
+                        // 头游和末游同队
+                        const winnerTeam = firstTeam === 'A' ? '己方（A队）' : '对方（B队）';
+                        const levelsUp = 1;
+                        return {
+                            winner: winnerTeam,
+                            type: '头游+末游',
+                            levelsUp: levelsUp,
+                            description: `${winnerTeam}获胜！\n头游+末游，升${levelsUp}级`,
+                            rankings: this.gameRankings
+                        };
+                    }
+                }
+            }
+
+            // 显示游戏结果
+            showGameResult(result) {
+                const rankings = result.rankings.map((pos, index) => {
+                    const rankNames = ['头游', '二游', '三游', '末游'];
+                    return `${rankNames[index]}: ${this.players[pos].name}`;
+                }).join('\n');
+
+                console.log('=== 游戏结果 ===');
+                console.log(rankings);
+                console.log(result.description);
+                console.log('================');
+
+                // 应用升级结果
+                this.applyLevelChange(result);
+            }
+
+            // 应用升级结果
+            applyLevelChange(result) {
+                // 根据胜负结果更新当前级数
+                const winnerTeam = result.winner.includes('己方') ? 'A' : 'B';
+
+                // 获取胜方的当前级数
+                const currentTeamLevel = winnerTeam === 'A' ? this.teamAScore : this.teamBScore;
+                const newLevel = currentTeamLevel + result.levelsUp;
+
+                // 更新胜方级数
+                if (winnerTeam === 'A') {
+                    this.teamAScore = newLevel;
+                } else {
+                    this.teamBScore = newLevel;
                 }
 
-                // 按剩余手牌数排序
-                playersWithCards.sort((a, b) => a.cardCount - b.cardCount);
+                // 全局当前级数取两个队伍级数的较大值
+                this.currentLevel = Math.max(this.teamAScore, this.teamBScore);
 
-                // 返回排名顺序（从第二名到第四名）
-                const rankings = [firstPlace];
-                playersWithCards.forEach(p => {
-                    if (p.position !== firstPlace) {
-                        rankings.push(p.position);
-                    }
-                });
+                // 更新规则引擎的级数
+                if (this.ruleEngine) {
+                    this.ruleEngine.setLevel(this.currentLevel);
+                }
 
-                return rankings;
+                // 下一局首出玩家是末游
+                this.lastGameLoser = this.gameRankings[3]; // 末游
+
+                console.log(`[升级] ${result.winner}从${currentTeamLevel}级升到${newLevel}级`);
+                console.log(`[首出] 下一局由${this.players[this.lastGameLoser].name}先出牌`);
             }
 
             // 检查是否开始新轮次
@@ -1222,6 +1687,11 @@
                 this.selectedCards = [];
                 this.lastPlay = null;
 
+                // 重置游戏结束相关变量
+                this.gameRankings = [];
+                this.gameEnded = false;
+                this.finishedPlayers = [];
+
                 // 清空所有玩家手牌
                 for (let pos in this.players) {
                     this.players[pos].cards = [];
@@ -1245,9 +1715,10 @@
 
             // 辅助函数：获取牌面值大小
             getRankValue(rank) {
+                // 掼蛋规则：A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2
                 const rankOrder = {
-                    '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-                    'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15, '小王': 16, '大王': 17
+                    '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+                    'J': 11, 'Q': 12, 'K': 13, 'A': 14, '小王': 102, '大王': 103
                 };
                 return rankOrder[rank] || 0;
             }
@@ -2408,6 +2879,10 @@
 
         function showSettings() {
             if (game) game.showSettings();
+        }
+
+        function toggleSortMode() {
+            if (game) game.toggleSortMode();
         }
 
         // 模块化加载管理器
