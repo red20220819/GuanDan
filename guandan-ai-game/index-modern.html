@@ -406,9 +406,9 @@
             // 辅助函数：获取牌面显示内容
             getCardDisplay(card) {
                 if (card.rank === '小王') {
-                    return { rank: '王', suit: '', color: 'black', isJoker: true };
+                    return { rank: 'JOKER', suit: '', color: 'black', isJoker: true };
                 } else if (card.rank === '大王') {
-                    return { rank: '王', suit: '', color: 'red', isJoker: true };
+                    return { rank: 'JOKER', suit: '', color: 'red', isJoker: true };
                 }
                 return { rank: card.rank, suit: card.suit, color: card.isRed ? 'red' : 'black', isJoker: false };
             }
@@ -649,10 +649,10 @@
                         // 大小王的特殊显示
                         cardHTML += `
                             <div class="card-top-left">
-                                <div class="card-rank joker-text">${card.rank}</div>
+                                <div class="card-rank joker-text">JOKER</div>
                             </div>
                             <div class="card-bottom-right">
-                                <div class="card-rank joker-text">${card.rank}</div>
+                                <div class="card-rank joker-text">JOKER</div>
                             </div>
                         `;
                     } else {
@@ -1244,8 +1244,16 @@
                 console.log(`  - isPlayerTurn: ${isPlayerTurn}`);
                 console.log(`  - selectedCards.length: ${this.selectedCards.length}`);
 
-                playBtn.disabled = !isPlayerTurn || this.selectedCards.length === 0;
-                console.log(`  - playBtn.disabled: ${playBtn.disabled} (禁用原因: ${!isPlayerTurn ? '不是玩家回合' : '没有选牌'})`);
+                // 检查选中的牌是否可以打出
+                let canPlay = false;
+                if (isPlayerTurn && this.selectedCards.length > 0) {
+                    const lastPlay = this.getLastPlay();
+                    canPlay = this.canBeatLastPlay(this.selectedCards, lastPlay);
+                    console.log(`  - canPlay: ${canPlay} (选中的牌是否能打出)`);
+                }
+
+                playBtn.disabled = !isPlayerTurn || this.selectedCards.length === 0 || !canPlay;
+                console.log(`  - playBtn.disabled: ${playBtn.disabled} (禁用原因: ${!isPlayerTurn ? '不是玩家回合' : this.selectedCards.length === 0 ? '没有选牌' : !canPlay ? '牌不合法' : '未知错误'})`);
 
                 passBtn.disabled = !isPlayerTurn;
                 hintBtn.disabled = !isPlayerTurn;
@@ -1294,11 +1302,12 @@
                     typeName = '单张';
                 }
 
-                // 检查出牌是否合法
+                // canPlay 已经在 updateControlButtons 中计算过了，这里需要重新计算来显示正确的提示
                 let canPlay = false;
                 if (this.currentPlayer === 'south' && this.gameState === 'playing') {
                     const lastPlay = this.getLastPlay();
                     canPlay = this.canBeatLastPlay(this.selectedCards, lastPlay);
+                    console.log(`[updatePlayButtonHint] 重新检查 canPlay: ${canPlay}`);
                 }
 
                 // 更新按钮文本和提示
@@ -1340,37 +1349,11 @@
                 }
 
                 // 使用规则引擎验证
-                const validation = this.rules.validatePlay(cards, lastPlay);
-                return validation.isValid;
+                const validation = this.rules.validatePlay(cards, lastPlay, this.players.south.cards);
+                return validation.valid;
             }
 
-            /**
-             * 获取牌型名称
-             */
-            getCardTypeName(cardType) {
-                // 如果传入的是对象，取type属性
-                if (typeof cardType === 'object' && cardType && cardType.type) {
-                    cardType = cardType.type;
-                }
-
-                const typeNames = {
-                    'single': '单张',
-                    'pair': '对子',
-                    'triple': '三张',
-                    'triple_single': '三带一',
-                    'triple_pair': '三带二',
-                    'straight': '顺子',
-                    'pair_straight': '连对',
-                    'plane': '飞机',
-                    'bomb': '炸弹',
-                    'king_bomb': '天王炸',
-                    'rocket': '天王炸',  // 兼容rocket类型
-                    'straight_flush': '同花顺',
-                    'invalid': '无效'
-                };
-                return typeNames[cardType] || '未知牌型';
-            }
-
+  
             selectCard(card, element) {
                 if (this.currentPlayer !== 'south') return;
 
@@ -2976,11 +2959,22 @@
                 // 清空之前的选择
                 this.clearSelection();
 
-                // 自动选牌
-                hint.cards.forEach(card => {
-                    const cardIndex = this.players.south.cards.findIndex(c =>
-                        c.id === card.id || (c.rank === card.rank && c.suit === card.suit)
-                    );
+                // 自动选牌 - 需要正确处理相同点数的多张牌
+                const remainingCards = [...this.players.south.cards];
+
+                hint.cards.forEach(targetCard => {
+                    // 找到第一张匹配的牌
+                    const cardIndex = this.players.south.cards.findIndex(c => {
+                        // 检查是否已经被选中
+                        const isSelected = this.selectedCards.some(selected =>
+                            selected.rank === c.rank && selected.suit === c.suit
+                        );
+                        // 匹配规则
+                        return !isSelected &&
+                               (c.id === targetCard.id ||
+                                (c.rank === targetCard.rank && c.suit === targetCard.suit));
+                    });
+
                     if (cardIndex !== -1) {
                         this.selectCardByIndex(cardIndex);
                     }
@@ -2991,6 +2985,9 @@
                     ` (${this.currentHintIndex + 1}/${this.availableHints.length})` : '';
                 this.showMessage(`提示${currentIndexText}: ${hint.description}`, 'info');
 
+                // 强制更新UI（特别是出牌按钮状态）
+                this.updateControlButtons();
+
                 // 播放提示音效
                 this.playSound('hint');
             }
@@ -3000,6 +2997,8 @@
                 if (cardElement && !cardElement.classList.contains('selected')) {
                     cardElement.classList.add('selected');
                     this.selectedCards.push(this.players.south.cards[index]);
+                    // 每次选牌后更新按钮状态
+                    this.updateControlButtons();
                 }
             }
 
@@ -3028,9 +3027,12 @@
                     'airplane': '钢板'
                 };
 
-                // 处理特殊对子
+                // 处理特殊牌型
                 if (cardType.type === 'pair' && cardType.rank === '王对') {
                     return '王对';
+                }
+                if (cardType.type === 'triple' && cardType.rank === '王牌') {
+                    return '三张王牌';
                 }
 
                 return typeNames[cardType.type] || cardType.type || '未知牌型';
@@ -3097,13 +3099,20 @@
                 for (let rank in rankGroups) {
                     const group = rankGroups[rank];
                     if (group.length >= 2) {
-                        const pair = [group[0], group[1]];
-                        const validation = this.rules.validatePlay(pair, lastPlay, handCards);
-                        if (validation.valid) {
-                            possiblePlays.push({
-                                cards: pair,
-                                type: validation.type
-                            });
+                        // 尝试所有可能的组合
+                        for (let i = 0; i < group.length - 1; i++) {
+                            for (let j = i + 1; j < group.length; j++) {
+                                const pair = [group[i], group[j]];
+                                const validation = this.rules.validatePlay(pair, lastPlay, handCards);
+                                console.log(`[对子检查] 尝试 ${rank}: ${pair.map(c => c.rank + c.suit).join(', ')}, 验证:`, validation);
+                                if (validation.valid) {
+                                    possiblePlays.push({
+                                        cards: pair,
+                                        type: validation.type
+                                    });
+                                    console.log(`[对子检查] ✓ ${rank} 可以出`);
+                                }
+                            }
                         }
                     }
                 }
@@ -3444,25 +3453,38 @@
                     }
                 }
 
-                // 检查火箭（大小王）
+                // 检查王牌特殊牌型
                 const jokers = handCards.filter(card => card.suit === 'joker');
-                if (jokers.length >= 2) {
-                    const hasBig = jokers.some(j => j.rank === 'big');
-                    const hasSmall = jokers.some(j => j.rank === 'small');
-                    if (hasBig && hasSmall) {
-                        const rocketCards = jokers.filter(j => j.rank === 'big' || j.rank === 'small').slice(0, 2);
-                        possiblePlays.push({
-                            cards: rocketCards,
-                            type: { type: 'rocket', subtype: 'kingRocket' }
-                        });
-                    }
+
+                // 四张王牌 - 天王炸
+                if (jokers.length === 4) {
+                    possiblePlays.push({
+                        cards: jokers.slice(0, 4),
+                        type: { type: 'bomb', subtype: 'kingBomb', family: 'bomb' }
+                    });
+                }
+
+                // 三张王牌 - 三张
+                if (jokers.length === 3) {
+                    possiblePlays.push({
+                        cards: jokers.slice(0, 3),
+                        type: { type: 'triple', family: 'normal', rank: '王牌' }
+                    });
+                }
+
+                // 两张王牌 - 王对
+                if (jokers.length === 2) {
+                    possiblePlays.push({
+                        cards: jokers.slice(0, 2),
+                        type: { type: 'pair', family: 'normal', rank: '王对' }
+                    });
                 }
             }
 
             // 找单牌
             findSingles(handCards, possiblePlays, lastType, lastPlay) {
-                // 如果上家出的是炸弹或火箭，不能用单牌打
-                if (lastType.type === 'bomb' || lastType.type === 'rocket') {
+                // 如果上家出的是炸弹，不能用单牌打
+                if (lastType.family === 'bomb') {
                     return;
                 }
 
@@ -3489,8 +3511,8 @@
 
             // 找对子
             findPairs(handCards, possiblePlays, lastType) {
-                // 如果上家出的是炸弹或火箭，不能用对子打
-                if (lastType.type === 'bomb' || lastType.type === 'rocket') {
+                // 如果上家出的是炸弹，不能用对子打
+                if (lastType.family === 'bomb') {
                     return;
                 }
 
@@ -3523,8 +3545,8 @@
 
             // 找三张
             findTriples(handCards, possiblePlays, lastType) {
-                // 如果上家出的是炸弹或火箭，不能用三张打
-                if (lastType.type === 'bomb' || lastType.type === 'rocket') {
+                // 如果上家出的是炸弹，不能用三张打
+                if (lastType.family === 'bomb') {
                     return;
                 }
 
@@ -3675,71 +3697,8 @@
             getCardType(cards) {
                 if (!cards || cards.length === 0) return null;
 
-                // 检查大小王（炸弹）
-                if (cards.length === 1) {
-                    if (cards[0].suit === 'joker') {
-                        return { type: 'bomb', subtype: 'singleJoker' };
-                    }
-                    return { type: 'single' };
-                } else if (cards.length === 2) {
-                    // 检查是否是火箭（大小王）
-                    if (cards[0].suit === 'joker' && cards[1].suit === 'joker') {
-                        return { type: 'rocket', subtype: 'kingRocket' };
-                    }
-                    // 检查是否是对子
-                    if (cards[0].rank === cards[1].rank) {
-                        return { type: 'pair' };
-                    }
-                    return { type: 'invalid' };
-                } else if (cards.length === 3) {
-                    // 检查是否是三张
-                    if (cards[0].rank === cards[1].rank && cards[1].rank === cards[2].rank) {
-                        return { type: 'triple' };
-                    }
-                    return { type: 'invalid' };
-                } else if (cards.length === 4) {
-                    // 检查是否是炸弹（4张同点数）
-                    const firstRank = cards[0].rank;
-                    if (cards.every(card => card.rank === firstRank)) {
-                        return { type: 'bomb', subtype: '4bomb' };
-                    }
-                    // 检查三带一
-                    const rankCounts = {};
-                    cards.forEach(card => {
-                        rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
-                    });
-                    const counts = Object.values(rankCounts);
-                    if (counts.includes(3) && counts.includes(1)) {
-                        const mainRank = Object.keys(rankCounts).find(rank => rankCounts[rank] === 3);
-                        return { type: 'tripleWithOne', mainRank: this.getRankValue(mainRank) };
-                    }
-                    return { type: 'invalid' };
-                } else if (cards.length === 5) {
-                    // 检查是否是炸弹（5张同点数）
-                    const firstRank = cards[0].rank;
-                    if (cards.every(card => card.rank === firstRank)) {
-                        return { type: 'bomb', subtype: '5bomb' };
-                    }
-                    // 检查三带二
-                    const rankCounts = {};
-                    cards.forEach(card => {
-                        rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
-                    });
-                    const counts = Object.values(rankCounts);
-                    if (counts.includes(3) && counts.includes(2)) {
-                        const mainRank = Object.keys(rankCounts).find(rank => rankCounts[rank] === 3);
-                        return { type: 'tripleWithPair', mainRank: this.getRankValue(mainRank) };
-                    }
-                    return { type: 'invalid' };
-                } else if (cards.length >= 6) {
-                    // 检查是否是炸弹（6张或更多同点数）
-                    const firstRank = cards[0].rank;
-                    if (cards.every(card => card.rank === firstRank)) {
-                        return { type: 'bomb', subtype: `${cards.length}bomb` };
-                    }
-                }
-
-                return { type: 'basic' };
+                // 使用规则引擎识别牌型
+                return this.rules.getCardType(cards);
             }
 
             // 验证牌型是否有效

@@ -93,6 +93,20 @@ class RuleEngine {
             };
         }
 
+        // 王牌特殊牌型（仅王牌）
+        if (jokerCount === count) {
+            // 所有牌都是王牌
+            if (count === 3) {
+                // 三张王牌
+                return {
+                    type: 'triple',
+                    family: 'normal',
+                    rank: '王牌',
+                    weight: 30 + 103  // 基于大王的权重
+                };
+            }
+        }
+
         // 普通炸弹（4-8张同点数）
         if (count >= 4 && count <= 8) {
             if (this.isNormalBomb(cards)) {
@@ -143,11 +157,9 @@ class RuleEngine {
         // 对子
         if (count === 2) {
             if (this.isPair(cards)) {
-                // 特殊处理：王对（大王+小王）
-                const isKingPair = cards.some(c => c.rank === '大王') &&
-                                 cards.some(c => c.rank === '小王');
-
-                if (isKingPair) {
+                // 特殊处理：任意两张王牌都是王对
+                const jokerCount = cards.filter(c => c.suit === 'joker').length;
+                if (jokerCount === 2) {
                     return {
                         type: 'pair',
                         family: 'normal',
@@ -265,10 +277,9 @@ class RuleEngine {
     isPair(cards) {
         if (cards.length !== 2) return false;
 
-        // 特殊处理：大王+小王组成王对
-        const isKingPair = cards.some(c => c.rank === '大王') &&
-                          cards.some(c => c.rank === '小王');
-        if (isKingPair) {
+        // 特殊处理：任意两张王牌都可以组成王对
+        const jokerCount = cards.filter(c => c.suit === 'joker').length;
+        if (jokerCount === 2) {
             return true;
         }
 
@@ -281,6 +292,14 @@ class RuleEngine {
      */
     isTriple(cards) {
         if (cards.length !== 3) return false;
+
+        // 特殊处理：三张王牌
+        const jokerCount = cards.filter(c => c.suit === 'joker').length;
+        if (jokerCount === 3) {
+            return true;
+        }
+
+        // 普通三张：点数必须相同
         return cards[0].rank === cards[1].rank && cards[1].rank === cards[2].rank;
     }
 
