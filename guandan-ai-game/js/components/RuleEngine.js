@@ -29,7 +29,7 @@ class RuleEngine {
         };
 
         // 同花顺炸弹权重（介于6炸和5炸之间）
-        this.straightFlushWeight = 550;
+        this.straightFlushWeight = 650;
     }
 
     /**
