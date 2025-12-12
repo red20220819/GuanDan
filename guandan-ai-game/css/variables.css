@@ -1,0 +1,377 @@
+/* 🎨 CSS变量系统 - 掼蛋游戏设计令牌 */
+
+/* =======================================
+   ROOT VARIABLES - 全局设计变量
+   ======================================= */
+
+:root {
+  /* 颜色系统 - 基于HSL色彩空间便于调整 */
+
+  /* 主色调 */
+  --color-primary-hue: 210;
+  --color-primary-saturation: 50%;
+  --color-primary-lightness: 40%;
+
+  --color-primary: hsl(var(--color-primary-hue), var(--color-primary-saturation), var(--color-primary-lightness));
+  --color-primary-light: hsl(var(--color-primary-hue), var(--color-primary-saturation), calc(var(--color-primary-lightness) + 15%));
+  --color-primary-dark: hsl(var(--color-primary-hue), var(--color-primary-saturation), calc(var(--color-primary-lightness) - 15%));
+
+  /* 次要色调 */
+  --color-secondary-hue: 145;
+  --color-secondary-saturation: 63%;
+  --color-secondary-lightness: 49%;
+
+  --color-secondary: hsl(var(--color-secondary-hue), var(--color-secondary-saturation), var(--color-secondary-lightness));
+  --color-secondary-light: hsl(var(--color-secondary-hue), var(--color-secondary-saturation), calc(var(--color-secondary-lightness) + 15%));
+  --color-secondary-dark: hsl(var(--color-secondary-hue), var(--color-secondary-saturation), calc(var(--color-secondary-lightness) - 15%));
+
+  /* 中性色调 */
+  --color-neutral-100: hsl(210, 20%, 98%);
+  --color-neutral-200: hsl(210, 16%, 93%);
+  --color-neutral-300: hsl(210, 12%, 85%);
+  --color-neutral-400: hsl(210, 10%, 70%);
+  --color-neutral-500: hsl(210, 8%, 55%);
+  --color-neutral-600: hsl(210, 12%, 40%);
+  --color-neutral-700: hsl(210, 16%, 25%);
+  --color-neutral-800: hsl(210, 20%, 15%);
+  --color-neutral-900: hsl(210, 24%, 10%);
+
+  /* 功能色调 */
+  --color-success: hsl(145, 63%, 49%);
+  --color-warning: hsl(35, 92%, 55%);
+  --color-error: hsl(0, 84%, 60%);
+  --color-info: hsl(205, 82%, 61%);
+
+  /* 游戏特定颜色 */
+  --color-game-bg-start: hsl(210, 29%, 24%);
+  --color-game-bg-end: hsl(145, 63%, 42%);
+  --color-table-felt: hsl(145, 40%, 35%);
+  --color-table-border: hsl(210, 13%, 30%);
+
+  /* 玩家颜色 */
+  --color-player-north: hsl(280, 60%, 60%);
+  --color-player-south: hsl(210, 80%, 55%);
+  --color-player-east: hsl(0, 75%, 55%);
+  --color-player-west: hsl(45, 85%, 55%);
+
+  /* 牌面颜色 */
+  --color-card-red: hsl(0, 70%, 45%);
+  --color-card-black: hsl(210, 10%, 20%);
+  --color-card-bg: hsl(45, 20%, 95%);
+  --color-card-border: hsl(210, 15%, 80%);
+  --color-card-shadow: hsla(210, 20%, 20%, 0.3);
+
+  /* =======================================
+     TYPOGRAPHY SYSTEM - 字体系统
+     ======================================= */
+
+  /* 字体族 */
+  --font-family-primary: 'Segoe UI', 'Microsoft YaHei', '微软雅黑', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  --font-family-icon: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+
+  /* 字体大小 - 使用clamp实现流体排版 */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  --font-size-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+  --font-size-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);
+
+  /* 字重 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* 行高 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* =======================================
+     SPACING SYSTEM - 间距系统
+     ======================================= */
+
+  /* 基础间距单位 - 使用8px网格系统 */
+  --spacing-unit: 0.5rem; /* 8px */
+
+  --space-0: 0;
+  --space-1: calc(var(--spacing-unit) * 0.5);   /* 4px */
+  --space-2: calc(var(--spacing-unit) * 1);     /* 8px */
+  --space-3: calc(var(--spacing-unit) * 1.5);   /* 12px */
+  --space-4: calc(var(--spacing-unit) * 2);     /* 16px */
+  --space-5: calc(var(--spacing-unit) * 2.5);   /* 20px */
+  --space-6: calc(var(--spacing-unit) * 3);     /* 24px */
+  --space-8: calc(var(--spacing-unit) * 4);     /* 32px */
+  --space-10: calc(var(--spacing-unit) * 5);    /* 40px */
+  --space-12: calc(var(--spacing-unit) * 6);    /* 48px */
+  --space-16: calc(var(--spacing-unit) * 8);    /* 64px */
+  --space-20: calc(var(--spacing-unit) * 10);   /* 80px */
+  --space-24: calc(var(--spacing-unit) * 12);   /* 96px */
+
+  /* =======================================
+     CARD SYSTEM - 牌面尺寸系统
+     ======================================= */
+
+  /* 基础牌面尺寸 - 优化为更紧凑 */
+  --card-width: 50px;
+  --card-height: 70px;
+  --card-border-radius: 6px;
+  --card-border-width: 1px;
+
+  /* 响应式牌面尺寸 */
+  --card-width-sm: 40px;
+  --card-height-sm: 56px;
+
+  --card-width-xs: 32px;
+  --card-height-xs: 45px;
+
+  --card-width-lg: 60px;
+  --card-height-lg: 84px;
+
+  /* 牌面间距 - 支持更紧密堆叠 */
+  --card-gap: 6px;
+  --card-gap-sm: 3px;
+  --card-gap-lg: 8px;
+  --card-overlap: -38px; /* 南方玩家手牌重叠间距 - 进一步缩小 */
+  --card-overlap-ai: -40px; /* AI玩家手牌重叠间距 */
+
+  /* 牌面动画 */
+  --card-transition-duration: 0.3s;
+  --card-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* =======================================
+     ANIMATION SYSTEM - 动画系统
+     ======================================= */
+
+  /* 动画时长 */
+  --duration-instant: 0.1s;
+  --duration-fast: 0.2s;
+  --duration-normal: 0.3s;
+  --duration-slow: 0.5s;
+  --duration-slower: 0.8s;
+
+  /* 动画缓动函数 */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* 通用动画 */
+  --animation-fade-in: fadeIn var(--duration-normal) var(--ease-out);
+  --animation-slide-up: slideUp var(--duration-normal) var(--ease-out);
+  --animation-scale-in: scaleIn var(--duration-fast) var(--ease-out);
+
+  /* =======================================
+     LAYOUT SYSTEM - 布局系统
+     ======================================= */
+
+  /* 容器尺寸 */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  /* 响应式断点 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* 布局间距 */
+  --layout-padding: var(--space-4);
+  --layout-gap: var(--space-6);
+
+  /* =======================================
+     SHADOW SYSTEM - 阴影系统
+     ======================================= */
+
+  /* 基础阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* 游戏特定阴影 */
+  --shadow-card: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-button: 0 4px 15px rgba(0, 0, 0, 0.2);
+  --shadow-button-hover: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+  /* =======================================
+     BORDER SYSTEM - 边框系统
+     ======================================= */
+
+  /* 圆角 */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;   /* 2px */
+  --radius-base: 0.25rem;  /* 4px */
+  --radius-md: 0.375rem;   /* 6px */
+  --radius-lg: 0.5rem;     /* 8px */
+  --radius-xl: 0.75rem;    /* 12px */
+  --radius-2xl: 1rem;      /* 16px */
+  --radius-3xl: 1.5rem;    /* 24px */
+  --radius-full: 9999px;
+
+  /* 边框宽度 */
+  --border-width-0: 0;
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+
+  /* =======================================
+     Z-INDEX SYSTEM - 层级系统
+     ======================================= */
+
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* 游戏特定层级 */
+  --z-game-table: 1;
+  --z-game-ui: 100;
+  --z-game-modal: 200;
+  --z-game-tooltip: 300;
+
+  /* =======================================
+     ACCESSIBILITY - 可访问性
+     ======================================= */
+
+  /* 焦点样式 */
+  --focus-ring-width: 2px;
+  --focus-ring-color: var(--color-primary);
+  --focus-ring-offset: 2px;
+
+  /* 最小触摸目标 */
+  --min-touch-target: 44px;
+
+  /* 色彩对比度 - WCAG标准 */
+  --contrast-min-ratio: 4.5; /* AA级标准 */
+  --contrast-enhanced-ratio: 7; /* AAA级标准 */
+}
+
+/* =======================================
+   DARK MODE VARIABLES - 暗色模式变量
+   ======================================= */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗色模式颜色调整 */
+    --color-neutral-100: hsl(210, 20%, 10%);
+    --color-neutral-200: hsl(210, 16%, 15%);
+    --color-neutral-300: hsl(210, 12%, 25%);
+    --color-neutral-400: hsl(210, 10%, 40%);
+    --color-neutral-500: hsl(210, 8%, 55%);
+    --color-neutral-600: hsl(210, 12%, 70%);
+    --color-neutral-700: hsl(210, 16%, 85%);
+    --color-neutral-800: hsl(210, 20%, 90%);
+    --color-neutral-900: hsl(210, 24%, 95%);
+
+    /* 游戏背景暗色调 */
+    --color-game-bg-start: hsl(210, 29%, 15%);
+    --color-game-bg-end: hsl(145, 40%, 25%);
+    --color-table-felt: hsl(145, 30%, 25%);
+    --color-table-border: hsl(210, 13%, 20%);
+
+    /* 阴影调整 */
+    --shadow-card: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-card-hover: 0 8px 16px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* =======================================
+   RESPONSIVE VARIABLES - 响应式变量
+   ======================================= */
+
+/* 手机端变量 */
+@media (max-width: 480px) {
+  :root {
+    /* 字体大小调整 */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 0.9375rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.125rem;
+    --font-size-2xl: 1.25rem;
+    --font-size-3xl: 1.5rem;
+    --font-size-4xl: 1.875rem;
+
+    /* 牌面尺寸 */
+    --card-width: var(--card-width-xs);
+    --card-height: var(--card-height-xs);
+    --card-gap: var(--card-gap-sm);
+
+    /* 间距调整 */
+    --layout-padding: var(--space-3);
+    --layout-gap: var(--space-4);
+
+    /* 最小触摸目标 */
+    --min-touch-target: 48px; /* 移动端更大的触摸目标 */
+  }
+}
+
+/* 平板端变量 */
+@media (min-width: 481px) and (max-width: 768px) {
+  :root {
+    /* 牌面尺寸 */
+    --card-width: var(--card-width-sm);
+    --card-height: var(--card-height-sm);
+
+    /* 间距调整 */
+    --layout-padding: var(--space-4);
+    --layout-gap: var(--space-5);
+  }
+}
+
+/* 桌面端变量 */
+@media (min-width: 769px) and (max-width: 1280px) {
+  :root {
+    /* 牌面尺寸 */
+    --card-width: 60px;
+    --card-height: 84px;
+  }
+}
+
+/* 大屏桌面端 */
+@media (min-width: 1281px) {
+  :root {
+    /* 牌面尺寸 */
+    --card-width: var(--card-width-lg);
+    --card-height: var(--card-height-lg);
+
+    /* 更大的字体 */
+    --font-size-base: 1.125rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+  }
+}
+
+/* =======================================
+   REDUCED MOTION - 减少动画模式
+   ======================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-normal: 0.01ms;
+    --duration-slow: 0.01ms;
+    --duration-slower: 0.01ms;
+
+    --card-transition-duration: 0.01ms;
+
+    --animation-fade-in: none;
+    --animation-slide-up: none;
+    --animation-scale-in: none;
+  }
+}

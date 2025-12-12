@@ -1,0 +1,634 @@
+/* 📱 响应式布局系统 - 掼蛋游戏 */
+
+/* =======================================
+   BASE LAYOUT SYSTEM - 基础布局系统
+   ======================================= */
+
+/* 游戏容器 - 使用CSS Grid实现响应式布局 */
+.game-table {
+  container-type: inline-size;
+}
+
+/* 各区域命名 - 已在game.css中正确设置 */
+
+/* =======================================
+   MOBILE LAYOUT (max-width: 480px)
+   ======================================= */
+
+@media (max-width: 480px) {
+  .game-table {
+    grid-template-areas:
+      "top-info-bar"
+      "team-info-bar"
+      "player-north"
+      "central-play-area"
+      "player-south"
+      "control-panel";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto 1fr auto auto;
+    gap: var(--space-3, 10px);
+    padding: var(--space-3, 10px);
+  }
+
+  /* 隐藏东西玩家，使用指示器代替 */
+  .player-west,
+  .player-east {
+    display: none;
+  }
+
+  /* 简化顶部信息栏 */
+  .top-info-bar {
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  .info-display {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+
+  /* 团队信息栏优化 */
+  .team-info-bar {
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+
+  /* 中央区域重新设计 */
+  .central-play-area {
+    min-height: 40vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  /* 玩家手牌区域 */
+  .player-hand-cards {
+    max-width: 100%;
+    padding: var(--space-2);
+    gap: var(--card-gap-sm);
+  }
+
+  /* 牌面尺寸调整 */
+  .player-card {
+    width: var(--card-width-xs);
+    height: var(--card-height-xs);
+    font-size: var(--font-size-xs);
+  }
+
+  /* 控制面板重新布局 */
+  .control-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(44, 62, 80, 0.98);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    z-index: var(--z-fixed);
+  }
+
+  .control-buttons {
+    justify-content: space-around;
+    gap: var(--space-2);
+  }
+
+  .btn {
+    min-width: var(--min-touch-target);
+    min-height: var(--min-touch-target);
+    font-size: var(--font-size-sm);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  /* 按钮图标和文字布局 */
+  .btn {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .btn .btn-icon {
+    font-size: var(--font-size-lg);
+  }
+
+  .btn .btn-text {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* =======================================
+   TABLET LAYOUT (481px - 768px)
+   ======================================= */
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .game-container {
+    grid-template-areas:
+      "top-bar top-bar"
+      "team-info team-info"
+      "west center"
+      "south south"
+      "controls controls";
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: auto auto 1fr auto auto auto;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  /* 隐藏东侧玩家 */
+  .player-position.player-east {
+    display: none;
+  }
+
+  /* 调整顶部信息栏 */
+  .top-info-bar {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  /* 团队信息栏 */
+  .team-info-bar {
+    padding: var(--space-3);
+    gap: var(--space-4);
+  }
+
+  /* 玩家区域布局 */
+  .player-position.player-west {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 牌面尺寸 */
+  .player-card {
+    width: var(--card-width-sm);
+    height: var(--card-height-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  /* 控制面板 */
+  .control-panel {
+    padding: var(--space-4);
+  }
+
+  .control-buttons {
+    justify-content: center;
+    gap: var(--space-3);
+  }
+}
+
+/* =======================================
+   DESKTOP LAYOUT (769px - 1280px)
+   ======================================= */
+
+@media (min-width: 769px) and (max-width: 1280px) {
+  .game-container {
+    grid-template-columns: 1fr 2.5fr 1fr;
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+
+  /* 优化顶部信息栏布局 */
+  .top-info-bar {
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-6);
+  }
+
+  /* 团队信息栏 */
+  .team-info-bar {
+    justify-content: center;
+    padding: var(--space-4);
+    gap: var(--space-6);
+  }
+
+  /* 玩家区域 */
+  .player-position {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 标准牌面尺寸 */
+  .player-card {
+    width: var(--card-width);
+    height: var(--card-height);
+  }
+}
+
+/* =======================================
+   LARGE DESKTOP LAYOUT (1281px+)
+   ======================================= */
+
+@media (min-width: 1281px) {
+  .game-container {
+    grid-template-columns: 1fr 3fr 1fr;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+
+  /* 大屏幕优化 */
+  .top-info-bar {
+    justify-content: space-between;
+    padding: var(--space-5) var(--space-8);
+  }
+
+  .info-display {
+    font-size: var(--font-size-lg);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  /* 团队信息栏 */
+  .team-info-bar {
+    justify-content: center;
+    padding: var(--space-5);
+    gap: var(--space-8);
+    font-size: var(--font-size-lg);
+  }
+
+  /* 大纸牌尺寸 */
+  .player-card {
+    width: var(--card-width-lg);
+    height: var(--card-height-lg);
+    font-size: var(--font-size-base);
+  }
+
+  /* 控制面板 */
+  .control-panel {
+    padding: var(--space-6);
+  }
+
+  .btn {
+    font-size: var(--font-size-base);
+    padding: var(--space-4) var(--space-6);
+    min-width: 120px;
+  }
+}
+
+/* =======================================
+   PLAYER POSITION LAYOUTS - 玩家位置布局
+   ======================================= */
+
+/* 玩家位置通用样式 */
+.player-position {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all var(--duration-normal) var(--ease-in-out);
+}
+
+.player-position:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 南北玩家（团队伙伴） */
+.player-position.player-north,
+.player-position.player-south {
+  background: linear-gradient(135deg,
+    rgba(52, 152, 219, 0.1) 0%,
+    rgba(41, 128, 185, 0.15) 100%);
+  border-color: rgba(52, 152, 219, 0.3);
+}
+
+/* 东西玩家（对手团队） */
+.player-position.player-east,
+.player-position.player-west {
+  background: linear-gradient(135deg,
+    rgba(231, 76, 60, 0.1) 0%,
+    rgba(192, 57, 43, 0.15) 100%);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+/* 当前玩家高亮 */
+.player-position.current-player {
+  background: linear-gradient(135deg,
+    rgba(241, 196, 15, 0.15) 0%,
+    rgba(243, 156, 18, 0.2) 100%);
+  border-color: rgba(241, 196, 15, 0.5);
+  box-shadow: 0 0 20px rgba(241, 196, 15, 0.3);
+}
+
+/* =======================================
+   HAND CARDS LAYOUT - 手牌布局优化
+   ======================================= */
+
+/* 手牌容器 */
+.player-hand-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--card-gap);
+  padding: var(--space-3);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.player-hand-cards::-webkit-scrollbar {
+  height: 6px;
+}
+
+.player-hand-cards::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+.player-hand-cards::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+/* 选中的牌 */
+.player-card.selected {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: var(--shadow-card-hover), 0 0 20px rgba(241, 196, 15, 0.4);
+  z-index: 10;
+}
+
+/* 牌组布局 */
+.card-group {
+  display: flex;
+  align-items: center;
+  gap: var(--card-gap-sm);
+  margin: var(--space-1);
+}
+
+/* 特殊牌型布局 */
+.card-sequence {
+  position: relative;
+}
+
+.card-sequence .player-card {
+  margin-right: -12px; /* 重叠效果 */
+}
+
+.card-sequence .player-card:last-child {
+  margin-right: 0;
+}
+
+/* =======================================
+   CENTRAL AREA LAYOUT - 中央区域布局
+   ======================================= */
+
+.central-play-area {
+  display: grid;
+  grid-template-areas:
+    "north-play"
+    "center-info"
+    "south-play";
+  grid-template-rows: 1fr auto 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* 出牌区域 */
+.played-cards-area {
+  grid-area: center-info;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  min-height: 120px;
+}
+
+/* 上一轮出牌显示 */
+.last-play-area {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  background: rgba(0, 0, 0, 0.5);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+}
+
+/* =======================================
+   CONTROL PANEL LAYOUT - 控制面板布局
+   ======================================= */
+
+.control-panel {
+  background: linear-gradient(135deg,
+    rgba(52, 73, 94, 0.95) 0%,
+    rgba(44, 62, 80, 0.9) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+}
+
+/* 控制按钮布局 */
+.control-buttons {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* 游戏状态显示 */
+.game-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* =======================================
+   SPECIAL LAYOUTS - 特殊布局场景
+   ======================================= */
+
+/* 游戏开始界面 */
+.game-start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+/* 游戏结束界面 */
+.game-over-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  z-index: var(--z-modal);
+}
+
+/* 加载界面 */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 100vh;
+  background: var(--color-game-bg-start);
+}
+
+/* =======================================
+   ANIMATION LAYOUTS - 动画布局
+   ======================================= */
+
+/* 牌入场动画 */
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 出牌动画 */
+@keyframes cardPlay {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.1);
+  }
+  100% {
+    transform: translateY(-20px) scale(1);
+  }
+}
+
+/* 胜利动画 */
+@keyframes victory {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* 动画类 */
+.animate-card-enter {
+  animation: cardEnter var(--duration-normal) var(--ease-out);
+}
+
+.animate-card-play {
+  animation: cardPlay var(--duration-normal) var(--ease-in-out);
+}
+
+.animate-victory {
+  animation: victory var(--duration-slow) var(--ease-in-out) infinite;
+}
+
+/* =======================================
+   UTILITY CLASSES - 工具类
+   ======================================= */
+
+/* 隐藏元素 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 可访问性隐藏 */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* 焦点可见 */
+.focus-visible:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 触摸目标优化 */
+.touch-target {
+  min-width: var(--min-touch-target);
+  min-height: var(--min-touch-target);
+}
+
+/* 响应式显示控制 */
+@media (max-width: 480px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 481px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .tablet-hidden {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tablet-only {
+    display: none !important;
+  }
+}
