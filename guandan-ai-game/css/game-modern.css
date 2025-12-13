@@ -377,16 +377,53 @@ body {
 .player-card.brushing {
     transform: translateY(-15px) scale(1.08);
     background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
     z-index: 1001; /* 比选中的牌更高一层 */
+    border-color: #2196F3;
+    border-width: 3px;
+    animation: brushPulse 0.3s ease-in-out;
 }
 
 /* 划选取消选中的临时效果 */
 .player-card.unselecting {
     transform: translateY(-15px) scale(1.08);
     background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-    box-shadow: 0 0 15px rgba(239, 83, 80, 0.4);
+    box-shadow: 0 0 25px rgba(239, 83, 80, 0.6), 0 0 15px rgba(239, 83, 80, 0.4);
     z-index: 1001;
+    border-color: #f44336;
+    border-width: 3px;
+    animation: unselectPulse 0.3s ease-in-out;
+}
+
+/* 划选动画效果 */
+@keyframes brushPulse {
+    0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 rgba(59, 130, 246, 0);
+    }
+    50% {
+        transform: translateY(-18px) scale(1.1);
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+    }
+    100% {
+        transform: translateY(-15px) scale(1.08);
+        box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+    }
+}
+
+@keyframes unselectPulse {
+    0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 rgba(239, 83, 80, 0);
+    }
+    50% {
+        transform: translateY(-18px) scale(1.1);
+        box-shadow: 0 0 30px rgba(239, 83, 80, 0.8);
+    }
+    100% {
+        transform: translateY(-15px) scale(1.08);
+        box-shadow: 0 0 25px rgba(239, 83, 80, 0.6);
+    }
 }
 
 /* 划选指示线 */
@@ -1185,4 +1222,52 @@ body {
         transform: scale(1);
         box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
     }
+}
+
+/* 出牌动画效果 */
+@keyframes playCardAnimation {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-50px) scale(1.2) rotate(5deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.player-card.playing {
+    animation: playCardAnimation 0.6s ease-out;
+    pointer-events: none;
+}
+
+/* 手牌飞入中央出牌区的动画 */
+@keyframes flyToCenter {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-100px) scale(0.8) translateX(0);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.player-card.flying-to-center {
+    animation: flyToCenter 0.8s ease-in-out;
+    pointer-events: none;
+    z-index: 2000 !important;
+}
+
+/* 手牌减少时的自然过渡 */
+.player-hand-cards .player-card {
+    transition: transform 0.3s ease, margin-left 0.3s ease;
 }
