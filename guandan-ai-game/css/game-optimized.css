@@ -439,33 +439,44 @@ body {
 .player-card:nth-child(9) { z-index: 9; }
 .player-card:nth-child(10) { z-index: 10; }
 
-/* 悬浮效果 */
+/* 悬浮效果 - 默认状态 */
 .player-card:hover {
-    transform: translateY(-12px) scale(1.05);
+    transform: translateY(-4px) scale(1.05);
     box-shadow: var(--shadow-card-hover);
     border-color: #3498db;
-    background: linear-gradient(135deg, 
-        #ffffff 0%, 
-        #f1f3f4 30%, 
-        #e8eaed 70%, 
+    background: linear-gradient(135deg,
+        #ffffff 0%,
+        #f1f3f4 30%,
+        #e8eaed 70%,
         #dadce0 100%);
     z-index: 100; /* 悬浮时提升到最高层 */
 }
 
-/* 选中状态 */
+/* 滑动时禁用悬浮 */
+.brushing .player-card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: inherit;
+    background: inherit;
+}
+
+/* 选中状态 - 提起动画，与悬浮无关 */
 .player-card.selected {
-    transform: translateY(-16px) scale(1.08);
-    border-color: #f39c12;
+    /* 提起动画 */
+    transform: translateY(-12px) scale(1.05) !important;
+    border-color: #f39c12 !important;
     border-width: 3px;
-    box-shadow: 
+    box-shadow:
         var(--shadow-card-hover),
         0 0 25px rgba(243, 156, 18, 0.4);
-    background: linear-gradient(135deg, 
-        #fff9e6 0%, 
-        #fef5e7 30%, 
-        #fdebd0 70%, 
-        #fce4b6 100%);
+    background: linear-gradient(135deg,
+        #fff9e6 0%,
+        #fef5e7 30%,
+        #fdebd0 70%,
+        #fce4b6 100%) !important;
     z-index: 101; /* 选中时最高层级 */
+    /* 添加平滑过渡，但不受.brushing影响 */
+    transition: transform 0.2s ease-out;
 }
 
 /* 牌面内容 */
@@ -952,7 +963,7 @@ body {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-out);
+    /* 移除transition: all，只保留背景色过渡 */
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -967,23 +978,10 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* 按钮光泽效果 */
+/* 按钮光泽效果 - 移除动画，保持静态 */
 .btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.3), 
-        transparent);
-    transition: left var(--duration-slow);
-}
-
-.btn:hover::before {
-    left: 100%;
+    /* 移除光泽动画效果 */
+    display: none;
 }
 
 .btn:disabled {
@@ -993,17 +991,15 @@ body {
     filter: grayscale(0.5);
 }
 
-/* 按钮悬停效果 */
+/* 按钮悬停效果 - 完全静态 */
 .btn:hover:not(:disabled) {
-    transform: translateY(-3px) scale(1.05);
+    /* 完全静态，没有任何动画效果 */
     box-shadow: var(--shadow-button-hover);
-    transition: all var(--duration-fast) var(--ease-out);
 }
 
 .btn:active:not(:disabled) {
-    transform: translateY(-1px) scale(1.02);
+    /* 完全静态，没有任何动画效果 */
     box-shadow: var(--shadow-button);
-    transition: all var(--duration-instant) var(--ease-out);
 }
 
 /* 具体按钮样式 */

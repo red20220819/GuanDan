@@ -37,6 +37,11 @@ class GameEngine {
         this.gameUI = null;
         this.aiPlayers = {};
 
+        // 升级系统组件
+        this.levelManager = null;
+        this.gameRanking = null;
+        this.upgradeRuleEngine = null;
+
         // 事件监听器
         this.eventListeners = new Map();
 
@@ -84,10 +89,16 @@ class GameEngine {
             // 8. 设置游戏状态为准备就绪
             this.gameState = 'ready';
 
+            // 9. 设置升级系统
+            this.setupPlayerTeamMapping();
+
             console.log('🎯 游戏初始化完成!');
             console.log(`玩家数量: ${this.players.length}`);
             console.log(`牌堆大小: ${this.deck.length}`);
             console.log(`当前等级: ${this.level}`);
+            if (this.levelManager) {
+                console.log('升级系统已初始化');
+            }
 
         } catch (error) {
             console.error('❌ 游戏初始化失败:', error);
@@ -202,7 +213,10 @@ class GameEngine {
             { name: 'PlayerManager', key: 'playerManager', timeout: 1000 },
             { name: 'DeckManager', key: 'deckManager', timeout: 1000 },
             { name: 'RuleEngine', key: 'ruleEngine', timeout: 1000 },
-            { name: 'GameUI', key: 'gameUI', timeout: 1000 }
+            { name: 'GameUI', key: 'gameUI', timeout: 1000 },
+            { name: 'LevelManager', key: 'levelManager', timeout: 1000, isUpgradeSystem: true },
+            { name: 'GameRanking', key: 'gameRanking', timeout: 1000, isUpgradeSystem: true },
+            { name: 'UpgradeRuleEngine', key: 'upgradeRuleEngine', timeout: 1000, isUpgradeSystem: true }
         ];
 
         for (const component of components) {
@@ -216,13 +230,21 @@ class GameEngine {
     /**
      * 初始化单个组件
      */
-    async initializeComponent({ name, key, timeout }) {
+    async initializeComponent({ name, key, timeout, isUpgradeSystem }) {
         try {
             this.sendProgress(`检查 ${name}...`);
 
             if (window[name]) {
                 console.log(`✅ ${name} 已找到`);
-                this[key] = new window[name](this);
+
+                if (isUpgradeSystem) {
+                    // 升级系统组件的特殊初始化
+                    this.initializeUpgradeComponent(name, key);
+                } else {
+                    // 普通组件初始化
+                    this[key] = new window[name](this);
+                }
+
                 console.log(`✅ ${name} 初始化完成`);
                 this.sendProgress(`${name} 初始化完成`);
             } else {
@@ -232,7 +254,11 @@ class GameEngine {
                 await this.waitForComponent(name, timeout);
 
                 if (window[name]) {
-                    this[key] = new window[name](this);
+                    if (isUpgradeSystem) {
+                        this.initializeUpgradeComponent(name, key);
+                    } else {
+                        this[key] = new window[name](this);
+                    }
                     console.log(`✅ ${name} 延迟加载成功`);
                     this.sendProgress(`${name} 延迟加载成功`);
                 } else {
@@ -245,6 +271,35 @@ class GameEngine {
             console.warn(`❌ ${name} 初始化失败: ${error.message}`);
             this[key] = this.createPlaceholderComponent(name);
             this.sendProgress(`${name} 创建占位组件`);
+        }
+    }
+
+    /**
+     * 初始化升级系统组件
+     */
+    initializeUpgradeComponent(name, key) {
+        switch (name) {
+            case 'LevelManager':
+                this.levelManager = new window[name]();
+                break;
+            case 'GameRanking':
+                this.gameRanking = new window[name]();
+                break;
+            case 'UpgradeRuleEngine':
+                // UpgradeRuleEngine 依赖 LevelManager 和 GameRanking
+                if (this.levelManager && this.gameRanking) {
+                    this.upgradeRuleEngine = new window[name](this.levelManager, this.gameRanking);
+                } else {
+                    throw new Error('LevelManager 和 GameRanking 必须先初始化');
+                }
+                break;
+            default:
+                this[key] = new window[name](this);
+        }
+
+        // 如果所有升级系统组件都初始化完成，则设置事件绑定
+        if (this.levelManager && this.gameRanking && this.upgradeRuleEngine) {
+            this.bindUpgradeEvents();
         }
     }
 
@@ -277,6 +332,104 @@ class GameEngine {
             update: () => console.log(`🔧 ${name} 占位组件更新`),
             reset: () => console.log(`🔧 ${name} 占位组件重置`)
         };
+    }
+
+    /**
+     * 绑定升级系统事件
+     */
+    bindUpgradeEvents() {
+        if (!this.upgradeRuleEngine) return;
+
+        // 监听游戏结果
+        this.upgradeRuleEngine.addEventListener('gameResult', (e) => {
+            this.onGameResult(e.detail);
+        });
+
+        // 监听到达A关
+        this.levelManager.addEventListener('reachAGate', (e) => {
+            this.onReachAGate(e.detail);
+        });
+
+        // 监听A关失败
+        this.levelManager.addEventListener('aGateFailed', (e) => {
+            this.onAGateFailed(e.detail);
+        });
+
+        // 监听游戏胜利
+        this.levelManager.addEventListener('gameWon', (e) => {
+            this.onGameWon(e.detail);
+        });
+
+        console.log('✅ 升级系统事件绑定完成');
+    }
+
+    /**
+     * 处理游戏结果
+     */
+    onGameResult(result) {
+        console.log('游戏结果:', result);
+
+        // 更新UI显示
+        if (this.gameUI) {
+            this.gameUI.showGameResult(result);
+        }
+
+        // 触发游戏结果事件
+        this.emit('gameResult', result);
+
+        // 检查游戏是否可以结束
+        if (result.upgradeResult.gameWon) {
+            this.endGame(result);
+        }
+    }
+
+    /**
+     * 处理到达A关
+     */
+    onReachAGate(detail) {
+        console.log(`${detail.team} 队到达A关！`);
+
+        if (this.gameUI) {
+            this.gameUI.showMessage(`${detail.team === 'A' ? '己方' : '对方'}到达A关，需要双上才能通过！`, 'info');
+        }
+
+        this.emit('reachAGate', detail);
+    }
+
+    /**
+     * 处理A关失败
+     */
+    onAGateFailed(detail) {
+        console.log(`${detail.team} 队打A失败，退回J级（第${detail.attempts}次尝试）`);
+
+        if (this.gameUI) {
+            this.gameUI.showMessage(`${detail.team === 'A' ? '己方' : '对方'}打A失败，退回J级`, 'warning');
+        }
+
+        this.emit('aGateFailed', detail);
+    }
+
+    /**
+     * 处理游戏胜利
+     */
+    onGameWon(detail) {
+        console.log(`🎉 ${detail.team === 'A' ? '己方' : '对方'}赢得整场比赛！`);
+
+        if (this.gameUI) {
+            this.gameUI.showVictory(detail);
+        }
+
+        this.emit('gameWon', detail);
+    }
+
+    /**
+     * 玩家出完牌时调用
+     */
+    onPlayerOut(playerPosition) {
+        if (this.gameRanking) {
+            const result = this.gameRanking.recordPlayerFinish(playerPosition);
+            console.log(`玩家 ${playerPosition} 出完牌，当前排名:`, this.gameRanking.getCurrentStatus());
+        }
     }
 
     /**
@@ -582,6 +735,12 @@ class GameEngine {
             }
         });
 
+        // 检查玩家是否出完牌
+        if (hand.length === 0) {
+            console.log(`玩家 ${playerId} 出完所有牌！`);
+            this.onPlayerOut(playerId);
+        }
+
         // 添加到当前墩
         this.currentTrick.push({
             player: playerId,
@@ -601,7 +760,8 @@ class GameEngine {
         this.notifyUI('cardsPlayed', {
             player: playerId,
             cards: cards,
-            type: type
+            type: type,
+            remainingCards: hand.length
         });
 
         // 检查是否该回合结束
@@ -782,6 +942,44 @@ class GameEngine {
     }
 
     /**
+     * 结束游戏
+     */
+    endGame(result) {
+        console.log('游戏结束:', result);
+        this.gameState = 'ended';
+
+        // 触发游戏结束事件
+        this.emit('gameEnd', result);
+
+        // 禁用UI控制
+        if (this.gameUI) {
+            this.gameUI.enableControls(false);
+        }
+    }
+
+    /**
+     * 重新开始游戏
+     */
+    restartGame() {
+        console.log('重新开始游戏...');
+
+        // 重置升级系统
+        if (this.upgradeRuleEngine) {
+            this.upgradeRuleEngine.reset();
+        }
+
+        // 重置游戏引擎
+        this.resetGame();
+
+        // 重新初始化
+        this.init().then(() => {
+            this.startGame();
+        }).catch(error => {
+            console.error('重新开始游戏失败:', error);
+        });
+    }
+
+    /**
      * 重置游戏
      */
     resetGame() {
@@ -803,6 +1001,35 @@ class GameEngine {
         });
 
         console.log('游戏已重置');
+    }
+
+    /**
+     * 获取升级系统状态
+     */
+    getUpgradeSystemStatus() {
+        if (!this.levelManager || !this.gameRanking) {
+            return null;
+        }
+
+        return {
+            teams: this.levelManager.getAllTeamStatus(),
+            rankings: this.gameRanking.getCurrentStatus(),
+            rules: this.upgradeRuleEngine ? this.upgradeRuleEngine.getUpgradeRules() : null
+        };
+    }
+
+    /**
+     * 设置初始玩家队伍映射到GameRanking
+     */
+    setupPlayerTeamMapping() {
+        if (this.gameRanking && this.players) {
+            const mapping = {};
+            this.players.forEach(player => {
+                mapping[player.id] = player.team;
+            });
+            this.gameRanking.setPlayerTeams(mapping);
+            console.log('玩家队伍映射设置完成:', mapping);
+        }
     }
 
     /**
