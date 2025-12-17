@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/game-modern.css">
     <link rel="stylesheet" href="css/mobile-landscape.css">
+    <link rel="stylesheet" href="css/ultrawide-mobile.css">
 
     <style>
         @keyframes shake {
@@ -235,34 +236,22 @@
                 <div class="ai-hand-cards" id="northCards">
                     <!-- AI手牌只显示牌背，堆叠效果 -->
                 </div>
-                <!-- 悬浮信息面板 -->
-                <div class="player-info">
-                    <div class="player-avatar">🤖</div>
-                    <div class="player-details">
-                        <div class="player-name-row">
-                            <div class="player-name">AI玩家2</div>
-                            <div class="team-indicator opponent-indicator" title="对手">🔴</div>
-                        </div>
-                        <div class="player-status">
-                            <span class="card-count-info">剩余: <span id="northCount">27</span>张</span>
-                        </div>
+                <!-- 极简信息面板 -->
+                <div class="player-info-simple">
+                    <div class="player-avatar-simple north-avatar">
+                        N
+                        <span class="team-badge opponent-badge">对手</span>
                     </div>
                 </div>
             </div>
 
             <!-- 西方玩家（队友） -->
             <div class="player-position player-west">
-                <!-- 悬浮信息面板 - 在手牌左边 -->
-                <div class="player-info">
-                    <div class="player-avatar">🎯</div>
-                    <div class="player-details">
-                        <div class="player-name-row">
-                            <div class="player-name">AI玩家3</div>
-                            <div class="team-indicator teammate-indicator" title="队友">💚</div>
-                        </div>
-                        <div class="player-status">
-                            <span class="card-count-info">剩余: <span id="westCount">27</span>张</span>
-                        </div>
+                <!-- 极简信息面板 - 在手牌左边 -->
+                <div class="player-info-simple">
+                    <div class="player-avatar-simple west-avatar">
+                        W
+                        <span class="team-badge teammate-badge">队友</span>
                     </div>
                 </div>
                 <!-- 手牌 - 在右边 -->
@@ -273,17 +262,11 @@
 
             <!-- 东方玩家（对手） -->
             <div class="player-position player-east">
-                <!-- 悬浮信息面板 - 在手牌左边 -->
-                <div class="player-info">
-                    <div class="player-avatar">⚡</div>
-                    <div class="player-details">
-                        <div class="player-name-row">
-                            <div class="player-name">AI玩家4</div>
-                            <div class="team-indicator opponent-indicator" title="对手">🔴</div>
-                        </div>
-                        <div class="player-status">
-                            <span class="card-count-info">剩余: <span id="eastCount">27</span>张</span>
-                        </div>
+                <!-- 极简信息面板 - 在手牌左边 -->
+                <div class="player-info-simple">
+                    <div class="player-avatar-simple east-avatar">
+                        E
+                        <span class="team-badge opponent-badge">对手</span>
                     </div>
                 </div>
                 <!-- 手牌 - 在右边 -->
@@ -294,8 +277,14 @@
 
             <!-- 南方玩家（自己） -->
             <div class="player-position player-south">
-                <!-- 主玩家信息面板 - 手牌左侧 -->
-                <div class="player-info main-player-info" id="mainPlayerInfo">
+                <!-- 简洁头像面板 - 手牌左侧 -->
+                <div class="player-info-simple">
+                    <div class="player-avatar-simple south-avatar">
+                        S
+                    </div>
+                </div>
+                <!-- 主玩家信息面板 - 隐藏但保留功能 -->
+                <div class="player-info main-player-info" id="mainPlayerInfo" style="display: none;">
                     <div class="player-avatar">🌟</div>
                     <div class="player-details">
                         <div class="player-name-row">

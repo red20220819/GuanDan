@@ -341,12 +341,17 @@ body {
 
 /* 北方玩家（对手） */
 .player-north {
-    grid-area: north;
+    position: absolute;
+    top: 5%;
+    left: calc(50% - 240px); /* 从正中间左移两个120px玩家容器宽度 */
+    transform: translateX(0);
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
     gap: var(--space-3);
+    width: 120px;
+    flex-shrink: 0;
+    z-index: 5;
 }
 
 /* 南方玩家（自己） */
@@ -364,23 +369,32 @@ body {
 
 /* 西方玩家（队友） */
 .player-west {
-    grid-area: west;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
     gap: var(--space-3);
+    left: calc((100vw - 70vw) / 2); /* 与S玩家左边缘对齐 */
+    width: 120px;
+    z-index: 5;
 }
 
 /* 西方玩家手牌在右侧，信息面板在左侧 - 由于HTML结构已调整，不需要order */
 
 /* 东方玩家（对手） */
 .player-east {
-    grid-area: east;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: row-reverse;
     align-items: center;
-    justify-content: center;
+    gap: var(--space-3);
+    right: 140px; /* 距离右边缘固定距离，与W玩家镜像对称 */
+    width: 120px;
+    z-index: 5;
 }
 
 /* =======================================
@@ -1762,5 +1776,125 @@ body {
     .mobile-landscape-container {
         max-width: 1200px;
         margin: 0 auto;
+    }
+}
+
+/* =======================================
+   简洁玩家信息样式 - 东西北玩家专用
+   ======================================= */
+
+.player-info-simple {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* 移除背景、边框、阴影等样式 */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+}
+
+/* 简洁头像样式 */
+.player-avatar-simple {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    flex-shrink: 0;
+    border: 3px solid white;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 不同玩家的头像颜色 */
+.north-avatar {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.west-avatar {
+    background: linear-gradient(135deg, #27ae60, #229954);
+}
+
+.east-avatar {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.south-avatar {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+/* 角标样式 - 贴边头像右下角 */
+.team-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 0 0 20px 0;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.opponent-badge {
+    background: rgba(231, 76, 60, 0.9);
+}
+
+.teammate-badge {
+    background: rgba(39, 174, 96, 0.9);
+}
+
+/* 极简牌数显示 */
+.card-count-simple {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    min-width: 24px;
+    text-align: center;
+    line-height: 1;
+}
+
+/* 确保新样式只在东西北玩家生效 */
+.player-north .player-info,
+.player-west .player-info,
+.player-east .player-info {
+    display: none; /* 隐藏旧的复杂样式 */
+}
+
+/* 在小屏幕下调整尺寸 */
+@media screen and (max-width: 768px) {
+    .player-info-simple {
+        gap: 6px;
+    }
+
+    .player-avatar-simple {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        font-size: 18px;
+        border: 2px solid white;
+    }
+
+    .card-count-simple {
+        font-size: 16px;
+    }
+
+    .team-badge {
+        font-size: 8px;
+        padding: 1px 2px;
+        transform: scale(0.8);
+        bottom: 1px;
+        right: 1px;
     }
 }
