@@ -341,12 +341,31 @@ class GameUI {
      * 获取选中牌的数据
      */
     getSelectedCardData() {
-        return this.selectedCards.map(cardElement => ({
+        // 获取选中牌的数据并按照手牌显示顺序排序
+        const cardsData = this.selectedCards.map(cardElement => ({
             suit: cardElement.dataset.suit,
             rank: cardElement.dataset.rank,
             value: parseInt(cardElement.dataset.value),
             id: cardElement.dataset.cardId,
-            display: cardElement.dataset.rank + cardElement.dataset.suit
+            display: cardElement.dataset.rank + cardElement.dataset.suit,
+            element: cardElement // 保留DOM元素引用用于排序
+        }));
+
+        // 按照在手牌容器中的位置进行排序，确保出牌顺序与手牌显示顺序一致
+        cardsData.sort((a, b) => {
+            // 比较DOM元素在手牌容器中的位置
+            const aIndex = Array.from(a.element.parentNode.children).indexOf(a.element);
+            const bIndex = Array.from(b.element.parentNode.children).indexOf(b.element);
+            return aIndex - bIndex;
+        });
+
+        // 移除element属性，只返回纯数据
+        return cardsData.map(card => ({
+            suit: card.suit,
+            rank: card.rank,
+            value: card.value,
+            id: card.id,
+            display: card.display
         }));
     }
 

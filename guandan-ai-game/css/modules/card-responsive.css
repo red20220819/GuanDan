@@ -1,0 +1,311 @@
+/**
+ * 响应式适配 - 模块化CSS
+ * 统一管理所有牌面的响应式缩放和适配
+ */
+
+/* =======================================
+   932x430 RESOLUTION - 特殊分辨率适配
+   ======================================= */
+
+@media screen and (width: 932px) and (height: 430px) {
+    :root {
+        /* 设置当前分辨率缩放比例 */
+        --card-scale: var(--card-scale-932x430);
+    }
+
+    /* 统一缩放所有牌面 */
+    .card-base,
+    .plays-group .player-card,
+    .player-hand-cards .player-card {
+        width: calc(var(--card-base-width) * var(--card-scale));
+        height: calc(var(--card-base-height) * var(--card-scale));
+    }
+
+    /* 统一缩放文字 - 强制保持一致性 */
+    .card-base .card-rank,
+    .plays-group .player-card .card-rank,
+    .player-hand-cards .player-card .card-rank {
+        font-size: calc(var(--card-rank-size) * var(--card-scale)) !important;
+        letter-spacing: calc(var(--card-letter-spacing) * var(--card-scale)) !important;
+        font-weight: bold !important;
+        white-space: nowrap !important;
+        display: inline-block !important;
+        width: auto !important;
+        transform: none !important;
+    }
+
+    .card-base .card-suit,
+    .plays-group .player-card .card-suit,
+    .player-hand-cards .player-card .card-suit {
+        font-size: calc(var(--card-suit-size) * var(--card-scale)) !important;
+        font-weight: bold !important;
+        line-height: 1 !important;
+    }
+
+    /* 特殊处理10数字 */
+    .card-base .card-rank[data-rank="10"],
+    .plays-group .player-card .card-rank[data-rank="10"],
+    .player-hand-cards .player-card .card-rank[data-rank="10"] {
+        font-size: calc(18px * var(--card-scale));
+        letter-spacing: calc(-3px * var(--card-scale));  /* 增加负间距，让1和0更靠近 */
+        white-space: nowrap;  /* 防止换行 */
+        display: inline-block;
+        width: auto;  /* 让宽度自动适应内容 */
+        transform: none;  /* 移除transform避免干扰 */
+        padding: 0;  /* 移除内边距 */
+    }
+
+    /* 大小王文字 */
+    .card-base .card-rank.joker-text,
+    .plays-group .player-card .card-rank.joker-text,
+    .player-hand-cards .player-card .card-rank.joker-text {
+        font-size: calc(13px * var(--card-scale));
+        transform: translateX(calc(-4px * var(--card-scale)));
+    }
+
+    /* 出牌区域堆叠间距调整 */
+    .plays-group .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+
+    .plays-group .player-card:first-child {
+        margin-left: 0;
+    }
+
+    /* 手牌区域堆叠间距调整 */
+    .player-hand-cards .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+
+    .player-hand-cards .player-card:first-child {
+        margin-left: 0;
+    }
+
+    /* 强制统一牌面内容位置和布局 */
+    .card-base .card-content,
+    .plays-group .player-card .card-content,
+    .player-hand-cards .player-card .card-content {
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding: calc(4px * var(--card-scale)) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* 强制统一角标位置 */
+    .card-base .card-top-left,
+    .card-base .card-bottom-right,
+    .plays-group .player-card .card-top-left,
+    .plays-group .player-card .card-bottom-right,
+    .player-hand-cards .player-card .card-top-left,
+    .player-hand-cards .player-card .card-bottom-right {
+        position: absolute !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        line-height: 1 !important;
+        z-index: 1 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card-base .card-top-left,
+    .plays-group .player-card .card-top-left,
+    .player-hand-cards .player-card .card-top-left {
+        top: calc(3px * var(--card-scale)) !important;
+        left: calc(3px * var(--card-scale)) !important;
+    }
+
+    .card-base .card-bottom-right,
+    .plays-group .player-card .card-bottom-right,
+    .player-hand-cards .player-card .card-bottom-right {
+        bottom: calc(3px * var(--card-scale)) !important;
+        right: calc(3px * var(--card-scale)) !important;
+        transform: rotate(180deg) !important;
+    }
+
+    /* 级牌"配"标记 */
+    .card-base .level-card-indicator,
+    .plays-group .player-card .level-card-indicator,
+    .player-hand-cards .player-card .level-card-indicator {
+        font-size: calc(16px * var(--card-scale));
+    }
+}
+
+/* =======================================
+   MOBILE RESPONSIVE - 移动端响应式
+   ======================================= */
+
+/* 手机端 - 最大480px */
+@media screen and (max-width: 480px) {
+    :root {
+        --card-scale: var(--card-scale-mobile);
+    }
+
+    /* 应用移动端缩放 */
+    .card-base,
+    .plays-group .player-card,
+    .player-hand-cards .player-card {
+        width: calc(var(--card-base-width) * var(--card-scale));
+        height: calc(var(--card-base-height) * var(--card-scale));
+    }
+
+    .card-base .card-rank,
+    .plays-group .player-card .card-rank,
+    .player-hand-cards .player-card .card-rank {
+        font-size: calc(var(--card-rank-size) * var(--card-scale));
+    }
+
+    .card-base .card-suit,
+    .plays-group .player-card .card-suit,
+    .player-hand-cards .player-card .card-suit {
+        font-size: calc(var(--card-suit-size) * var(--card-scale));
+    }
+
+    /* 堆叠间距调整 */
+    .plays-group .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+
+    .player-hand-cards .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+}
+
+/* =======================================
+   TABLET RESPONSIVE - 平板端响应式
+   ======================================= */
+
+/* 平板端 - 481px到768px */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    :root {
+        --card-scale: var(--card-scale-tablet);
+    }
+
+    /* 应用平板端缩放 */
+    .card-base,
+    .plays-group .player-card,
+    .player-hand-cards .player-card {
+        width: calc(var(--card-base-width) * var(--card-scale));
+        height: calc(var(--card-base-height) * var(--card-scale));
+    }
+
+    .card-base .card-rank,
+    .plays-group .player-card .card-rank,
+    .player-hand-cards .player-card .card-rank {
+        font-size: calc(var(--card-rank-size) * var(--card-scale));
+    }
+
+    .card-base .card-suit,
+    .plays-group .player-card .card-suit,
+    .player-hand-cards .player-card .card-suit {
+        font-size: calc(var(--card-suit-size) * var(--card-scale));
+    }
+
+    /* 堆叠间距调整 */
+    .plays-group .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+
+    .player-hand-cards .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+}
+
+/* =======================================
+   DESKTOP RESPONSIVE - 桌面端响应式
+   ======================================= */
+
+/* 桌面端 - 769px到1024px */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    :root {
+        --card-scale: 0.85;
+    }
+
+    /* 应用桌面端缩放 */
+    .card-base,
+    .plays-group .player-card,
+    .player-hand-cards .player-card {
+        width: calc(var(--card-base-width) * var(--card-scale));
+        height: calc(var(--card-base-height) * var(--card-scale));
+    }
+
+    .card-base .card-rank,
+    .plays-group .player-card .card-rank,
+    .player-hand-cards .player-card .card-rank {
+        font-size: calc(var(--card-rank-size) * var(--card-scale));
+    }
+
+    .card-base .card-suit,
+    .plays-group .player-card .card-suit,
+    .player-hand-cards .player-card .card-suit {
+        font-size: calc(var(--card-suit-size) * var(--card-scale));
+    }
+}
+
+/* =======================================
+   LARGE DESKTOP - 大屏桌面端
+   ======================================= */
+
+/* 大屏桌面端 - 1025px以上 */
+@media screen and (min-width: 1025px) {
+    /* 大屏下使用原始尺寸 */
+    .card-base,
+    .plays-group .player-card,
+    .player-hand-cards .player-card {
+        width: var(--card-base-width);
+        height: var(--card-base-height);
+    }
+
+    .card-base .card-rank,
+    .plays-group .player-card .card-rank,
+    .player-hand-cards .player-card .card-rank {
+        font-size: var(--card-rank-size);
+    }
+
+    .card-base .card-suit,
+    .plays-group .player-card .card-suit,
+    .player-hand-cards .player-card .card-suit {
+        font-size: var(--card-suit-size);
+    }
+
+    /* 保持原始堆叠间距 */
+    .plays-group .player-card {
+        margin-left: var(--card-uniform-overlap);
+    }
+
+    .player-hand-cards .player-card {
+        margin-left: var(--card-uniform-overlap);
+    }
+}
+
+/* =======================================
+   ULTRAWIDE MOBILE - 超宽移动设备
+   ======================================= */
+
+/* 超宽移动设备 - 特殊处理 */
+@media screen and (min-width: 900px) and (max-height: 500px) {
+    :root {
+        --card-scale: var(--card-scale-932x430);
+    }
+
+    /* 应用超宽移动设备缩放 */
+    .card-base,
+    .plays-group .player-card,
+    .player-hand-cards .player-card {
+        width: calc(var(--card-base-width) * var(--card-scale));
+        height: calc(var(--card-base-height) * var(--card-scale));
+    }
+
+    /* 超宽设备的特殊堆叠处理 */
+    .plays-group .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+
+    .player-hand-cards .player-card {
+        margin-left: calc(var(--card-uniform-overlap) * var(--card-scale));
+    }
+}

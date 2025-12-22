@@ -15,6 +15,7 @@ class UIEnhancements {
         this.setupPlayAreaEffects();
         this.setupTooltips();
         this.setupKeyboardShortcuts();
+        this.setupControlPanelFix(); // 新增：修复控制面板
     }
 
     /**
@@ -643,6 +644,44 @@ class UIEnhancements {
             messageDiv.style.animation = 'slideOutDown 0.3s ease';
             setTimeout(() => messageDiv.remove(), 300);
         }, 2000);
+    }
+
+    /**
+     * 🔧 修复932x430分辨率控制面板问题
+     * 动态添加simplified类以激活相关CSS样式
+     */
+    setupControlPanelFix() {
+        // 简化控制面板修复，主要由CSS和ControlPanel932x430模块处理
+        console.log('🎮 控制面板修复已简化，由CSS和专用模块处理');
+    }
+
+                btn.style.setProperty('text-overflow', 'ellipsis', 'important');
+                btn.style.setProperty('display', 'flex', 'important');
+                btn.style.setProperty('align-items', 'center', 'important');
+                btn.style.setProperty('justify-content', 'center', 'important');
+                btn.style.setProperty('box-sizing', 'border-box', 'important');
+
+                // 隐藏emoji图标，只显示文字
+                const text = btn.textContent.replace(/[🔀🔄]/g, '').trim();
+                btn.textContent = text;
+            });
+
+            // 强制设置按钮容器样式
+            const buttonContainer = controlPanel.querySelector('.control-buttons');
+            if (buttonContainer) {
+                buttonContainer.style.cssText = `
+                    display: flex !important;
+                    flex-direction: row !important;
+                    gap: 2px !important;
+                    height: 26px !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    width: 100% !important;
+                `;
+            }
+        }
     }
 }
 

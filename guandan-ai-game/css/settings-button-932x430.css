@@ -1,0 +1,126 @@
+/**
+ * 掼蛋游戏 - 932x430分辨率设置按钮专用修复
+ * 超高优先级覆盖规则，确保设置按钮强制显示
+ */
+
+@media screen and (width: 932px) and (height: 430px) {
+    /* 超高优先级选择器 - 强制显示top-info-bar容器 */
+    html body div.game-container div.top-info-bar,
+    html body .game-container .top-info-bar,
+    html body .top-info-bar {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        left: auto !important;
+        width: auto !important;
+        height: auto !important;  /* 自动高度 */
+        z-index: 10001 !important;
+        background: transparent !important;  /* 完全透明 */
+        justify-content: flex-end !important;
+        align-items: center !important;
+        padding: 4px 8px !important;  /* 最小内边距 */
+        border: none !important;  /* 无边框 */
+        backdrop-filter: none !important;  /* 无背景模糊 */
+    }
+
+    /* 设置按钮强制显示 - 独立定位，只显示图标 */
+    html body .top-info-bar .btn-settings,
+    html body .btn-settings {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 10002 !important;
+        background: transparent !important;  /* 完全透明背景 */
+        color: white !important;
+        border: none !important;  /* 无边框 */
+        padding: 4px 6px !important;  /* 内边距 */
+        border-radius: 0 !important;  /* 无圆角 */
+        font-size: 16px !important;  /* 图标大小 */
+        font-weight: normal !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;  /* 增强阴影确保在任何背景下可见 */
+        box-shadow: none !important;  /* 无阴影 */
+        backdrop-filter: none !important;  /* 无背景模糊 */
+        min-width: auto !important;
+        width: auto !important;
+        height: auto !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+    }
+
+    /* 设置按钮悬停效果 - 只有图标变化 */
+    html body .top-info-bar .btn-settings:hover,
+    html body .btn-settings:hover {
+        background: transparent !important;
+        transform: scale(1.15) !important;  /* 图标轻微放大 */
+        color: rgba(255, 255, 255, 0.9) !important;  /* 稍微变淡 */
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;  /* 增强阴影确保可见 */
+    }
+
+    /* 设置菜单样式优化 - 确保正确显示 */
+    html body .settings-menu {
+        position: absolute !important;
+        top: 100% !important;
+        right: 0 !important;
+        margin-top: 2px !important;
+        background: linear-gradient(135deg,
+            rgba(52, 73, 94, 0.98) 0%,
+            rgba(44, 62, 80, 0.95) 100%) !important;
+        border-radius: 4px !important;
+        backdrop-filter: blur(12px) !important;
+        min-width: 110px !important;
+        max-width: 130px !important;
+        z-index: 10002 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        overflow: hidden !important;
+        display: block !important;  /* 确保显示 */
+    }
+
+    /* 设置菜单项样式 - 紧凑设计 */
+    html body .settings-menu .settings-item {
+        padding: 6px 12px !important;  /* 缩小内边距 */
+        color: white !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;  /* 更快的过渡 */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;  /* 更淡的分割线 */
+        font-size: 11px !important;  /* 缩小字体 */
+        font-weight: 400 !important;  /* 减轻字体粗细 */
+        line-height: 1.3 !important;  /* 减小行高 */
+        white-space: nowrap !important;  /* 防止换行 */
+    }
+
+    html body .settings-menu .settings-item:hover {
+        background: rgba(255, 255, 255, 0.08) !important;  /* 更淡的悬停背景 */
+    }
+
+    html body .settings-menu .settings-item:last-child {
+        border-bottom: none !important;
+    }
+
+    /* 确保其他元素保持隐藏 */
+    html body .top-info-bar .coin-display,
+    html body .top-info-bar .level-display,
+    html body .top-info-bar .score-display,
+    html body .team-info-bar,
+    html body .info-display {
+        display: none !important;
+    }
+
+    /* 超高优先级：确保设置菜单在显示时可见 */
+    html body .settings-menu[style*="block"],
+    html body .settings-menu {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* 防止其他CSS规则覆盖 */
+    html body .top-info-bar * {
+        box-sizing: border-box !important;
+    }
+}

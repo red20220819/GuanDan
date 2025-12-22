@@ -1,0 +1,32 @@
+/**
+ * 出牌区域数字对齐修复 - 简化版
+ * 移除transform冲突，专注于文字适配
+ */
+
+@media screen and (width: 932px) and (height: 430px) {
+    /* 10数字的最终保险措施 - 与其他数字保持一致 */
+    .plays-group .player-card .card-rank[data-rank="10"] {
+        font-size: 15px !important;  /* 与其他数字一致 */
+        letter-spacing: -1.7px !important;  /* -2px * 0.85 */
+        transform: none !important;  /* 确保没有transform */
+        display: inline-block !important;
+        white-space: nowrap !important;
+        width: auto !important;  /* 自动宽度，确保完整显示 */
+    }
+
+    /* JOKER文字大小与其他数字一致 */
+    .plays-group .player-card .card-rank.joker-text {
+        font-size: 13px !important;  /* 与其他数字一致（15px，但JOKER稍小） */
+        width: auto !important;  /* 自动宽度 */
+        white-space: nowrap !important;
+        margin-left: 1px !important;  /* 右移1像素 */
+    }
+
+    /* 确保容器不会导致文字被切掉 */
+    .plays-group .player-card .card-top-left,
+    .plays-group .player-card .card-bottom-right {
+        width: auto !important;
+        min-width: 0 !important;
+        overflow: visible !important;  /* 允许内容溢出显示 */
+    }
+}

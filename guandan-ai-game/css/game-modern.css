@@ -376,7 +376,7 @@ body {
     flex-direction: row;
     align-items: center;
     gap: var(--space-3);
-    left: calc((100vw - 70vw) / 2); /* 与S玩家左边缘对齐 */
+    left: 20px; /* 调整为20px，真正靠近左边缘 */
     width: 120px;
     z-index: 5;
 }
@@ -392,7 +392,7 @@ body {
     flex-direction: row-reverse;
     align-items: center;
     gap: var(--space-3);
-    right: 140px; /* 距离右边缘固定距离，与W玩家镜像对称 */
+    right: 20px; /* 调整为20px，真正靠近右边缘 */
     width: 120px;
     z-index: 5;
 }
@@ -449,7 +449,7 @@ body {
     flex: 1;
     min-height: 90px;  /* 从140px减小到90px */
     overflow: visible;  /* 确保选中的牌不会被裁剪 */
-    z-index: 10;      /* 确保手牌容器有足够高的层级 */
+    z-index: 100;      /* 提高手牌容器的层级，确保牌不被遮挡 */
 }
 
 .player-card {
@@ -472,29 +472,42 @@ body {
 }
 
 .player-card:hover {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: var(--shadow-xl);
-    z-index: 10;
+    transform: translateY(-15px) scale(1.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 8888;
+    position: relative;
 }
 
 .player-card.selected {
-    transform: translateY(-20px) scale(1.1);
+    transform: translateY(-30px) scale(1.12);
     border-color: var(--color-warning);
-    border-width: 2px;  /* 从3px减小到2px */
+    border-width: 3px;
     background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%);
-    box-shadow: 0 0 20px rgba(243, 156, 18, 0.5);
-    z-index: 1000; /* 使用非常高的z-index确保在最顶层 */
+    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 9999; /* 确保选中牌在最顶层，不被任何容器遮挡 */
+    position: relative; /* 确保z-index生效 */
 }
 
-/* 划选过程中的临时高亮效果 */
+/* 划选过程中的临时高亮效果 - 只在鼠标按下时显示 */
 .player-card.brushing {
     transform: translateY(-15px) scale(1.08);
     background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
     box-shadow: 0 0 25px rgba(59, 130, 246, 0.6), 0 0 15px rgba(59, 130, 246, 0.4);
-    z-index: 1001; /* 比选中的牌更高一层 */
+    z-index: 9998; /* 确保比悬停高，比选中低 */
     border-color: #2196F3;
     border-width: 3px;
     animation: brushPulse 0.3s ease-in-out;
+    position: relative;
+}
+
+/* 当鼠标释放时，如果牌未被选中，立即恢复正常状态 */
+.player-card:not(.selected):not(.brushing) {
+    transform: none;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: #373836;
+    border-width: 1px;
+    z-index: auto;
 }
 
 /* 划选取消选中的临时效果 */
@@ -610,20 +623,24 @@ body {
     padding: 4px;
 }
 
+/* 使用更高优先级的选择器确保样式生效 */
+.game-table .player-card .card-top-left,
+.game-table .player-card .card-bottom-right,
 .player-card .card-top-left,
 .player-card .card-bottom-right {
     position: absolute;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;  /* 从 center 改为 flex-start，实现左对齐 */
-    justify-content: flex-start;  /* 确保水平方向也是左对齐 */
+    align-items: center !important;  /* 强制居中对齐 */
+    justify-content: flex-start;
     line-height: 1;
+    padding: 0 !important;  /* 确保没有内边距影响 */
 }
 
 .player-card .card-top-left {
     top: 3px;
     left: 3px;
-    padding-left: 2px;  /* 添加统一的左边距 */
+    /* 移除 padding-left 以确保真正居中 */
     box-sizing: border-box;
 }
 
@@ -639,11 +656,34 @@ body {
     margin-bottom: -5px;  /* 减小与花色的间距 */
     text-align: center;  /* 数字居中 */
     letter-spacing: -2px;  /* 缩小数字间距，特别是'10' */
+    width: 20px;  /* 固定宽度，确保居中 */
+    display: inline-block;  /* 支持transform */
+    position: relative;
+}
+
+/* 为"10"添加向左偏移，使其视觉中心与其他数字对齐 */
+.player-card .card-rank[data-rank="10"] {
+    transform: translateX(-2px);
+}
+
+/* 为A,2,3,4,5,6,7,8,9,K添加额外的向左偏移 */
+.player-card .card-rank[data-rank="A"],
+.player-card .card-rank[data-rank="2"],
+.player-card .card-rank[data-rank="3"],
+.player-card .card-rank[data-rank="4"],
+.player-card .card-rank[data-rank="5"],
+.player-card .card-rank[data-rank="6"],
+.player-card .card-rank[data-rank="7"],
+.player-card .card-rank[data-rank="8"],
+.player-card .card-rank[data-rank="9"],
+.player-card .card-rank[data-rank="K"] {
+    transform: translateX(-1px);
 }
 
 .player-card .card-suit {
     font-size: 30px;  /* 从18px增加到36px，放大一倍 */
     text-align: center;  /* 花色居中 */
+    width: 20px;  /* 固定宽度，与数字保持一致 */
 }
 
 .player-card.red { color: #DC143C; }
@@ -656,6 +696,15 @@ body {
     line-height: 1;
     margin-bottom: -5px;  /* 与普通牌保持一致的间距 */
     text-align: center;  /* JOKER字母居中 */
+    display: inline-block;  /* 支持transform */
+    position: relative;
+}
+
+/* 大小王实际使用的joker-text类 */
+.player-card .card-rank.joker-text {
+    transform: translateX(-4px) !important;  /* 向左移动4像素（从-6px向右调整2px） */
+    display: inline-block !important;  /* 支持transform */
+    position: relative !important;
 }
 
 /* =======================================
@@ -888,7 +937,7 @@ body {
 
 /* 出牌堆叠效果 */
 .plays-group > .player-card {
-    margin-left: -35px !important;  /* 与手牌相同的堆叠间距 */
+    margin-left: -40px !important;  /* 与手牌相同的堆叠间距 */
     position: relative;
     transform: scale(1.0);      /* 与手牌相同的大小 */
     z-index: calc(10 * var(--card-index, 1));
@@ -911,17 +960,18 @@ body {
     font-size: 18px;  /* 增大到18px，提高可读性 */
 }
 
-/* 调整内容位置 - 应用左对齐 */
+/* 调整内容位置 - 应用居中对齐 */
 .plays-group .player-card .card-top-left,
 .plays-group .player-card .card-bottom-right {
-    align-items: flex-start;
+    align-items: center !important;  /* 强制居中对齐 */
     justify-content: flex-start;
+    padding: 0 !important;  /* 确保没有内边距影响 */
 }
 
 .plays-group .player-card .card-top-left {
     top: 2px;
     left: 2px;
-    padding-left: 2px;  /* 添加统一的左边距 */
+    /* 移除 padding-left 以确保真正居中 */
     box-sizing: border-box;
 }
 
@@ -970,23 +1020,26 @@ body {
     gap: var(--space-2);
 }
 
-.btn {
-    padding: var(--space-3) var(--space-4);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: 44px;
-    position: relative;
-    overflow: hidden;
-    font-family: var(--font-family-primary);
-    transition: all 0.3s ease;
-    text-transform: none;
+/* 排除932x430分辨率，避免与专用样式冲突 */
+@media not screen and (width: 932px) and (height: 430px) {
+    .btn {
+        padding: var(--space-3) var(--space-4);
+        border: none;
+        border-radius: var(--radius-lg);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        min-height: 44px;
+        position: relative;
+        overflow: hidden;
+        font-family: var(--font-family-primary);
+        transition: all 0.3s ease;
+        text-transform: none;
+    }
 }
 
 .btn:disabled {
@@ -1799,13 +1852,13 @@ body {
 
 /* 简洁头像样式 */
 .player-avatar-simple {
-    width: 80px;
-    height: 80px;
+    width: 90px;  /* 从80px增加到90px */
+    height: 90px;
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 36px;  /* 从32px增加到36px */
     font-weight: bold;
     color: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -1813,23 +1866,96 @@ body {
     flex-shrink: 0;
     border: 3px solid white;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    animation: avatarBreathe 4s ease-in-out infinite;
+}
+
+/* 头像呼吸动画 */
+@keyframes avatarBreathe {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.02);
+        filter: brightness(1.1);
+    }
 }
 
 /* 不同玩家的头像颜色 */
 .north-avatar {
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    box-shadow:
+        0 4px 15px rgba(245, 158, 11, 0.4),
+        0 0 20px rgba(245, 158, 11, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* N玩家头像悬浮效果 */
+.north-avatar:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow:
+        0 6px 20px rgba(245, 158, 11, 0.5),
+        0 0 30px rgba(245, 158, 11, 0.3);
 }
 
 .west-avatar {
-    background: linear-gradient(135deg, #27ae60, #229954);
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+    box-shadow:
+        0 4px 15px rgba(34, 197, 94, 0.4),
+        0 0 20px rgba(34, 197, 94, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* W玩家头像悬浮效果 */
+.west-avatar:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow:
+        0 6px 20px rgba(34, 197, 94, 0.5),
+        0 0 30px rgba(34, 197, 94, 0.3);
 }
 
 .east-avatar {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
+    box-shadow:
+        0 4px 15px rgba(239, 68, 68, 0.4),
+        0 0 20px rgba(239, 68, 68, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* E玩家头像悬浮效果 */
+.east-avatar:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow:
+        0 6px 20px rgba(239, 68, 68, 0.5),
+        0 0 30px rgba(239, 68, 68, 0.3);
 }
 
 .south-avatar {
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+    box-shadow:
+        0 4px 15px rgba(139, 92, 246, 0.4),
+        0 0 20px rgba(139, 92, 246, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* S玩家头像悬浮效果 */
+.south-avatar:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow:
+        0 6px 20px rgba(139, 92, 246, 0.5),
+        0 0 30px rgba(139, 92, 246, 0.3);
 }
 
 /* 角标样式 - 贴边头像右下角 */
@@ -1896,5 +2022,148 @@ body {
         transform: scale(0.8);
         bottom: 1px;
         right: 1px;
+    }
+}
+
+/* =======================================
+   手牌上方操作按钮样式
+   ======================================= */
+/* 手牌上方操作按钮（独立定位） */
+.hand-action-buttons {
+    position: absolute;
+    bottom: 120px;  /* 根据手牌位置调整，确保在手牌上方 */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg,
+        rgba(52, 73, 94, 0.9) 0%,
+        rgba(44, 62, 80, 0.85) 100%);
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-game-ui);
+}
+
+/* 手牌上方按钮样式 */
+.hand-action-buttons .btn {
+    min-width: 80px;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hand-action-buttons .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.hand-action-buttons .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 手牌上方按钮类型样式 */
+.hand-action-buttons .btn-primary {
+    background: linear-gradient(135deg, var(--color-success) 0%, #27ae60 100%);
+    color: white;
+}
+
+.hand-action-buttons .btn-secondary {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #2980b9 100%);
+    color: white;
+}
+
+.hand-action-buttons .btn-warning {
+    background: linear-gradient(135deg, var(--color-warning) 0%, #d68910 100%);
+    color: white;
+}
+
+/* =======================================
+   设置菜单样式
+   ======================================= */
+/* 设置按钮 - 增强优先级 */
+.top-info-bar .btn-settings {
+    padding: 8px 16px !important;
+    background: rgba(52, 73, 94, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--radius-lg) !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    display: inline-block !important;
+    margin-left: var(--space-3) !important;
+}
+
+.top-info-bar .btn-settings:hover {
+    background: rgba(52, 73, 94, 1) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 设置下拉菜单 */
+.settings-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: linear-gradient(135deg,
+        rgba(52, 73, 94, 0.98) 0%,
+        rgba(44, 62, 80, 0.95) 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    box-shadow: var(--shadow-xl);
+    min-width: 150px;
+    z-index: var(--z-dropdown);
+    overflow: hidden;
+}
+
+.settings-item {
+    padding: 12px 20px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* =======================================
+   简化控制面板样式
+   ======================================= */
+/* 排除932x430分辨率，避免冲突 */
+@media not screen and (width: 932px) and (height: 430px) {
+    .control-panel.simplified {
+        min-width: 200px;
+        padding: 15px;
+    }
+
+    .control-panel.simplified .control-buttons {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .control-panel.simplified .btn {
+        width: 100%;
+        padding: 12px;
     }
 }

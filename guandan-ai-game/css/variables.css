@@ -139,6 +139,25 @@
   --card-overlap: -38px; /* 南方玩家手牌重叠间距 - 进一步缩小 */
   --card-overlap-ai: -40px; /* AI玩家手牌重叠间距 */
 
+  /* =======================================
+     UNIFIED CARD SYSTEM - 统一牌面系统
+     ======================================= */
+
+  /* 牌面基础尺寸 - 从南方手牌提取 */
+  --card-base-width: 64px;
+  --card-base-height: 98px;
+  --card-uniform-overlap: -40px;  /* 统一的重叠间距 */
+
+  /* 牌面文字大小 - 南方手牌标准 */
+  --card-rank-size: 20px;
+  --card-suit-size: 30px;
+  --card-letter-spacing: -2px;
+
+  /* 响应式缩放比例 */
+  --card-scale-932x430: 0.5;
+  --card-scale-mobile: 0.75;
+  --card-scale-tablet: 0.85;
+
   /* 牌面动画 */
   --card-transition-duration: 0.3s;
   --card-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);

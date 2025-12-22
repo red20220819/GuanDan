@@ -437,24 +437,27 @@
    CONTROL PANEL LAYOUT - 控制面板布局
    ======================================= */
 
-.control-panel {
-  background: linear-gradient(135deg,
-    rgba(52, 73, 94, 0.95) 0%,
-    rgba(44, 62, 80, 0.9) 100%);
-  border-radius: var(--radius-xl);
-  padding: var(--space-4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(10px);
-}
+/* 排除932x430分辨率，避免与专用样式冲突 */
+@media not screen and (width: 932px) and (height: 430px) {
+  .control-panel {
+    background: linear-gradient(135deg,
+      rgba(52, 73, 94, 0.95) 0%,
+      rgba(44, 62, 80, 0.9) 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+  }
 
-/* 控制按钮布局 */
-.control-buttons {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
+  /* 控制按钮布局 */
+  .control-buttons {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 /* 游戏状态显示 */

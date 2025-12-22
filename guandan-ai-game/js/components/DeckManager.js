@@ -41,7 +41,7 @@ class DeckManager {
                 suit: 'joker',
                 rank: 'small',
                 display: '🃟',
-                value: 17,
+                value: 102,  // 小王权重，与规则文档一致
                 deckNum: deckNum,
                 id: `card_${deckNum}_joker_small`
             });
@@ -50,7 +50,7 @@ class DeckManager {
                 suit: 'joker',
                 rank: 'big',
                 display: '🃏',
-                value: 18,
+                value: 103,  // 大王权重，与规则文档一致
                 deckNum: deckNum,
                 id: `card_${deckNum}_joker_big`
             });

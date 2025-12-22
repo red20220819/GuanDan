@@ -1,0 +1,178 @@
+/* 🎮 掼蛋游戏 - 统一控制面板CSS
+ * 解决CSS冲突，统一控制面板样式
+ * 最后更新：2025-12-22
+ */
+
+/* ===================================
+   基础控制面板样式（桌面版）
+   =================================== */
+.control-panel {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    min-width: 200px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(52, 73, 94, 0.9), rgba(44, 62, 80, 0.85));
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    z-index: var(--z-game-ui, 1000);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-panel.simplified {
+    min-width: 150px;
+    padding: 8px;
+    background: linear-gradient(135deg, rgba(52, 73, 94, 0.95), rgba(44, 62, 80, 0.9));
+}
+
+.control-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.control-panel.simplified .control-buttons {
+    grid-template-columns: 1fr;
+    gap: 6px;
+}
+
+/* ===================================
+   按钮基础样式
+   =================================== */
+.btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    min-height: 40px;
+}
+
+/* 按钮变体 */
+.btn-primary { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
+.btn-secondary { background: linear-gradient(135deg, #95a5a6, #7f8c8d); color: white; }
+.btn-warning { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
+.btn-sort { background: linear-gradient(135deg, #3498db, #5dade2); color: white; }
+.btn-restart { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+
+/* 按钮状态 */
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+.btn:active { transform: scale(0.95); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===================================
+   932x430移动端专用样式
+   =================================== */
+@media screen and (width: 932px) and (height: 430px) {
+
+    /* 控制面板容器 */
+    html body .control-panel.simplified {
+        position: fixed !important;
+        right: 5px !important;
+        bottom: 5px !important;
+        width: auto !important;
+        min-width: 190px !important;
+        max-width: 210px !important;
+        height: 30px !important;
+        padding: 2px 3px !important;
+        z-index: 99999 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(52, 73, 94, 0.9) !important;
+        border-radius: 6px !important;
+    }
+
+    /* 按钮容器 */
+    html body .control-panel.simplified .control-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 3px !important;
+        height: 26px !important;
+        justifyContent: center !important;
+        align-items: center !important;
+        margin: 0 !important;
+        padding: 2px 3px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 按钮样式 - 超高优先级 */
+    html body .control-panel.simplified .btn,
+    html body .control-panel.simplified .btn-sort,
+    html body .control-panel.simplified .btn-restart {
+        height: 16px !important;
+        max-height: 16px !important;
+        width: 85px !important;
+        min-width: 85px !important;
+        max-width: 85px !important;
+        font-size: 8px !important;
+        padding: 1px 3px !important;
+        line-height: 1 !important;
+        border-radius: 2px !important;
+        margin: 0 1px !important;
+        flex: 1 1 auto !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: inline-flex !important;
+        background: rgba(52, 73, 94, 0.8) !important;
+        color: white !important;
+        border: none !important;
+        vertical-align: middle !important;
+        font-family: inherit !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        transform: none !important;
+        position: static !important;
+    }
+
+    /* 按钮悬停效果 */
+    html body .control-panel.simplified .btn:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* 安全区域支持 */
+    @supports (padding: max(0px)) {
+        html body .control-panel.simplified {
+            bottom: max(5px, env(safe-area-inset-bottom)) !important;
+            right: max(5px, env(safe-area-inset-right)) !important;
+        }
+    }
+}
+
+/* ===================================
+   其他移动端适配
+   =================================== */
+@media (max-width: 768px) {
+    .control-panel {
+        right: 10px;
+        bottom: 10px;
+        min-width: 150px;
+        padding: 10px;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 6px 10px;
+        min-height: 36px;
+    }
+
+    .control-buttons {
+        gap: 6px;
+    }
+}

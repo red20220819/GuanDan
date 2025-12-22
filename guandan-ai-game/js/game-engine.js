@@ -41,6 +41,7 @@ class GameEngine {
         this.levelManager = null;
         this.gameRanking = null;
         this.upgradeRuleEngine = null;
+        this.levelDisplay = null;
 
         // 事件监听器
         this.eventListeners = new Map();
@@ -300,6 +301,14 @@ class GameEngine {
         // 如果所有升级系统组件都初始化完成，则设置事件绑定
         if (this.levelManager && this.gameRanking && this.upgradeRuleEngine) {
             this.bindUpgradeEvents();
+
+            // 初始化级别显示组件
+            if (window.LevelDisplay) {
+                this.levelDisplay = new LevelDisplay(this);
+                console.log('✅ LevelDisplay 初始化完成');
+            } else {
+                console.warn('⚠️ LevelDisplay 组件未找到，跳过初始化');
+            }
         }
     }
 
@@ -498,7 +507,7 @@ class GameEngine {
         const aiPlayers = this.players.filter(player => player.isAI);
 
         for (const player of aiPlayers) {
-            this.aiPlayers[player.id] = new AIPlayer(player.id, this.aiDifficulty);
+            this.aiPlayers[player.id] = new AIPlayer(this, player.id);
             this.aiPlayers[player.id].initialize(player);
             this.aiPlayers[player.id].setDifficulty(this.aiDifficulty);
         }

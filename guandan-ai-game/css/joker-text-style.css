@@ -1,0 +1,14 @@
+/**
+ * JOKER文字样式 - 模块化
+ */
+
+/* JOKER竖向显示样式 */
+.player-card .card-rank.joker-text {
+    writing-mode: vertical-rl !important;
+    text-orientation: upright !important;
+    letter-spacing: -3px !important; /* 减少字母间距，更紧凑 */
+    line-height: 0.6 !important; /* 减少行高，更紧凑 */
+    font-size: 14px !important; /* 改回14px */
+    margin-left: -5px !important; /* 向左移动5像素 */
+    display: inline-block !important;
+}

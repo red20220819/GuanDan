@@ -1,0 +1,73 @@
+/* 逢人配（级牌）特殊样式 */
+
+/* 逢人配牌的整体样式 */
+.player-card.level-card {
+    border: 2px solid #ff6b6b;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+    background: linear-gradient(135deg, #fff 0%, #ffcccc 100%);
+}
+
+/* 逢人配左上角标记 - 替换花色 */
+/* 使用更高优先级的选择器覆盖 flex 布局影响 */
+.player-card.level-card .card-top-left,
+.player-card.level-card .card-top-left .card-suit.level-card-indicator {
+    /* 覆盖父容器的 align-items: center */
+    align-self: flex-start !important;
+    justify-self: flex-start !important;
+}
+
+/* 逢人配左上角标记的具体样式 */
+div.player-card.level-card div.card-top-left div.card-suit.level-card-indicator {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    background: #ff0000 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    line-height: 20px !important;
+    position: absolute !important;
+    top: 25px !important;
+    left: 2px !important;
+    padding: 0 !important;
+    text-align: center !important;
+    overflow: hidden !important;
+    font-family: Arial, sans-serif !important;
+    z-index: 100 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    /* 关键：脱离 flex 布局流 */
+    flex: none !important;
+    align-self: flex-start !important;
+    margin: 0 !important;
+}
+
+/* 右下角的逢人配标记隐藏 */
+.player-card .card-bottom-right .card-suit.level-card-indicator {
+    display: none !important;
+}
+
+/* 逢人配牌的字体颜色特殊处理 */
+.player-card.level-card.red {
+    color: #d32f2f;
+}
+
+.player-card.level-card.black {
+    color: #d32f2f;
+}
+
+/* 逢人配牌选中时的效果 */
+.player-card.level-card.selected {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.5);
+    border-color: #ff4444;
+}
+
+/* 逢人配牌悬停效果 */
+.player-card.level-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}

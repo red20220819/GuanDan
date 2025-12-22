@@ -8,10 +8,17 @@ class RuleEngine {
         this.gameEngine = gameEngine;
         this.currentLevel = 2; // 当前级数
 
-        // 牌型权重定义（掼蛋规则：A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2）
+        // 导入A级规则
+        if (typeof LevelARules !== 'undefined') {
+            this.levelARules = new LevelARules(this);
+        } else {
+            this.levelARules = null;
+        }
+
+        // 牌型权重定义（掼蛋规则：A是最大的普通牌，2是最小的）
         this.cardWeights = {
             '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-            'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 2,  // 注意：2是最小的
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 2,  // 重要：2是最小的
             // 级牌权重
             'level': 101,
             // 王牌权重
@@ -37,6 +44,10 @@ class RuleEngine {
      */
     setLevel(level) {
         this.currentLevel = level;
+        // 同时更新A级规则
+        if (this.levelARules) {
+            this.levelARules.setLevel(level);
+        }
     }
 
     /**
@@ -70,20 +81,162 @@ class RuleEngine {
     }
 
     /**
-     * 识别牌型 - 核心方法
+     * 处理万能牌（逢人配和王牌）的替换
      */
-    getCardType(cards) {
-        if (!cards || cards.length === 0) {
-            return null;
+    replaceWildCards(cards, targetType) {
+        const levelCards = cards.filter(c => this.isLevelCard(c));
+        const jokers = cards.filter(c => c.suit === 'joker');
+        const normalCards = cards.filter(c => !this.isLevelCard(c) && c.suit !== 'joker');
+
+        // 根据目标牌型进行万能牌替换
+        switch (targetType) {
+            case 'single':
+                return this.replaceForSingle(cards, normalCards, levelCards, jokers);
+            case 'pair':
+                return this.replaceForPair(cards, normalCards, levelCards, jokers);
+            case 'triple':
+                return this.replaceForTriple(cards, normalCards, levelCards, jokers);
+            case 'straight':
+                return this.replaceForStraight(cards, normalCards, levelCards, jokers);
+            case 'bomb':
+                return this.replaceForBomb(cards, normalCards, levelCards, jokers);
+            default:
+                return { valid: false, message: '不支持的牌型' };
+        }
+    }
+
+    /**
+     * 替换单张
+     */
+    replaceForSingle(cards, normalCards, levelCards, jokers) {
+        // 如果只有一张牌，无需替换
+        if (cards.length === 1) {
+            return { valid: true, cards: cards };
+        }
+        return { valid: false, message: '单张牌型不能有万能牌' };
+    }
+
+    /**
+     * 替换对子
+     */
+    replaceForPair(cards, normalCards, levelCards, jokers) {
+        if (cards.length !== 2) return { valid: false, message: '对子必须为2张' };
+
+        // 如果两张都是普通牌且点数相同
+        if (normalCards.length === 2 && normalCards[0].rank === normalCards[1].rank) {
+            return { valid: true, cards: cards };
         }
 
-        const count = cards.length;
+        // 如果有一张万能牌
+        if ((normalCards.length === 1 && levelCards.length === 1) ||
+            (normalCards.length === 1 && jokers.length === 1)) {
+            return { valid: true, cards: cards };
+        }
 
-        // 王牌特殊处理
-        const jokerCount = cards.filter(c => c.suit === 'joker').length;
+        // 如果两张都是万能牌
+        if ((levelCards.length === 2) || (jokers.length === 2) ||
+            (levelCards.length === 1 && jokers.length === 1)) {
+            return { valid: true, cards: cards };
+        }
 
-        // 天王炸弹（4张王牌）- 官方最大牌型
-        if (count === 4 && jokerCount === 4) {
+        return { valid: false, message: '无法组成对子' };
+    }
+
+    /**
+     * 替换三张
+     */
+  replaceForTriple(cards, normalCards, levelCards, jokers) {
+      if (cards.length !== 3) return { valid: false, message: '三张必须为3张' };
+
+      // 如果三张都是普通牌且点数相同
+      if (normalCards.length === 3 && normalCards[0].rank === normalCards[1].rank && normalCards[1].rank === normalCards[2].rank) {
+          return { valid: true, cards: cards };
+      }
+
+      // 如果有万能牌，检查是否可以组成三张
+      const wildCardCount = levelCards.length + jokers.length;
+      if (wildCardCount > 0) {
+          const normalRank = normalCards.length > 0 ? normalCards[0].rank : null;
+          // 计算相同点数的牌数量
+          const sameRankCount = normalCards.filter(c => c.rank === normalRank).length;
+
+          // 如果有2张普通牌+1张万能牌，或1张普通牌+2张万能牌
+          if ((sameRankCount === 2 && wildCardCount === 1) ||
+              (sameRankCount === 1 && wildCardCount === 2) ||
+              (sameRankCount === 0 && wildCardCount === 3)) {
+              return { valid: true, cards: cards };
+          }
+      }
+
+      return { valid: false, message: '无法组成三张' };
+  }
+
+  /**
+   * 替换顺子
+   */
+  replaceForStraight(cards, normalCards, levelCards, jokers) {
+      if (cards.length < 5) return { valid: false, message: '顺子至少需要5张' };
+
+      // 过滤掉2和王牌（不能参与顺子）
+      const validNormalCards = normalCards.filter(c => c.rank !== '2' && c.suit !== 'joker');
+      const wildCardCount = levelCards.length + jokers.length;
+
+      // 如果没有万能牌，检查是否为天然顺子
+      if (wildCardCount === 0) {
+          return this.checkStraight(cards) ? { valid: true, cards: cards } : { valid: false, message: '不是顺子' };
+      }
+
+      // 有万能牌的情况，尝试组成顺子
+      // TODO: 实现复杂的顺子替换逻辑
+      return { valid: false, message: '暂不支持万能牌组成顺子' };
+  }
+
+  /**
+   * 替换炸弹
+   */
+  replaceForBomb(cards, normalCards, levelCards, jokers) {
+      const totalCount = cards.length;
+
+      // 检查是否可以组成炸弹
+      if (totalCount < 4 || totalCount > 8) {
+          return { valid: false, message: '炸弹必须为4-8张' };
+      }
+
+      // 统计各点数的牌数
+      const rankCounts = {};
+      cards.forEach(card => {
+          const rank = this.isLevelCard(card) || card.suit === 'joker' ? 'wild' : card.rank;
+          rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+      });
+
+      // 检查是否可以组成炸弹
+      const normalCount = Object.entries(rankCounts).filter(([rank, count]) => rank !== 'wild').reduce((sum, [rank, count]) => sum + count, 0);
+      const wildCount = rankCounts['wild'] || 0;
+
+      if (normalCount + wildCount === totalCount && normalCount + wildCount >= 4) {
+          return { valid: true, cards: cards };
+      }
+
+      return { valid: false, message: '无法组成炸弹' };
+  }
+
+  /**
+   * 识别牌型 - 核心方法
+   */
+  getCardType(cards) {
+      if (!cards || cards.length === 0) {
+          return null;
+      }
+
+      const count = cards.length;
+
+      // 分离逢人配、王牌和普通牌
+      const levelCards = cards.filter(c => this.isLevelCard(c));
+      const jokerCount = cards.filter(c => c.suit === 'joker').length;
+      const wildCardCount = levelCards.length + jokerCount;
+
+      // 天王炸弹（4张王牌）- 官方最大牌型
+      if (count === 4 && jokerCount === 4) {
             return {
                 type: 'bomb',
                 subtype: 'kingBomb',
@@ -96,8 +249,16 @@ class RuleEngine {
         // 王牌特殊牌型（仅王牌）
         if (jokerCount === count) {
             // 所有牌都是王牌
-            if (count === 3) {
-                // 三张王牌
+            if (count === 2) {
+                // 两张王牌组成王对
+                return {
+                    type: 'pair',
+                    family: 'normal',
+                    rank: '王对',
+                    weight: 20 + 103  // 王对的权重基于大王（103）
+                };
+            } else if (count === 3) {
+                // 三张王牌按普通三张处理，只能管三张的牌
                 return {
                     type: 'triple',
                     family: 'normal',
@@ -507,16 +668,19 @@ class RuleEngine {
 
         console.log(`[canBeat] 比较: ${cards1.map(c => c.rank + c.suit).join(',')} vs ${cards2.map(c => c.rank + c.suit).join(',')}`);
         console.log(`[canBeat] 类型: ${type1.type} vs ${type2.type}`);
+        console.log(`[canBeat] 家族: ${type1.family} vs ${type2.family}`);
         console.log(`[canBeat] 权重: ${type1.weight} vs ${type2.weight}`);
+
+        // 掼蛋规则严格检查：非炸弹不能打任何炸弹
+        if (type1.family !== 'bomb' && type2.family === 'bomb') {
+            console.log(`[canBeat] 非炸弹(${type1.family})不能打炸弹(${type2.family})，返回false`);
+            return false;
+        }
 
         // 炸弹可以打任何非炸弹牌型
         if (type1.family === 'bomb' && type2.family !== 'bomb') {
+            console.log(`[canBeat] 炸弹可以打非炸弹，返回true`);
             return true;
-        }
-
-        // 非炸弹不能打炸弹
-        if (type1.family !== 'bomb' && type2.family === 'bomb') {
-            return false;
         }
 
         // 注意：这一行被移除，因为炸弹可以打任何非炸弹牌型
@@ -534,6 +698,7 @@ class RuleEngine {
                 return false;
             }
 
+    
             // 同花顺 vs 普通炸弹
             if (type1.subtype === 'straightFlush' && type2.subtype !== 'straightFlush') {
                 // 同花顺 > 5炸 和 4炸，但 < 6炸及以上
@@ -579,6 +744,18 @@ class RuleEngine {
     validatePlay(cards, lastPlay, playerHand) {
         if (!cards || cards.length === 0) {
             return { valid: false, message: '请选择要出的牌' };
+        }
+
+        // A级特殊规则检查
+        if (this.levelARules && this.levelARules.isLevelA()) {
+            const playContext = {
+                lastPlay: lastPlay,
+                isFirstPlay: !lastPlay || lastPlay.length === 0
+            };
+            const levelAValidation = this.levelARules.validatePlay(cards, playContext);
+            if (!levelAValidation.valid) {
+                return levelAValidation;
+            }
         }
 
         const currentType = this.getCardType(cards);

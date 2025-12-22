@@ -1,0 +1,95 @@
+/**
+ * 出牌区域牌堆叠和文字大小修复
+ * 932x430分辨率专用
+ */
+
+@media screen and (width: 932px) and (height: 430px) {
+    /* 出牌区域布局调整 - 确保所有方向都是水平排列 */
+    /* 东西两家在932x430下改为水平排列 */
+    .west-plays,
+    .east-plays {
+        flex-direction: row !important;  /* 覆盖默认的column，改为水平排列 */
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* 出牌区域的牌堆叠间距 - 调整为更紧密的堆叠 */
+    /* 使用更高优先级的选择器覆盖game-modern.css中的规则 */
+    .north-plays .plays-group > .player-card,
+    .south-plays .plays-group > .player-card,
+    .west-plays .plays-group > .player-card,
+    .east-plays .plays-group > .player-card {
+        margin-left: -45px !important;  /* 水平堆叠间距，调整为-45px */
+        /* 保持牌的大小不变 */
+        width: 32px !important;
+        height: 44px !important;
+    }
+
+    /* 所有方向第一张牌不应用负边距 - 使用高优先级选择器 */
+    .north-plays .plays-group > .player-card:first-child,
+    .south-plays .plays-group > .player-card:first-child,
+    .west-plays .plays-group > .player-card:first-child,
+    .east-plays .plays-group > .player-card:first-child {
+        margin-left: 0 !important;
+    }
+
+    /* 统一出牌区域与南方手牌相同的文字大小 - 完全复制PC模式南方手牌样式 */
+    .plays-group .player-card .card-rank {
+        font-weight: 700 !important;
+        font-size: 20px !important;  /* 与PC模式南方手牌完全一致：20px */
+        margin-bottom: -5px !important;  /* 与PC模式南方手牌完全一致 */
+        text-align: center !important;  /* 与PC模式南方手牌完全一致 */
+        letter-spacing: -2px !important;  /* 与PC模式南方手牌完全一致 */
+        width: 20px !important;  /* 与PC模式南方手牌完全一致 */
+        display: inline-block !important;  /* 与PC模式南方手牌完全一致 */
+        position: relative !important;
+        line-height: 1 !important;
+    }
+
+    /* 特殊处理10数字，与PC模式南方手牌保持完全一致 */
+    .plays-group .player-card .card-rank[data-rank="10"] {
+        transform: translateX(-2px) !important;  /* 与PC模式南方手牌完全一致 */
+    }
+
+    /* 为A,2,3,4,5,6,7,8,9,K添加额外的向左偏移 - 与PC模式南方手牌完全一致 */
+    .plays-group .player-card .card-rank[data-rank="A"],
+    .plays-group .player-card .card-rank[data-rank="2"],
+    .plays-group .player-card .card-rank[data-rank="3"],
+    .plays-group .player-card .card-rank[data-rank="4"],
+    .plays-group .player-card .card-rank[data-rank="5"],
+    .plays-group .player-card .card-rank[data-rank="6"],
+    .plays-group .player-card .card-rank[data-rank="7"],
+    .plays-group .player-card .card-rank[data-rank="8"],
+    .plays-group .player-card .card-rank[data-rank="9"],
+    .plays-group .player-card .card-rank[data-rank="K"] {
+        transform: translateX(-1px) !important;  /* 与PC模式南方手牌完全一致 */
+    }
+
+    /* 统一出牌区域与南方手牌相同的花色大小 - 完全复制PC模式南方手牌样式 */
+    .plays-group .player-card .card-suit {
+        font-size: 30px !important;  /* 与PC模式南方手牌完全一致：30px */
+        text-align: center !important;  /* 与PC模式南方手牌完全一致 */
+        width: 20px !important;  /* 与PC模式南方手牌完全一致 */
+        font-weight: bold !important;
+        line-height: 1 !important;
+    }
+
+    /* 调整牌面内容位置，与南方手牌布局完全一致 */
+    .plays-group .player-card .card-top-left,
+    .plays-group .player-card .card-bottom-right {
+        padding: 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        margin: 0 !important;
+    }
+
+    .plays-group .player-card .card-top-left {
+        top: 3px !important;  /* 与南方手牌一致的位置 */
+        left: 3px !important;   /* 与南方手牌一致的位置 */
+    }
+
+    .plays-group .player-card .card-bottom-right {
+        bottom: 3px !important;  /* 与南方手牌一致的位置 */
+        right: 3px !important;   /* 与南方手牌一致的位置 */
+  

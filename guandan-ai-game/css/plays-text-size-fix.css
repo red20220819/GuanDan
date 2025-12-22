@@ -1,0 +1,30 @@
+/**
+ * 出牌区域文字大小修复 - 最高优先级
+ * 确保所有数字大小一致
+ */
+
+/* 932x430分辨率下，强制统一所有出牌区域数字大小 */
+@media screen and (width: 932px) and (height: 430px) {
+    /* 最高优先级的选择器，覆盖所有之前的定义 */
+    html body .game-container .game-table .plays-group .player-card .card-top-left .card-rank,
+    html body .game-container .game-table .plays-group .player-card .card-bottom-right .card-rank,
+    html body .game-container .game-table .plays-group .player-card .card-rank {
+        font-size: 15px !important;  /* 统一大小 */
+        font-weight: bold !important;
+    }
+
+    /* 特别处理10数字 */
+    html body .game-container .game-table .plays-group .player-card .card-top-left .card-rank[data-rank="10"],
+    html body .game-container .game-table .plays-group .player-card .card-bottom-right .card-rank[data-rank="10"],
+    html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="10"] {
+        font-size: 15px !important;  /* 与其他数字完全一致 */
+    }
+
+    /* JOKER文字 */
+    html body .game-container .game-table .plays-group .player-card .card-top-left .card-rank.joker-text,
+    html body .game-container .game-table .plays-group .player-card .card-bottom-right .card-rank.joker-text,
+    html body .game-container .game-table .plays-group .player-card .card-rank.joker-text {
+        font-size: 13px !important;  /* 稍小一点 */
+        margin-left: 1px !important;  /* 保持右移 */
+    }
+}

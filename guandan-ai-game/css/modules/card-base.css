@@ -1,0 +1,218 @@
+/**
+ * 牌面基础样式 - 模块化CSS
+ * 从南方手牌提取的统一样式，供手牌和出牌区共同使用
+ */
+
+/* =======================================
+   BASE CARD STYLES - 基础牌面样式
+   ======================================= */
+
+/* 基础牌面样式类 */
+.card-base {
+    /* 使用统一样式变量 */
+    width: var(--card-base-width);
+    height: var(--card-base-height);
+
+    /* 基础外观 */
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+    border: 1px solid #373836;
+    border-radius: var(--radius-md);
+
+    /* 布局和定位 */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 动画和过渡 */
+    transition: all var(--card-transition-duration) var(--card-transition-timing);
+
+    /* 阴影效果 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    /* 性能优化 */
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* 牌面内容基础样式 */
+.card-base .card-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 牌面角标区域 */
+.card-base .card-top-left,
+.card-base .card-bottom-right {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+    z-index: 1;
+}
+
+.card-base .card-top-left {
+    top: 3px;
+    left: 3px;
+}
+
+.card-base .card-bottom-right {
+    bottom: 3px;
+    right: 3px;
+    transform: rotate(180deg);
+}
+
+/* 统一牌面文字样式 */
+.card-base .card-rank {
+    /* 使用统一样式变量 */
+    font-size: var(--card-rank-size);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--card-letter-spacing);
+
+    /* 文字样式 */
+    color: inherit;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: -5px;
+}
+
+.card-base .card-suit {
+    /* 使用统一样式变量 */
+    font-size: var(--card-suit-size);
+    font-weight: var(--font-weight-bold);
+
+    /* 文字样式 */
+    color: inherit;
+    text-align: center;
+    line-height: 1;
+}
+
+/* 牌面颜色区分 */
+.card-base.red {
+    color: var(--color-card-red);
+}
+
+.card-base.black {
+    color: var(--color-card-black);
+}
+
+/* 特殊牌型处理 */
+
+/* 大小王处理 */
+.card-base .card-rank.joker-text {
+    font-size: 13px;
+    transform: translateX(-4px);
+    letter-spacing: -0.5px;
+}
+
+/* "10"数字的特殊处理 */
+.card-base .card-rank[data-rank="10"] {
+    transform: none;  /* 移除transform避免干扰 */
+    letter-spacing: -3px;  /* 增加负间距，让1和0更靠近 */
+    white-space: nowrap;  /* 防止换行 */
+    display: inline-block;
+    width: auto;  /* 让宽度自动适应内容 */
+    padding: 0;  /* 移除内边距 */
+}
+
+/* 级牌"配"标记 */
+.card-base .level-card-indicator {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-error);
+}
+
+/* 大小王图片容器 */
+.card-base .joker-image-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.card-base .joker-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* =======================================
+   CARD INTERACTIONS - 牌面交互效果
+   ======================================= */
+
+/* 悬浮效果 */
+.card-base:hover {
+    transform: translateY(-15px) scale(1.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 8888;
+}
+
+/* 选中效果 */
+.card-base.selected {
+    transform: translateY(-30px) scale(1.12);
+    border-color: var(--color-warning);
+    border-width: 3px;
+    background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%);
+    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.6);
+    z-index: 9999;
+}
+
+/* 划选效果 */
+.card-base.brushing {
+    transform: translateY(-15px) scale(1.08);
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+    border-color: #2196F3;
+    border-width: 3px;
+}
+
+/* =======================================
+   ACCESSIBILITY - 可访问性
+   ======================================= */
+
+/* 焦点样式 */
+.card-base:focus {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    .card-base {
+        border-width: 2px;
+    }
+
+    .card-base.red {
+        color: #d32f2f;
+    }
+
+    .card-base.black {
+        color: #000000;
+    }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+    .card-base {
+        transition: none;
+    }
+
+    .card-base:hover,
+    .card-base.selected,
+    .card-base.brushing {
+        transform: none;
+    }
+}

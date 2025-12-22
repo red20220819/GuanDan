@@ -45,11 +45,37 @@
         overflow: hidden;
     }
 
-    /* 隐藏顶部信息栏，节省垂直空间 */
-    .top-info-bar,
+    /* 隐藏顶部信息栏的特定元素，但保留设置按钮空间 */
     .team-info-bar,
     .info-display {
         display: none !important;
+    }
+
+    .top-info-bar {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        height: auto !important;  /* 自动高度 */
+        padding: 4px 8px !important;  /* 最小内边距 */
+        background: transparent !important;  /* 完全透明 */
+        z-index: 999 !important;
+        max-width: 120px !important;
+        overflow: hidden !important;
+    }
+
+    /* 只隐藏非必要元素，保留设置按钮和菜单 */
+    .top-info-bar .coin-display,
+    .top-info-bar .level-display,
+    .top-info-bar .score-display {
+        display: none !important;
+    }
+
+    /* 确保设置菜单不被意外隐藏 */
+    .top-info-bar .settings-menu {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
     /* 玩家区域优化 */
@@ -181,7 +207,7 @@
     /* 选中状态优化 */
     .player-card.selected,
     .hand-card.selected {
-        transform: translateY(-12px) scale(1.08);
+        transform: translateY(-12px);
         box-shadow: 0 8px 20px rgba(241, 196, 15, 0.4);
         z-index: 10;
     }
@@ -195,13 +221,13 @@
         background: rgba(44, 62, 80, 0.95);
         backdrop-filter: blur(10px);
         border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 8px 16px;
+        padding: 6px 16px;  /* 上下padding从8px减到6px */
         z-index: 1000;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 12px;
-        height: 60px;
+        height: 45px;  /* 60px * 0.75 = 45px */
     }
 
     .control-buttons {
@@ -227,9 +253,9 @@
 
     /* 玩家头像优化 */
     .player-avatar {
-        width: 36px;
-        height: 36px;
-        font-size: 14px;
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
         border-radius: 50%;
         flex-shrink: 0;
     }
@@ -300,12 +326,12 @@
         .game-table {
             padding-left: max(8px, env(safe-area-inset-left));
             padding-right: max(8px, env(safe-area-inset-right));
-            padding-bottom: max(68px, env(safe-area-inset-bottom));
+            padding-bottom: max(51px, env(safe-area-inset-bottom));  /* 68px * 0.75 = 51px */
         }
 
         .control-panel {
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
-            height: max(60px, calc(60px + env(safe-area-inset-bottom)));
+            padding-bottom: max(6px, env(safe-area-inset-bottom));  /* 8px * 0.75 = 6px */
+            height: max(45px, calc(45px + env(safe-area-inset-bottom)));  /* 60px * 0.75 = 45px */
         }
     }
 
@@ -347,6 +373,11 @@
 
 /* 针对932x430特定尺寸的微调 */
 @media screen and (min-width: 900px) and (max-width: 960px) and (min-height: 400px) and (max-height: 460px) {
+    /* 手牌上方操作区域上移50px */
+    .hand-action-buttons {
+        bottom: 170px !important;  /* 从120px调整为170px，上移50px */
+    }
+
     .control-btn,
     .action-btn,
     .btn {
@@ -354,6 +385,8 @@
         height: 38px;
         font-size: 11px;
     }
+
+      /* 控制面板样式已迁移到 css/control-panel-unified.css */
 
     .player-avatar {
         width: 34px;
@@ -366,26 +399,53 @@
         gap: 6px;
     }
 
-    .player-north, .player-west, .player-east {
+    .player-west, .player-east {
         width: 100px;
         flex-shrink: 0;
         position: absolute;
     }
 
     .player-north {
-        top: 8%;
-        left: calc(50% - 200px); /* 932x430下左移两个100px玩家容器宽度 */
-        transform: translateX(0);
-        z-index: 5;
+        top: calc(5% - 15px); /* 向上移动15个像素 */
+        left: calc(50% - 140px); /* 哈哈，再向左移动30px，总共向左移动80px */
+        transform: translateX(-50%);
+        width: 120px; /* 与W、E玩家一致 */
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center; /* 居中对齐 */
+        flex-shrink: 0;
+        position: absolute;
+        z-index: 10;
     }
 
-    
-  
+    /* 932x430尺寸下W和E玩家的水平位置调整 */
+    /* 使用更高优先级的选择器覆盖HTML内联样式 */
+    body .game-table .player-position.player-west {
+        position: absolute !important;
+        left: 10px !important;  /* 调整为10px，真正靠近左边缘 */
+        top: calc(50% - 60px) !important;  /* 向上移动60个像素 */
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        flex-direction: row !important;
+    }
+
+    body .game-table .player-position.player-east {
+        position: absolute !important;
+        right: 10px !important;  /* 调整为10px，真正靠近右边缘 */
+        top: calc(50% - 60px) !important;  /* 向上移动60个像素 */
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        flex-direction: row-reverse !important;
+    }
+
     .player-avatar-simple {
-        width: 60px;
-        height: 60px;
+        width: 70px;  /* 从60px增加到70px */
+        height: 70px;
         border-radius: 14px;
-        font-size: 26px;
+        font-size: 30px;  /* 从26px增加到30px */
         border: 2px solid white;
         text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
     }
@@ -422,6 +482,74 @@
         min-height: 35px;
     }
 
+    /* 出牌区域的牌缩小到75%（再缩小10%） */
+    .plays-group .player-card {
+        width: 32px !important;   /* 36px * 0.9 ≈ 32px */
+        height: 44px !important;  /* 49px * 0.9 ≈ 44px */
+        margin-left: -31px !important;  /* -34px * 0.9 ≈ -31px */
+        transform: none !important;  /* 明确移除所有transform */
+        /* 移除背景设置，让它继承.player-card的默认样式 */
+        border-radius: 4px !important;  /* 5px * 0.9 ≈ 4px */
+        font-size: 14px !important;
+    }
+
+    .plays-group .player-card:first-child {
+        margin-left: 0 !important;  /* 第一张牌保持原位 */
+    }
+
+    /* 保持与南方手牌相同的字体大小，只添加必要的样式 */
+    .plays-group .player-card .card-rank {
+        /* 继承默认的20px字体大小 */
+        white-space: nowrap !important;  /* 防止换行 */
+        /* 保持默认的letter-spacing: -2px */
+    }
+
+    /* 10数字的特殊处理 - 保持transform: none */
+    .plays-group .player-card .card-rank[data-rank="10"] {
+        transform: none !important;  /* 确保没有transform */
+    }
+
+    /* 花色继承默认的30px字体大小 */
+
+    /* 优化容器内边距，给文字更多空间 */
+    .plays-group .player-card .card-top-left {
+        top: 1px !important;
+        left: 1px !important;
+        padding: 0 1px !important;
+        width: auto !important;  /* 允许自动调整宽度 */
+        min-width: 0 !important;
+        /* 移除 overflow: hidden，让文字完整显示 */
+    }
+
+    .plays-group .player-card .card-bottom-right {
+        bottom: 1px !important;
+        right: 1px !important;
+        padding: 0 1px !important;
+        width: auto !important;  /* 允许自动调整宽度 */
+        min-width: 0 !important;
+        /* 移除 overflow: hidden，让文字完整显示 */
+    }
+
+    /* 调整数字和花色的大小到75%（再缩小10%） */
+    .plays-group .player-card .card-rank {
+        font-size: 15px !important;  /* 17px * 0.9 ≈ 15px */
+        width: auto !important;  /* 自动宽度，不限制 */
+        min-width: 13px !important;  /* 最小宽度按比例缩小 */
+        text-align: center !important;
+    }
+
+    .plays-group .player-card .card-suit {
+        font-size: 23px !important;  /* 26px * 0.9 ≈ 23px */
+        width: auto !important;  /* 自动宽度，不限制 */
+        min-width: 13px !important;  /* 最小宽度按比例缩小 */
+        text-align: center !important;
+    }
+
+    /* JOKER文字缩小到约75% */
+    .plays-group .player-card .card-rank.joker-text {
+        font-size: 13px !important;  /* 14px * 0.9 ≈ 13px */
+    }
+
     /* 南方玩家手牌紧凑显示 */
     .player-south .player-hand-cards {
         gap: 0 !important;  /* 消除牌间距 */
@@ -437,8 +565,9 @@
 
     /* 选中状态调整 - 确保选中的牌能正确显示 */
     .player-south .player-card.selected {
-        transform: translateY(-12px) scale(1.08) translateX(5px) !important;
+        transform: translateY(-12px) !important;
         z-index: 1000 !important;
-        margin-right: 10px !important;  /* 为选中的牌增加右边距 */
     }
 }
+
+/* ==================== 控制面板强制修复 - 已注释，让 control-panel-unified.css 处理 ==================== */

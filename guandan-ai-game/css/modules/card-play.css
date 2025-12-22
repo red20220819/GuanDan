@@ -1,0 +1,243 @@
+/**
+ * 出牌区域专用样式 - 模块化CSS
+ * 继承基础牌面样式，并添加出牌区特定功能
+ */
+
+/* =======================================
+   PLAY AREA CARD STYLES - 出牌区域牌面样式
+   ======================================= */
+
+/* 出牌区域的基础牌面样式 - 继承card-base */
+.plays-group .player-card {
+    /* 继承所有基础样式 */
+    width: var(--card-base-width);
+    height: var(--card-base-height);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+    border: 1px solid #373836;
+    border-radius: var(--radius-md);
+    position: relative;
+    transition: all var(--card-transition-duration) var(--card-transition-timing);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    /* 出牌区特定样式 */
+    margin-left: var(--card-uniform-overlap);  /* 使用统一的重叠间距 */
+    z-index: calc(10 * var(--card-index, 1));
+
+    /* 性能优化 */
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* 第一张牌不重叠 */
+.plays-group .player-card:first-child {
+    margin-left: 0;
+}
+
+/* =======================================
+   PLAY AREA CARD CONTENT - 出牌区域牌面内容
+   ======================================= */
+
+/* 出牌区域牌面内容样式 */
+.plays-group .player-card .card-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 出牌区域角标样式 */
+.plays-group .player-card .card-top-left,
+.plays-group .player-card .card-bottom-right {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+    z-index: 1;
+}
+
+.plays-group .player-card .card-top-left {
+    top: 3px;
+    left: 3px;
+}
+
+.plays-group .player-card .card-bottom-right {
+    bottom: 3px;
+    right: 3px;
+    transform: rotate(180deg);
+}
+
+/* 出牌区域文字样式 - 使用统一变量 */
+.plays-group .player-card .card-rank {
+    font-size: var(--card-rank-size);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--card-letter-spacing);
+    color: inherit;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: -5px;
+}
+
+.plays-group .player-card .card-suit {
+    font-size: var(--card-suit-size);
+    font-weight: var(--font-weight-bold);
+    color: inherit;
+    text-align: center;
+    line-height: 1;
+}
+
+/* 出牌区域颜色区分 */
+.plays-group .player-card.red {
+    color: var(--color-card-red);
+}
+
+.plays-group .player-card.black {
+    color: var(--color-card-black);
+}
+
+/* =======================================
+   PLAY AREA SPECIAL CARDS - 出牌区域特殊牌型
+   ======================================= */
+
+/* 大小王处理 */
+.plays-group .player-card .card-rank.joker-text {
+    font-size: 13px;
+    transform: translateX(-4px);
+    letter-spacing: -0.5px;
+}
+
+/* "10"数字的特殊处理 */
+.plays-group .player-card .card-rank[data-rank="10"] {
+    transform: none;  /* 移除transform避免干扰 */
+    letter-spacing: -3px;  /* 增加负间距，让1和0更靠近 */
+    white-space: nowrap;  /* 防止换行 */
+    display: inline-block;
+    width: auto;  /* 让宽度自动适应内容 */
+    padding: 0;  /* 移除内边距 */
+}
+
+/* 级牌"配"标记 */
+.plays-group .player-card .level-card-indicator {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-error);
+}
+
+/* 大小王图片容器 */
+.plays-group .player-card .joker-image-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.plays-group .player-card .joker-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* =======================================
+   LATEST PLAY HIGHLIGHT - 最新出牌突出显示
+   ======================================= */
+
+/* 最新出牌组突出显示 */
+.latest-group {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+}
+
+.latest-group .player-card {
+    animation: latestPulse 2s ease-in-out infinite alternate;
+}
+
+/* 最新出牌脉冲动画 */
+@keyframes latestPulse {
+    0% {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+}
+
+/* =======================================
+   PLAY AREA POSITIONING - 出牌区域定位
+   ======================================= */
+
+/* 北方出牌区域 */
+.north-plays {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* 南方出牌区域 */
+.south-plays {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* 西方出牌区域 */
+.west-plays {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* 东方出牌区域 */
+.east-plays {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* =======================================
+   ACCESSIBILITY FOR PLAY AREA - 出牌区域可访问性
+   ======================================= */
+
+/* 焦点样式 */
+.plays-group .player-card:focus {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    .plays-group .player-card {
+        border-width: 2px;
+    }
+
+    .plays-group .player-card.red {
+        color: #d32f2f;
+    }
+
+    .plays-group .player-card.black {
+        color: #000000;
+    }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+    .plays-group .player-card {
+        transition: none;
+    }
+
+    .latest-group {
+        filter: none;
+    }
+
+    .latest-group .player-card {
+        animation: none;
+    }
+}
