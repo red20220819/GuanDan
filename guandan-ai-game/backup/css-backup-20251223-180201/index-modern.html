@@ -8,25 +8,551 @@
     <meta http-equiv="Expires" content="0">
     <title>掼蛋 - 现代化界面版本 v2.3.3</title>
 
-       <!-- 掼蛋游戏 - 重构后的CSS样式 -->
-      <!-- 1. CSS变量系统 -->
-      <link rel="stylesheet" href="css/variables.css">
-      <!-- 2. 基础样式 -->
-      <link rel="stylesheet" href="css/base.css">
-      <!-- 3. 游戏布局 -->
-      <link rel="stylesheet" href="css/game-layout.css">
-      <!-- 4. 功能样式 -->
-      <link rel="stylesheet" href="css/features/animations.css">
-      <link rel="stylesheet" href="css/features/joker-styles.css">
-      <!-- 5. 组件样式 -->
-      <link rel="stylesheet" href="css/components/cards.css">
-      <link rel="stylesheet" href="css/components/player-positions.css">
-      <link rel="stylesheet" href="css/components/control-panel.css">
-      <link rel="stylesheet" href="css/components/level-card.css">
-      <!-- 6. 响应式样式 -->
-      <link rel="stylesheet" href="css/responsive/general.css">
-      <link rel="stylesheet" href="css/responsive/mobile.css">
-      <link rel="stylesheet" href="css/responsive/932x430.css">
+    <!-- 引入现代化CSS样式 -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/game-modern.css">
+    <link rel="stylesheet" href="css/level-card.css">
+    <link rel="stylesheet" href="css/joker-text-style.css">
+    <link rel="stylesheet" href="css/joker-images.css">
+    <link rel="stylesheet" href="css/mobile-landscape.css">
+    <link rel="stylesheet" href="css/ultrawide-mobile.css">
+    <link rel="stylesheet" href="css/plays-align-fix.css">
+    <!-- <link rel="stylesheet" href="css/plays-text-size-fix.css"> 已禁用，与play-area-cards-fix.css冲突 -->
+    <link rel="stylesheet" href="css/avatar-position-932x430.css">
+    <link rel="stylesheet" href="css/play-area-cards-fix.css">
+    <link rel="stylesheet" href="css/settings-button-932x430.css">
+    <link rel="stylesheet" href="css/control-panel-unified.css">
+
+    <!-- 模块化CSS - 统一牌面样式 -->
+    <link rel="stylesheet" href="css/modules/card-base.css">
+    <link rel="stylesheet" href="css/modules/card-play.css">
+    <!-- <link rel="stylesheet" href="css/modules/card-responsive.css"> 已禁用，与play-area-cards-fix.css冲突 -->
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translate(-50%, -50%) translateX(5px); }
+        }
+
+        /* 932x430分辨率下强制统一出牌区域与南方手牌样式 - 最高优先级 */
+        @media screen and (width: 932px) and (height: 430px) {
+            /* 使用超高优先级选择器确保样式生效 */
+            html body .game-container .game-table .plays-group .player-card .card-rank,
+            html body .game-container .game-table .plays-group .player-card .card-top-left .card-rank,
+            html body .game-container .game-table .plays-group .player-card .card-bottom-right .card-rank {
+                font-weight: 700 !important;
+                font-size: 20px !important;
+                margin-bottom: -5px !important;
+                text-align: center !important;
+                letter-spacing: -2px !important;
+                width: 20px !important;
+                display: inline-block !important;
+                position: relative !important;
+                line-height: 1 !important;
+                transform: none !important;
+            }
+
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="10"] {
+                transform: translateX(-2px) !important;
+            }
+
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="A"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="2"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="3"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="4"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="5"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="6"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="7"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="8"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="9"],
+            html body .game-container .game-table .plays-group .player-card .card-rank[data-rank="K"] {
+                transform: translateX(-1px) !important;
+            }
+
+            html body .game-container .game-table .plays-group .player-card .card-suit,
+            html body .game-container .game-table .plays-group .player-card .card-top-left .card-suit,
+            html body .game-container .game-table .plays-group .player-card .card-bottom-right .card-suit {
+                font-size: 30px !important;
+                text-align: center !important;
+                width: 20px !important;
+                font-weight: bold !important;
+                line-height: 1 !important;
+            }
+
+            html body .game-container .game-table .plays-group .player-card {
+                margin-left: -45px !important;  /* 调整为-45px堆叠间距 */
+                width: 32px !important;
+                height: 44px !important;
+            }
+
+            /* 堆叠样式已在play-area-cards-fix.css中正确设置 */
+
+            /* 932x430尺寸下大小王文字调整：与南方手牌完全一致的样式 */
+            html body .game-container .game-table .plays-group .player-card .card-rank.joker-text,
+            html body .game-container .game-table .plays-group .player-card .card-top-left .card-rank.joker-text,
+            html body .game-container .game-table .plays-group .player-card .card-bottom-right .card-rank.joker-text {
+                /* 与南方手牌完全一致的竖向显示样式 */
+                writing-mode: vertical-rl !important;
+                text-orientation: upright !important;
+                letter-spacing: -3px !important; /* 与南方手牌一致的字母间距 */
+                line-height: 0.6 !important; /* 与南方手牌一致的行高 */
+                font-size: 14px !important; /* 放大到14px */
+                margin-left: -11px !important; /* 向左移动6像素：-10px - 1px = -11px */
+                display: inline-block !important;
+                transform: none !important; /* 覆盖之前的translateX */
+            }
+
+            /* 932x430尺寸下大小王图片放大1.2倍 */
+            html body .game-container .game-table .plays-group .player-card .joker-image-container,
+            html body .game-container .game-table .plays-group .player-card .card-top-left .joker-image-container,
+            html body .game-container .game-table .plays-group .player-card .card-bottom-right .joker-image-container {
+                width: 72% !important;  /* 原来60% * 1.2 = 72% */
+                height: 72% !important; /* 原来60% * 1.2 = 72% */
+            }
+
+            /* 浮动设置按钮样式 - 只显示图标 */
+            .floating-settings-btn {
+                display: flex !important;
+                position: fixed !important;
+                top: 4px !important;
+                right: 6px !important;
+                width: auto !important;  /* 自动宽度 */
+                height: auto !important;  /* 自动高度 */
+                background: transparent !important;  /* 透明背景 */
+                border: none !important;  /* 无边框 */
+                border-radius: 0 !important;  /* 无圆角 */
+                align-items: center !important;
+                justify-content: center !important;
+                cursor: pointer !important;
+                z-index: 10003 !important;
+                padding: 4px !important;  /* 只保留内边距 */
+                transition: all 0.2s ease !important;
+            }
+
+            .floating-settings-btn:hover {
+                background: transparent !important;
+                transform: scale(1.2) !important;  /* 悬停时放大 */
+            }
+
+            .floating-settings-btn .settings-icon {
+                font-size: 16px !important;  /* 图标大小 */
+                color: white !important;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;  /* 强阴影确保可见性 */
+            }
+        }
+
+        /* 浮动设置按钮默认隐藏 - 只在932x430下显示 */
+        .floating-settings-btn {
+            display: none !important;
+        }
+
+        /* 强制修复牌面显示问题 */
+        .player-card.red {
+            color: #DC143C !important;
+        }
+        .player-card.black {
+            color: #000 !important;
+        }
+
+        /* 确保牌面内容定位正确 */
+        .player-card .card-top-left,
+        .player-card .card-bottom-right {
+            position: absolute !important;
+        }
+
+        .player-card .card-top-left {
+            top: 3px !important;
+            left: 3px !important;
+        }
+
+        .player-card .card-bottom-right {
+            bottom: 3px !important;
+            right: 3px !important;
+            transform: rotate(180deg) !important;
+        }
+
+        /* 牌面文字样式 */
+        .player-card .card-rank {
+            font-weight: bold !important;
+            font-size: 18px !important; /* 从14px增加到18px (1.3倍) */
+            line-height: 1 !important;
+        }
+
+        .player-card .card-suit {
+            font-size: 26px !important; /* 从20px增加到26px (1.3倍) */
+            line-height: 1 !important;
+        }
+
+        .message-bubble {
+            /* 移除过渡动画，避免位置移动 */
+        }
+
+        /* 默认悬浮效果 - 轻微上浮 */
+        .player-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+            border-color: #3498db;
+            /* 使用柔和的动画曲线 */
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* 滑动时禁用悬浮 */
+        .brushing .player-card:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            border-color: inherit !important;
+        }
+
+        /* 强制覆盖选中牌的样式 - 保持原有z-index */
+        .player-card.selected {
+            transform: translateY(-20px) !important;
+            border-color: #f39c12 !important;
+            border-width: 2px !important;
+            background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%) !important;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.5) !important;
+            /* 保持原有的z-index计算 */
+            z-index: calc(5 * var(--card-index, 1)) !important;
+            /* 添加更舒缓的动画过渡效果 */
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* 划选时的选中动画 - 推拽感效果 */
+        .player-card.brushing.selected {
+            transform: translateY(-20px) !important;
+            border-color: #f39c12 !important;
+            border-width: 2px !important;
+            background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%) !important;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.5) !important;
+            /* 推拽感动画 - 有弹性的缓动函数 */
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+
+        /* 推拽效果 - 延迟动画类，让每张牌错开时间 */
+        .player-card.brushing.selected.delay-1 {
+            transition-delay: 0.05s !important;
+        }
+        .player-card.brushing.selected.delay-2 {
+            transition-delay: 0.1s !important;
+        }
+        .player-card.brushing.selected.delay-3 {
+            transition-delay: 0.15s !important;
+        }
+        .player-card.brushing.selected.delay-4 {
+            transition-delay: 0.2s !important;
+        }
+        .player-card.brushing.selected.delay-5 {
+            transition-delay: 0.25s !important;
+        }
+
+        /* 选中状态不受滑动影响 */
+        .brushing .player-card.selected,
+        .brushing .player-card.selected:hover {
+            transform: translateY(-20px) !important;
+            border-color: #f39c12 !important;
+            border-width: 2px !important;
+            background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%) !important;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.5) !important;
+        }
+
+        /* 确保未选中且不在划选状态的牌完全恢复正常 */
+        .player-card:not(.selected):not(.brushing) {
+            transform: none !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%) !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+            border-color: #373836 !important;
+            border-width: 1px !important;
+        }
+
+        /* 确保手牌容器内的牌保持正确的层级关系 */
+        #southCards .player-card:nth-child(n) {
+            z-index: calc(5 * var(--card-index, 1)) !important;
+        }
+
+        /* 手牌上方操作区域调整（独立定位） */
+        .hand-action-buttons {
+            bottom: 80px;  /* 调整为适合932x430的位置 */
+            gap: 10px;
+            padding: 8px 15px;
+        }
+
+        .hand-action-buttons .btn {
+            min-width: 70px;
+            height: 36px;
+            font-size: 13px;
+        }
+
+        /* 简化的控制面板 - 932x430横向布局 */
+        .control-panel.simplified {
+            right: 15px;
+            bottom: 30px;  /* 调整为30px，控制面板在屏幕底部向上30px处 */
+            min-width: 120px;
+            max-width: 140px;
+        }
+
+        /* 932x430下控制按钮横向排列 */
+        .control-panel.simplified .control-buttons {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 8px !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        /* 932x430下按键样式优化 */
+        .control-panel.simplified .btn {
+            min-width: auto !important;
+            max-width: none !important;
+            width: auto !important;
+            padding: 4px 8px !important;  /* 减小内边距 */
+            font-size: 10px !important;
+            height: 28px !important;  /* 减小按钮高度 */
+            flex: 1 !important;
+            text-align: center !important;
+            justify-content: center !important;
+            align-items: center !important;
+            line-height: 1.2 !important;
+            border-radius: 4px !important;
+        }
+
+        /* 932x430暴力修复 - 使用最高优先级和内联样式覆盖 */
+        @media screen and (width: 932px) and (height: 430px) {
+            html body .control-panel.simplified {
+                position: fixed !important;
+                right: 5px !important;
+                bottom: 5px !important;
+                left: auto !important;
+                top: auto !important;
+                width: auto !important;
+                height: 32px !important;
+                min-width: 200px !important;
+                max-width: 220px !important;
+                padding: 3px !important;
+                background: rgba(52, 73, 94, 0.95) !important;
+                border-radius: 6px !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+                z-index: 999999 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 !important;
+                transform: none !important;
+            }
+
+            html body .control-panel.simplified .control-buttons {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 5px !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                width: 100% !important;
+                height: 26px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            html body .control-panel.simplified .btn {
+                width: 90px !important;
+                height: 22px !important;
+                min-width: 90px !important;
+                max-width: 90px !important;
+                font-size: 9px !important;
+                padding: 2px !important;
+                line-height: 1.2 !important;
+                border-radius: 3px !important;
+                margin: 0 !important;
+                text-align: center !important;
+                justify-content: center !important;
+                align-items: center !important;
+                flex: none !important;
+                display: inline-flex !important;
+                background: rgba(52, 73, 94, 0.8) !important;
+                color: white !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                font-weight: 600 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                box-sizing: border-box !important;
+            }
+
+            /* 强制隐藏图标 */
+            html body .control-panel.simplified .btn::before,
+            html body .control-panel.simplified .btn::after {
+                display: none !important;
+                content: none !important;
+            }
+        }
+
+        /* 强制显示设置按钮 - 最高优先级 */
+        html body .top-info-bar .btn-settings {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            z-index: 1000 !important;
+            background: rgba(52, 73, 94, 0.9) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-left: 10px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        html body .top-info-bar .btn-settings:hover {
+            background: rgba(52, 73, 94, 1) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+        }
+
+      </style>
+
+    <!-- 932x430分辨率头像位置调整 - 最高优先级内联样式 -->
+    <style>
+        @media screen and (min-width: 900px) and (max-width: 960px) and (min-height: 400px) and (max-height: 460px) {
+            /* N玩家位置 - 最高优先级，完全覆盖所有CSS冲突 */
+            .player-position.player-north {
+                /* 强制覆盖所有定位属性 */
+                position: absolute !important !important;
+                top: 5% !important !important;
+                left: calc(50% - 60px) !important !important; /* 120px/2 = 60px，真正居中 */
+                transform: translateX(-50%) !important !important;
+
+                /* 强制覆盖容器大小和布局 */
+                width: 120px !important !important; /* 与W、E玩家一致 */
+                min-width: 120px !important !important;
+                max-width: 120px !important !important;
+                height: auto !important !important;
+                display: flex !important !important;
+                flex-direction: row !important !important;
+                align-items: center !important !important;
+                justify-content: space-between !important !important;
+                flex-shrink: 0 !important !important;
+
+                /* 强制覆盖所有Grid布局属性 */
+                grid-area: unset !important !important;
+                grid-column: unset !important !important;
+                grid-row: unset !important !important;
+                grid-column-start: unset !important !important;
+                grid-column-end: unset !important !important;
+                grid-row-start: unset !important !important;
+                grid-row-end: unset !important !important;
+
+                /* 确保最高层级 */
+                z-index: 99999 !important !important;
+
+                /* 调试边框 */
+                box-sizing: border-box !important !important;
+                border: 3px solid green !important !important;
+            }
+
+            /* N玩家子元素特殊处理 */
+            .player-position.player-north .ai-hand-cards {
+                width: 30px !important; /* 缩小手牌宽度 */
+                height: 50px !important;
+                flex-shrink: 0;
+            }
+
+            .player-position.player-north .player-info-simple {
+                flex-shrink: 0;
+                margin-left: 5px; /* 与手牌的间距 */
+            }
+
+            /* W玩家位置 - 向上移动10px */
+            .player-position.player-west {
+                top: calc(50% - 10px) !important;
+            }
+
+            /* E玩家位置 - 向上移动10px */
+            .player-position.player-east {
+                top: calc(50% - 10px) !important;
+            }
+        }
+
+        /* 备用媒体查询：精确匹配932x430尺寸 */
+        @media screen and (width: 932px) and (height: 430px) {
+            .player-position.player-north {
+                position: absolute !important;
+                top: 5% !important;
+                left: calc(50% - 60px) !important; /* 120px/2 = 60px，真正居中 */
+                transform: translateX(-50%) !important;
+                width: 120px !important;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                z-index: 100 !important;
+            }
+
+            /* 932x430尺寸下强制显示设置按钮 */
+            html body .top-info-bar .btn-settings {
+                display: inline-block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                z-index: 1000 !important;
+                background: rgba(52, 73, 94, 0.9) !important;
+                color: white !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                padding: 6px 12px !important;
+                border-radius: 6px !important;
+                cursor: pointer !important;
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                margin-left: 8px !important;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+                flex-shrink: 0 !important;
+            }
+
+            html body .top-info-bar .btn-settings:hover {
+                background: rgba(52, 73, 94, 1) !important;
+                transform: translateY(-1px) !important;
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+            }
+
+            /* 932x430尺寸下设置菜单样式 */
+            html body .settings-menu {
+                position: absolute !important;
+                top: 100% !important;
+                right: 0 !important;
+                margin-top: 4px !important;
+                background: linear-gradient(135deg,
+                    rgba(52, 73, 94, 0.98) 0%,
+                    rgba(44, 62, 80, 0.95) 100%) !important;
+                border-radius: 6px !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                backdrop-filter: blur(15px) !important;
+                min-width: 140px !important;
+                z-index: 1001 !important;
+                overflow: hidden !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            }
+
+            html body .settings-item {
+                padding: 10px 16px !important;
+                color: white !important;
+                cursor: pointer !important;
+                font-size: 12px !important;
+                font-weight: 500 !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+            }
+
+            html body .settings-item:last-child {
+                border-bottom: none !important;
+            }
+
+            html body .settings-item:hover {
+                background: rgba(255, 255, 255, 0.1) !important;
+            }
+        }
+        }
+    </style>
 </head>
 <body>
     <!-- 加载画面 -->
@@ -54,11 +580,11 @@
         </div>
 
         <!-- 消息提示气泡 -->
-        <div id="messageBubble" class="message-bubble"></div>
+        <div id="messageBubble" class="message-bubble" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2196F3; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 1000; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"></div>
 
 
         <!-- 记牌器弹窗 -->
-        <div class="card-counter-modal d-none" id="cardCounterModal">
+        <div class="card-counter-modal" id="cardCounterModal" style="display: none;">
             <div class="modal-content glass-card">
                 <div class="modal-header">
                     <h3>记牌器</h3>
@@ -109,7 +635,7 @@
                 </button>
 
                 <!-- 设置下拉菜单 -->
-                <div class="settings-menu d-none" id="settingsMenu">
+                <div class="settings-menu" id="settingsMenu" style="display: none;">
                     <div class="settings-item" onclick="showRecords()">
                         🏆 战绩
                     </div>
@@ -149,11 +675,6 @@
                         N
                         <span class="team-badge opponent-badge">对手</span>
                     </div>
-                    <!-- 北方玩家倒计时 -->
-                    <div class="countdown-timer opponent-timer" id="northTimer">
-                        <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
-                    </div>
                 </div>
             </div>
 
@@ -164,11 +685,6 @@
                     <div class="player-avatar-simple west-avatar">
                         W
                         <span class="team-badge teammate-badge">队友</span>
-                    </div>
-                    <!-- 西方玩家倒计时 -->
-                    <div class="countdown-timer opponent-timer" id="westTimer">
-                        <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
                     </div>
                 </div>
                 <!-- 手牌 - 在右边 -->
@@ -184,11 +700,6 @@
                     <div class="player-avatar-simple east-avatar">
                         E
                         <span class="team-badge opponent-badge">对手</span>
-                    </div>
-                    <!-- 东方玩家倒计时 -->
-                    <div class="countdown-timer opponent-timer" id="eastTimer">
-                        <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
                     </div>
                 </div>
                 <!-- 手牌 - 在右边 -->
@@ -206,7 +717,7 @@
                     </div>
                 </div>
                 <!-- 主玩家信息面板 - 隐藏但保留功能 -->
-                <div class="player-info main-player-info d-none" id="mainPlayerInfo">
+                <div class="player-info main-player-info" id="mainPlayerInfo" style="display: none;">
                     <div class="player-avatar">🌟</div>
                     <div class="player-details">
                         <div class="player-name-row">
@@ -222,18 +733,13 @@
                 <!-- 南方手牌上方操作按钮区域（独立容器） -->
                 <div class="hand-action-buttons">
                     <button class="btn btn-primary btn-large" id="playBtn" onclick="playCards()" disabled>
-                        出牌
+                        🚀 出牌
                     </button>
-                    <!-- 南方玩家倒计时 -->
-                    <div class="countdown-timer south-timer" id="southTimer">
-                        <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
-                    </div>
                     <button class="btn btn-secondary btn-large" id="hintBtn" onclick="showHint()">
-                        提示
+                        💡 提示
                     </button>
                     <button class="btn btn-warning btn-large" id="passBtn" onclick="passTurn()" disabled>
-                        不要
+                        ✋ 不要
                     </button>
                 </div>
                 <div class="player-hand-cards" id="southCards">
@@ -265,7 +771,7 @@
             <div class="control-panel simplified">
                 <div class="control-buttons">
                     <button class="btn btn-sort" id="sortBtn" onclick="toggleSortMode()" title="切换排序方式">
-                        牌型
+                        🔀 牌型
                     </button>
                     <button class="btn btn-restart" id="restartBtn" onclick="restartGame()">
                         🔄 重新开始
@@ -374,16 +880,6 @@
                     east: []   // 记录东家出的牌
                 };
 
-                // 倒计时配置
-                this.countdownConfig = {
-                    enabled: true,
-                    duration: 15,
-                    warningThreshold: 5,
-                    autoPassOnTimeout: true
-                };
-                this.countdownTimers = { south: null, north: null, west: null, east: null };
-                this.countdownRemaining = { south: 0, north: 0, west: 0, east: 0 };
-
                 // 音频系统
                 this.audioContext = null;
 
@@ -423,9 +919,6 @@
             }
 
             initializeGame() {
-                // 停止所有倒计时
-                this.stopAllCountdowns();
-
                 console.log('[游戏初始化] 开始发牌...');
                 this.dealCards();
                 console.log('[游戏初始化] 发牌完成');
@@ -442,13 +935,10 @@
                     }
                 }
 
-                // 默认隐藏操作按钮
-                const btnsContainer = document.querySelector('.hand-action-buttons');
-                if (btnsContainer) {
-                    btnsContainer.classList.remove('buttons-visible');
-                }
+                // 强制设置932*430尺寸下W和E玩家的位置
+                this.forcePlayerPositions();
 
-                // 决定首出玩家
+      // 决定首出玩家
             this.currentPlayer = this.determineFirstPlayer();
             console.log(`游戏初始化完成，首出玩家：${this.currentPlayer}`);
 
@@ -456,16 +946,16 @@
             const sortBtn = document.getElementById('sortBtn');
             if (sortBtn) {
                 if (this.sortMode === 'pattern') {
-                    sortBtn.innerHTML = '牌型';
+                    sortBtn.innerHTML = '🎯 牌型';
                     sortBtn.title = '切换到点数排序';
                 } else {
-                    sortBtn.innerHTML = '点数';
+                    sortBtn.innerHTML = '🔀 点数';
                     sortBtn.title = '切换到牌型排序';
                 }
             }
 
-            this.gameState = 'playing';
             this.updateUI();
+            this.gameState = 'playing';
 
             // 如果首出玩家是AI，自动出牌
             if (this.players[this.currentPlayer].isAI) {
@@ -897,13 +1387,13 @@
                     if (sortBtn) {
                         console.log(`[toggleSortMode] 当前sortMode: ${this.sortMode}`);
                         if (this.sortMode === 'pattern') {
-                            sortBtn.innerHTML = '牌型';
+                            sortBtn.innerHTML = '🎯 牌型';
                             sortBtn.title = '切换到点数排序';
-                            console.log('[toggleSortMode] 按钮文字更新为: 牌型');
+                            console.log('[toggleSortMode] 按钮文字更新为: 🎯 牌型');
                         } else {
-                            sortBtn.innerHTML = '点数';
+                            sortBtn.innerHTML = '🔀 点数';
                             sortBtn.title = '切换到牌型排序';
-                            console.log('[toggleSortMode] 按钮文字更新为: 点数');
+                            console.log('[toggleSortMode] 按钮文字更新为: 🔀 点数');
                         }
                         console.log('[toggleSortMode] 按钮innerHTML实际值:', sortBtn.innerHTML);
                     } else {
@@ -1416,18 +1906,6 @@
             updateControlButtons() {
                 const isPlayerTurn = this.currentPlayer === 'south' && this.gameState === 'playing';
 
-                // 条件显示按钮容器 - 只在南方玩家回合显示
-                const btnsContainer = document.querySelector('.hand-action-buttons');
-                if (btnsContainer) {
-                    if (isPlayerTurn) {
-                        btnsContainer.classList.add('buttons-visible');
-                    } else {
-                        btnsContainer.classList.remove('buttons-visible');
-                        // 隐藏按钮时，同时隐藏倒计时（确保同步消失）
-                        this.hideCountdown('south');
-                    }
-                }
-
                 // 主要游戏按钮
                 const playBtn = document.getElementById('playBtn');
                 const passBtn = document.getElementById('passBtn');
@@ -1489,7 +1967,7 @@
                 if (!playBtn) return;
 
                 if (this.selectedCards.length === 0) {
-                    playBtn.innerHTML = '出牌';
+                    playBtn.innerHTML = '🚀 出牌';
                     playBtn.title = '请先选择要出的牌';
                     return;
                 }
@@ -1518,10 +1996,10 @@
 
                 // 更新按钮文本和提示
                 if (canPlay) {
-                    playBtn.innerHTML = '出牌';
+                    playBtn.innerHTML = `🚀 出牌 (${typeName})`;
                     playBtn.title = `出${this.selectedCards.length}张${typeName}`;
                 } else {
-                    playBtn.innerHTML = '出牌';
+                    playBtn.innerHTML = `🚀 出牌 (${typeName})`;
 
                     // 获取上家出牌信息
                     const lastPlay = this.getLastPlay();
@@ -2080,18 +2558,13 @@
                     this.roundPassedPlayers.clear(); // 清空过牌记录
                     this.updateUI();
 
-                    // 停止所有倒计时
-                    this.stopAllCountdowns();
-
                     // 如果最后出牌的是南家，让南家继续出牌
                     if (this.currentPlayer === 'south') {
                         console.log('[轮次结束] 南家获得新一轮出牌权');
                         this.showMessage('你获得新一轮出牌权！');
-                        this.startCountdown('south');
                     } else {
                         // AI继续出牌
                         console.log(`[轮次结束] ${this.currentPlayer} 获得新一轮出牌权`);
-                        this.startCountdown(this.currentPlayer);
                         setTimeout(() => this.aiAutoPlay(), 1000);
                     }
                     return;
@@ -2133,18 +2606,13 @@
                     this.roundPassedPlayers.clear(); // 清空过牌记录
                     this.updateUI();
 
-                    // 停止所有倒计时
-                    this.stopAllCountdowns();
-
                     // 如果最后出牌的是南家，让南家继续出牌
                     if (this.currentPlayer === 'south') {
                         console.log('[强制清理] 南家获得新一轮出牌权');
                         this.showMessage('你获得新一轮出牌权！');
-                        this.startCountdown('south');
                     } else {
                         // AI继续出牌
                         console.log(`[强制清理] ${this.currentPlayer} 获得新一轮出牌权`);
-                        this.startCountdown(this.currentPlayer);
                         setTimeout(() => this.aiAutoPlay(), 1000);
                     }
                     return;
@@ -2153,10 +2621,6 @@
                 // 正常轮转到下一个玩家
                 this.currentPlayer = nextPlayer;
                 console.log(`\n[轮转] ${order[currentIndex]} → ${nextPlayer}`);
-
-                // 先停止所有倒计时，再启动新的
-                this.stopAllCountdowns();
-                this.startCountdown(nextPlayer);
 
                 // 如果切换到非南家玩家，重置提示状态
                 if (nextPlayer !== 'south') {
@@ -2302,9 +2766,6 @@
 
             async aiAutoPlay() {
                 if (this.gameState !== 'playing') return;
-
-                // 停止当前玩家的倒计时（AI开始出牌）
-                this.stopCountdown(this.currentPlayer);
 
                 // 安全检查：确保currentPlayer存在
                 if (!this.currentPlayer || !this.players[this.currentPlayer]) {
@@ -3869,8 +4330,8 @@
                     positionElement.classList.add('thinking');
                 }
 
-                // 显示思考提示 - 倒计时已启动，不需要额外的文字提示
-                // this.showMessage(`${positions[player]}正在思考...`, 'info');
+                // 显示思考提示
+                this.showMessage(`${positions[player]}正在思考...`, 'info');
 
                 // 播放思考音效
                 this.playSound('thinking');
@@ -4968,75 +5429,91 @@
                 }
             }
 
-            // ========================================
-            // COUNTDOWN TIMER - 倒计时管理方法
-            // ========================================
+            // 强制设置玩家位置的函数
+            forcePlayerPositions() {
+                // 检查是否在932*430尺寸
+                if (window.innerWidth >= 900 && window.innerWidth <= 960 &&
+                    window.innerHeight >= 400 && window.innerHeight <= 460) {
 
-            startCountdown(player) {
-                if (!this.countdownConfig.enabled) return;
+                    console.log('[forcePlayerPositions] 检测到932*430尺寸，强制设置玩家位置');
 
-                this.stopCountdown(player);
-                this.countdownRemaining[player] = this.countdownConfig.duration;
-                this.showCountdown(player);
-                this.updateCountdownDisplay(player);
-
-                this.countdownTimers[player] = setInterval(() => {
-                    this.countdownRemaining[player]--;
-                    this.updateCountdownDisplay(player);
-                    if (this.countdownRemaining[player] <= 0) {
-                        this.stopCountdown(player);
-                        this.onCountdownTimeout(player);
-                    }
-                }, 1000);
-            }
-
-            stopCountdown(player) {
-                if (this.countdownTimers[player]) {
-                    clearInterval(this.countdownTimers[player]);
-                    this.countdownTimers[player] = null;
-                }
-                this.hideCountdown(player);
-            }
-
-            stopAllCountdowns() {
-                ['south', 'north', 'west', 'east'].forEach(player => {
-                    this.stopCountdown(player);
-                });
-            }
-
-            showCountdown(player) {
-                const el = document.getElementById(player + 'Timer');
-                if (el) el.classList.add('visible');
-            }
-
-            hideCountdown(player) {
-                const el = document.getElementById(player + 'Timer');
-                if (el) {
-                    el.classList.remove('visible');
-                    el.classList.remove('urgent');
-                }
-            }
-
-            updateCountdownDisplay(player) {
-                const el = document.getElementById(player + 'Timer');
-                if (!el) return;
-                const secEl = el.querySelector('.timer-seconds');
-                if (secEl) secEl.textContent = this.countdownRemaining[player];
-                if (this.countdownRemaining[player] <= this.countdownConfig.warningThreshold) {
-                    el.classList.add('urgent');
-                } else {
-                    el.classList.remove('urgent');
-                }
-            }
-
-            onCountdownTimeout(player) {
-                if (player === 'south' && this.countdownConfig.autoPassOnTimeout) {
-                    this.showMessage('倒计时结束，自动过牌', 'warning');
+                    // 等待DOM渲染完成
                     setTimeout(() => {
-                        if (this.currentPlayer === 'south') {
-                            this.passTurn();
+                        const westPlayer = document.querySelector('.player-west');
+                        const eastPlayer = document.querySelector('.player-east');
+
+                        if (westPlayer) {
+                            westPlayer.style.cssText = `
+                                position: absolute !important;
+                                left: 10px !important;
+                                top: calc(50% - 60px) !important; /* 再向上移动30px，总共向上移动60px */
+                                transform: translateY(-50%) !important;
+                                z-index: 100 !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                flex-direction: row !important;
+                                width: 120px !important;
+                                flex-shrink: 0 !important;
+                            `;
+
+        
+                            console.log('[forcePlayerPositions] W玩家位置设置完成');
                         }
-                    }, 500);
+
+                        if (eastPlayer) {
+                            eastPlayer.style.cssText = `
+                                position: absolute !important;
+                                right: 10px !important;
+                                top: calc(50% - 60px) !important; /* 再向上移动30px，总共向上移动60px */
+                                transform: translateY(-50%) !important;
+                                z-index: 100 !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                flex-direction: row-reverse !important;
+                                width: 120px !important;
+                                flex-shrink: 0 !important;
+                            `;
+
+          
+                            console.log('[forcePlayerPositions] E玩家位置设置完成');
+                        }
+
+                        // 添加N玩家位置设置
+                        const northPlayer = document.querySelector('.player-north');
+                        if (northPlayer) {
+                            northPlayer.style.cssText = `
+                                position: absolute !important;
+                                top: calc(5% - 15px) !important; /* 向上移动5px，原来是-10px，现在是-15px */
+                                left: calc(50% - 140px) !important; /* 哈哈，再向左移动30px，总共向左移动80px */
+                                transform: translateX(-50%) !important;
+                                width: 120px !important;
+                                height: auto !important;
+                                display: flex !important;
+                                flex-direction: row !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                z-index: 999 !important;
+                                flex-shrink: 0 !important;
+
+                                /* 毛玻璃容器样式（与W、E玩家完全一致） */
+                                margin: 0 !important;
+                                padding: 8px 10px 8px 6px !important; /* 右边多2px，左边少2px，容器向右移2px */
+                                border-radius: 12px !important;
+                                background: rgba(255, 255, 255, 0.08) !important;
+                                backdrop-filter: blur(8px) !important;
+                                border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                                box-sizing: border-box !important;
+                            `;
+
+                            // 确保N玩家使用与W、E相同的样式类
+                            const playerInfo = northPlayer.querySelector('.player-info');
+                            if (playerInfo) {
+                                playerInfo.className = 'player-info-simple';
+                            }
+
+                            console.log('[forcePlayerPositions] N玩家位置设置完成（使用最高优先级内联样式）');
+                        }
+                    }, 100); // 添加延迟和闭合setTimeout
                 }
             }
 
@@ -5100,6 +5577,9 @@
 
                     // 重新发牌
                     this.dealCards();
+
+                    // 强制重新设置玩家位置
+                    this.forcePlayerPositions();
 
                     // 决定首出玩家
                     this.currentPlayer = this.determineFirstPlayer();

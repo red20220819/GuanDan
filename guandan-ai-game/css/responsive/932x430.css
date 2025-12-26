@@ -1,0 +1,729 @@
+/**
+ * 掼蛋游戏 - 932x430分辨率专用样式
+ * 统一管理所有932x430相关的CSS规则
+ * 使用CSS变量系统确保样式一致性
+ */
+
+@media screen and (min-width: 900px) and (max-width: 960px) and (min-height: 400px) and (max-height: 460px) {
+  /* ========================================
+     覆盖基础变量 - 使用html选择器而不是:root
+     ======================================== */
+
+  html {
+    --card-base-width: 42px !important;
+    --card-base-height: 57px !important;
+  }
+
+  /* ========================================
+     全局设置 - 允许出牌区域自由移动
+     ======================================== */
+
+  body {
+    overflow: visible !important;  /* 允许出牌区域显示在视口外部 */
+  }
+
+  html {
+    overflow: visible !important;
+  }
+
+  /* ========================================
+     移除玩家容器背景
+     ======================================== */
+
+  .player-position,
+  .player-north,
+  .player-west,
+  .player-east,
+  .player-south {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* 固定南方玩家容器，头像在左侧，手牌在右侧 */
+  .player-south {
+    position: absolute !important;
+    bottom: 30px !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 120px !important;
+    display: flex !important;
+    flex-direction: row !important;  /* 水平排列 */
+    align-items: flex-end !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    grid-area: none !important;  /* 脱离grid布局 */
+    z-index: 1000 !important;  /* 高于出牌区域的100，确保按钮在上层 */
+  }
+
+  /* 南方玩家头像 - 独立定位 */
+  .player-south .player-info-simple {
+    position: absolute !important;  /* 独立定位 */
+    bottom: 8px !important;        /* 距离底部10px */
+    left: 40px !important;          /* 距离左侧20px - 可调整 */
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 1000 !important;
+  }
+
+  /* 南方玩家手牌区域 - 留出头像空间 */
+  .player-south .player-hand-cards {
+    margin-left: 100px !important;  /* 为头像留出空间 */
+    gap: 0 !important;
+  }
+
+  /* ========================================
+     玩家位置调整
+     ======================================== */
+
+  /* N玩家位置 - 使用变量 */
+  .player-north {
+    position: absolute !important;
+    top: var(--player-north-top-932x430) !important;
+    left: var(--player-north-left-932x430) !important;
+    transform: translateX(-50%) !important;
+    width: 120px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: var(--z-player-positions-932x430) !important;
+  }
+
+  /* N玩家子元素 */
+  .player-north .ai-hand-cards {
+    width: 30px !important;
+    height: 50px !important;
+    flex-shrink: 0;
+  }
+
+  .player-north .player-info-simple {
+    flex-shrink: 0;
+    margin-left: 5px;
+  }
+
+  /* W玩家位置 - 使用变量 */
+  .player-west {
+    position: absolute !important;
+    left: 30px !important;
+    top: var(--player-west-top-932x430) !important;
+    transform: translateY(-50%) !important;
+    z-index: var(--z-player-positions-932x430) !important;
+    width: 100px !important;
+    flex-shrink: 0;
+  }
+
+  /* E玩家位置 - 使用变量 */
+  .player-east {
+    position: absolute !important;
+    right: 0px !important;
+    top: var(--player-east-top-932x430) !important;
+    transform: translateY(-50%) !important;
+    z-index: var(--z-player-positions-932x430) !important;
+    width: 100px !important;
+    flex-shrink: 0;
+  }
+
+  /* 确保东西玩家为水平排列 */
+  .player-west,
+  .player-east {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  /* ========================================
+     头像样式
+     ======================================== */
+
+  .player-avatar-simple {
+    width: var(--avatar-width-932x430) !important;
+    height: var(--avatar-height-932x430) !important;
+    border-radius: 14px;
+    font-size: var(--avatar-font-size-932x430) !important;
+    border: 2px solid white;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    position: relative !important;
+  }
+
+  .card-count-simple {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .team-badge {
+    position: absolute !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    font-size: 13px !important;
+    padding: 2px 4px !important;
+    border-radius: 0 0 14px 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: white !important;
+  }
+
+  .team-badge.team-a {
+    background: rgba(52, 152, 219, 0.8) !important;
+  }
+
+  .team-badge.team-b {
+    background: rgba(231, 76, 60, 0.8) !important;
+  }
+
+  /* ========================================
+     出牌区域样式 - 使用CSS变量，可独立调整位置
+     ======================================== */
+
+  /* 北方玩家出牌区域 */
+  .north-plays {
+    grid-area: none !important;
+    position: absolute !important;
+    top: var(--north-plays-top) !important;
+    left: var(--north-plays-left) !important;
+    right: var(--north-plays-right) !important;
+    bottom: var(--north-plays-bottom) !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    border: none !important;
+    padding: 4px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    z-index: 100 !important;
+  }
+
+  /* 西方玩家出牌区域 */
+  .west-plays {
+    grid-area: none !important;
+    position: absolute !important;
+    top: var(--west-plays-top) !important;
+    left: var(--west-plays-left) !important;
+    right: var(--west-plays-right) !important;
+    bottom: var(--west-plays-bottom) !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    border: none !important;
+    padding: 4px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    z-index: 100 !important;
+  }
+
+  /* 东方玩家出牌区域 */
+  .east-plays {
+    grid-area: none !important;
+    position: absolute !important;
+    top: var(--east-plays-top) !important;
+    left: var(--east-plays-left) !important;
+    right: var(--east-plays-right) !important;
+    bottom: var(--east-plays-bottom) !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    border: none !important;
+    padding: 4px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    z-index: 100 !important;
+  }
+
+  /* 南方玩家出牌区域 */
+  .south-plays {
+    grid-area: none !important;
+    position: absolute !important;
+    top: var(--south-plays-top) !important;
+    left: var(--south-plays-left) !important;
+    right: var(--south-plays-right) !important;
+    bottom: var(--south-plays-bottom) !important;
+    transform: translateX(-50%) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border: none !important;
+    padding: 4px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    z-index: 100 !important;
+  }
+
+  /* 出牌区域的牌堆叠间距 - 更紧凑 */
+  .plays-group .player-card {
+    margin-left: -35px !important;  /* 堆叠效果 */
+  }
+
+  /* 出牌区域的牌尺寸 - 仅针对932x430 */
+  .north-plays .plays-group > .player-card,
+  .south-plays .plays-group > .player-card,
+  .west-plays .plays-group > .player-card,
+  .east-plays .plays-group > .player-card {
+    width: 42px !important;
+    height: 57px !important;
+    min-width: 42px !important;
+    min-height: 57px !important;
+    max-width: 42px !important;
+    max-height: 57px !important;
+  }
+
+  /* 第一张牌不应用负边距 */
+  .plays-group .player-card:first-child,
+  .north-plays .plays-group > .player-card:first-child,
+  .south-plays .plays-group > .player-card:first-child,
+  .west-plays .plays-group > .player-card:first-child,
+  .east-plays .plays-group > .player-card:first-child {
+    margin-left: 0 !important;
+  }
+
+  /* 牌面文字大小 - 使用变量 */
+  .plays-group .player-card .card-rank {
+    font-weight: 700 !important;
+    font-size: var(--card-rank-size-932x430) !important;
+    margin-bottom: -5px !important;
+    text-align: center !important;
+    letter-spacing: var(--card-letter-spacing-932x430) !important;
+    width: 20px !important;
+    display: inline-block !important;
+    position: relative !important;
+    line-height: 1 !important;
+  }
+
+  /* 10数字特殊处理 */
+  .plays-group .player-card .card-rank[data-rank="10"] {
+    transform: translateX(-2px) !important;
+  }
+
+  /* 其他数字偏移 */
+  .plays-group .player-card .card-rank[data-rank="A"],
+  .plays-group .player-card .card-rank[data-rank="2"],
+  .plays-group .player-card .card-rank[data-rank="3"],
+  .plays-group .player-card .card-rank[data-rank="4"],
+  .plays-group .player-card .card-rank[data-rank="5"],
+  .plays-group .player-card .card-rank[data-rank="6"],
+  .plays-group .player-card .card-rank[data-rank="7"],
+  .plays-group .player-card .card-rank[data-rank="8"],
+  .plays-group .player-card .card-rank[data-rank="9"],
+  .plays-group .player-card .card-rank[data-rank="K"] {
+    transform: translateX(-1px) !important;
+  }
+
+  /* 大小王图片容器缩放 */
+  .plays-group .player-card .joker-image-container {
+    width: 72% !important;
+    height: 72% !important;
+  }
+
+  /* 牌面内容位置 */
+  .plays-group .player-card .card-top-left {
+    top: 3px !important;
+    left: 3px !important;
+    padding: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+
+  .plays-group .player-card .card-bottom-right {
+    bottom: 3px !important;
+    right: 3px !important;
+    padding: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    transform: rotate(180deg) !important;
+  }
+
+  /* ========================================
+     手牌区域样式
+     ======================================== */
+
+  /* 南方玩家手牌紧凑显示 */
+  .player-south .player-hand-cards {
+    gap: 0 !important;
+  }
+
+  /* 南方玩家手牌 - 1.5倍大小 */
+  html body div.game-table div.player-south div.player-hand-cards div.player-card,
+  html body div.game-table div.player-south div.player-card,
+  #southCards .player-card,
+  .player-south .player-card {
+    width: 70px !important;   /* 1.5倍 */
+    height: 96px !important;  /* 1.5倍 */
+    min-width: 70px !important;
+    min-height: 96px !important;
+    max-width: 70px !important;
+    max-height: 96px !important;
+    margin-left: -44px !important;  /* 间距也相应调整 */
+  }
+
+  #southCards .player-card:first-child {
+    margin-left: 0 !important;
+  }
+
+  .player-south .player-hand-cards .player-card:first-child,
+  .player-south .player-card:first-child {
+    margin-left: 0 !important;
+  }
+
+  /* 选中状态 - 只提起，不改变层级，无动画过渡 */
+  .player-south .player-card {
+    transition: none !important;  /* 删除所有过渡动画 */
+  }
+
+  .player-south .player-card:hover {
+    transform: none !important;  /* 禁用hover悬浮效果 */
+    box-shadow: none !important;  /* 禁用hover蓝色阴影 */
+    border-color: var(--color-card-border) !important;  /* 保持原边框颜色 */
+    transition: none !important;
+  }
+
+  .player-south .player-card.selected {
+    transform: translateY(-12px) !important;
+    z-index: auto !important;  /* 不改变层级 */
+    transition: none !important;  /* 删除选中过渡 */
+  }
+
+  /* ========================================
+     南方手牌王牌文字 - 更紧凑
+     ======================================== */
+
+  .player-south .player-card .card-rank.joker-text {
+    writing-mode: vertical-rl !important;
+    text-orientation: upright !important;
+    letter-spacing: -6px !important;  /* 更紧凑 */
+    line-height: 0.30 !important;    /* 更紧凑 */
+    font-size: 16px !important;
+    margin-left: 1 !important;       /* 不偏移 */
+    display: inline-block !important;
+    transform: translateY(-3px) !important;  /* 向上移动3px */
+    padding: 1px 0 !important;
+  }
+
+  /* ========================================
+     出牌区王牌文字 - 向外移动到边缘
+     ======================================== */
+
+  .plays-group .player-card .card-rank.joker-text {
+    writing-mode: vertical-rl !important;
+    text-orientation: upright !important;
+    letter-spacing: -6px !important;
+    line-height: 0.45 !important;
+    font-size: 13px !important;
+    margin-left: -13px !important;   /* 向牌边缘移动更多 */
+    display: inline-block !important;
+    transform: none !important;
+    padding: 2px 0 !important;
+  }
+
+  /* 出牌区左上角位置调整 */
+  .plays-group .player-card .card-top-left {
+    top: 2px !important;
+    left: 4px !important;  /* 向右移动，更靠边缘 */
+    padding: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+
+  /* ========================================
+     手牌上方操作按钮
+     ======================================== */
+
+  .hand-action-buttons {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    display: flex !important;
+    gap: var(--action-btn-gap) !important;  /* 使用变量控制间隔 */
+    padding: 0 !important;
+    bottom: var(--hand-action-buttons-bottom) !important;  /* 使用变量控制位置 */
+    z-index: 1000 !important;  /* 高于出牌区域的100，确保按钮在上层 */
+  }
+
+  /* 932x430下默认隐藏按钮 */
+  .hand-action-buttons {
+    display: none !important;
+  }
+
+  /* 南家轮次时显示按钮（有buttons-visible类时） */
+  .hand-action-buttons.buttons-visible {
+    display: flex !important;
+  }
+
+  /* 操作按钮样式 - 932x430专用 */
+  .hand-action-buttons .btn-large {
+    /* 按钮固定尺寸 - 独立于文字大小 */
+    width: var(--action-btn-width) !important;
+    height: var(--action-btn-height) !important;
+    min-width: var(--action-btn-width) !important;
+    max-width: var(--action-btn-width) !important;
+    /* 文字样式 - 独立控制 */
+    font-size: var(--action-btn-font-size) !important;
+    font-weight: var(--action-btn-font-weight) !important;
+    letter-spacing: var(--action-btn-letter-spacing, 0.2em) !important;
+    /* 文字位置偏移 - 独立控制 */
+    padding-left: calc(var(--action-btn-text-offset, 0px)) !important;
+    padding-right: 0 !important;
+    /* 其他样式 */
+    border-radius: var(--action-btn-border-radius) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ========================================
+     设置按钮和菜单
+     ======================================== */
+
+  /* 顶部信息栏 */
+  .top-info-bar {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: var(--z-settings-button-932x430, 10001) !important;
+    background: transparent !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    padding: 4px 8px !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    max-width: 120px !important;
+    overflow: hidden !important;
+  }
+
+  /* 设置按钮 */
+  .btn-settings {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: var(--z-settings-menu-932x430, 10002) !important;
+    background: transparent !important;
+    color: white !important;
+    border: none !important;
+    padding: 4px 6px !important;
+    border-radius: 0 !important;
+    font-size: 16px !important;
+    font-weight: normal !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  .btn-settings:hover {
+    background: transparent !important;
+    transform: scale(1.15) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* 设置菜单 */
+  .settings-menu {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 2px !important;
+    background: linear-gradient(135deg,
+      rgba(52, 73, 94, 0.98) 0%,
+      rgba(44, 62, 80, 0.95) 100%) !important;
+    border-radius: 4px !important;
+    backdrop-filter: blur(12px) !important;
+    min-width: 110px !important;
+    max-width: 130px !important;
+    z-index: var(--z-settings-menu-932x430, 10002) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    overflow: hidden !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* 设置菜单项 */
+  .settings-menu .settings-item {
+    padding: 6px 12px !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+  }
+
+  .settings-menu .settings-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .settings-menu .settings-item:last-child {
+    border-bottom: none !important;
+  }
+
+  /* 隐藏其他顶部信息元素 */
+  .top-info-bar .coin-display,
+  .top-info-bar .level-display,
+  .top-info-bar .score-display,
+  .team-info-bar,
+  .info-display {
+    display: none !important;
+  }
+
+  /* ========================================
+     控制面板
+     ======================================== */
+
+  .control-panel {
+    height: var(--control-panel-height-932x430) !important;
+    min-width: var(--control-panel-width-932x430) !important;
+  }
+
+  /* 控制面板按钮 - 使用高优先级选择器覆盖 */
+  html body .control-panel.simplified .btn,
+  html body .control-panel.simplified .btn-sort,
+  html body .control-panel.simplified .btn-restart {
+    font-size: var(--control-panel-btn-font-size) !important;  /* 使用独立的文字大小变量 */
+  }
+
+  .control-panel .btn {
+    width: var(--btn-width-932x430) !important;
+    height: var(--btn-height-932x430) !important;
+    padding: var(--btn-padding-932x430) !important;
+  }
+
+  /* ========================================
+     游戏容器优化
+     ======================================== */
+
+  .game-container,
+  .mobile-landscape-container,
+  .game-table {
+    display: grid !important;
+    grid-template-areas:
+      "north north north"
+      "west center east"
+      "south south south";
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr 2fr 1fr;
+    height: 100vh;
+    width: 100vw;
+    padding: 8px;
+    gap: 8px;
+    overflow: visible !important;  /* 允许出牌区域显示在容器外部 */
+  }
+
+  /* 中央出牌区域 */
+  .central-play-area {
+    min-height: 120px;
+    padding: 8px;
+    background: transparent;
+    border-radius: 12px;
+  }
+
+  .played-cards-area,
+  .last-play-area {
+    min-height: 40px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+
+  .plays-group {
+    min-height: 35px;
+  }
+
+  /* ========================================
+     浮动设置按钮（备用方案）
+     ======================================== */
+
+  .floating-settings-btn {
+    display: none !important; /* 默认隐藏，如需启用改为 flex */
+  }
+
+  /* ========================================
+     AI 手牌隐藏 - 932x430专用
+     ======================================== */
+
+  .ai-hand-cards {
+    display: none !important;
+  }
+
+  /* ========================================
+     COUNTDOWN TIMER - 932x430专用样式
+     ======================================== */
+
+  /* 南方玩家倒计时样式 - 使用流式布局，不需要位置控制 */
+  .south-timer .timer-icon {
+    font-size: var(--countdown-icon-size-932x430) !important;
+  }
+
+  .south-timer .timer-seconds {
+    font-size: var(--countdown-font-size-932x430) !important;
+    min-width: 20px !important;
+  }
+
+  /* 其他玩家倒计时样式 */
+  .opponent-timer {
+    padding: 3px 6px !important;
+    gap: 2px !important;
+  }
+
+  .opponent-timer .timer-icon {
+    font-size: 12px !important;
+  }
+
+  .opponent-timer .timer-seconds {
+    font-size: 14px !important;
+    min-width: 16px !important;
+  }
+
+  /* 其他玩家倒计时位置 */
+  #northTimer,
+  #westTimer,
+  #eastTimer {
+    position: absolute !important;
+  }
+
+  #northTimer {
+    left: var(--north-timer-left-932x430) !important;
+    top: var(--north-timer-top-932x430) !important;
+  }
+
+  #westTimer {
+    left: var(--west-timer-left-932x430) !important;
+    top: var(--west-timer-top-932x430) !important;
+  }
+
+  #eastTimer {
+    left: var(--east-timer-left-932x430) !important;
+    top: var(--east-timer-top-932x430) !important;
+  }
+}

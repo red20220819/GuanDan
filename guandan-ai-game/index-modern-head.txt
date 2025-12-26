@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>掼蛋 - 现代化界面版�?v2.3.3</title>
+
+    <!-- 引入现代化CSS样式 -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/game-modern.css">
+    <link rel="stylesheet" href="css/level-card.css">
+    <link rel="stylesheet" href="css/joker-text-style.css">
+    <link rel="stylesheet" href="css/joker-images.css">
+    <link rel="stylesheet" href="css/mobile-landscape.css">
+    <link rel="stylesheet" href="css/ultrawide-mobile.css">
+    <link rel="stylesheet" href="css/plays-align-fix.css">
+    <!-- <link rel="stylesheet" href="css/plays-text-size-fix.css"> 已禁用，与play-area-cards-fix.css冲突 -->
+    <link rel="stylesheet" href="css/avatar-position-932x430.css">
+    <link rel="stylesheet" href="css/play-area-cards-fix.css">
+    <link rel="stylesheet" href="css/settings-button-932x430.css">
+    <link rel="stylesheet" href="css/control-panel-unified.css">
+
+    <!-- 模块化CSS - 统一牌面样式 -->
+    <link rel="stylesheet" href="css/modules/card-base.css">
+    <link rel="stylesheet" href="css/modules/card-play.css">
+    <!-- <link rel="stylesheet" href="css/modules/card-responsive.css"> 已禁用，与play-area-cards-fix.css冲突 -->
+

@@ -1,0 +1,79 @@
+/**
+ * 掼蛋游戏 - 大小王统一样式
+ * 合并了joker-images.css和joker-text-style.css
+ */
+
+/* =======================================
+   JOKER TEXT STYLES - 大小王文字样式
+   ======================================= */
+
+/* JOKER竖向显示样式 */
+.player-card .card-rank.joker-text,
+.hand-card .card-rank.joker-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: -5px;
+  line-height: 0.5;
+  font-size: 14px;
+  margin-left: 3px;
+  display: inline-block;
+}
+
+/* =======================================
+   JOKER IMAGE STYLES - 大小王图片样式
+   ======================================= */
+
+/* 大小王图片容器 */
+.joker-image-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 66%;
+  height: 66%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 大小王图片 */
+.joker-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* 小王图片（使用原图，不转为黑色） */
+.small-joker-image {
+  filter: none;
+}
+
+/* 大王图片（彩色） */
+.big-joker-image {
+  filter: none;
+}
+
+/* 出牌区域的JOKER图片调整 */
+.plays-group .player-card .joker-image-container {
+  width: 55%;
+  height: 55%;
+}
+
+/* 手牌区域的JOKER图片调整 */
+.player-hand-cards .player-card .joker-image-container {
+  width: 60%;
+  height: 60%;
+}
+
+/* 932x430分辨率下特殊调整 */
+@media screen and (width: 932px) and (height: 430px) {
+  .plays-group .player-card .joker-image-container {
+    width: 72%;
+    height: 72%;
+  }
+
+  .player-hand-cards .player-card .joker-image-container {
+    width: 65%;
+    height: 65%;
+  }
+}

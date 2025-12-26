@@ -1,0 +1,288 @@
+/**
+ * 掼蛋游戏 - 玩家位置样式
+ * 包含玩家头像、玩家信息、玩家位置等相关样式
+ */
+
+/* =======================================
+   PLAYER INFO - 玩家信息
+   ======================================= */
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.player-info-simple {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+/* =======================================
+   PLAYER AVATAR - 玩家头像
+   ======================================= */
+
+.player-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg,
+    rgba(52, 152, 219, 0.8) 0%,
+    rgba(41, 128, 185, 0.8) 100%);
+  color: white;
+}
+
+.player-avatar-simple {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: bold;
+  background: linear-gradient(135deg,
+    rgba(52, 152, 219, 0.8) 0%,
+    rgba(41, 128, 185, 0.8) 100%);
+  color: white;
+  border: 2px solid white;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 不同玩家的头像颜色 */
+.player-north .player-avatar,
+.player-north .player-avatar-simple {
+  background: linear-gradient(135deg, #34C759, #30b858);
+}
+
+.player-west .player-avatar,
+.player-west .player-avatar-simple {
+  background: linear-gradient(135deg, #8E8E93, #6c757d);
+}
+
+.player-east .player-avatar,
+.player-east .player-avatar-simple {
+  background: linear-gradient(135deg, #FF9500, #ff9800);
+}
+
+.player-south .player-avatar,
+.player-south .player-avatar-simple {
+  background: linear-gradient(135deg, #007AFF, #4a90e2);
+}
+
+/* =======================================
+   PLAYER NAME - 玩家名称
+   ======================================= */
+
+.player-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  white-space: nowrap;
+}
+
+/* =======================================
+   CARD COUNT - 牌数显示
+   ======================================= */
+
+.card-count-simple {
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: white;
+}
+
+.player-cards-count {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+}
+
+/* =======================================
+   TEAM BADGE - 队伍徽章
+   ======================================= */
+
+.team-badge {
+  position: absolute;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.team-badge.team-a {
+  background: rgba(52, 152, 219, 0.8);
+}
+
+.team-badge.team-b {
+  background: rgba(231, 76, 60, 0.8);
+}
+
+/* =======================================
+   PLAYER STATUS - 玩家状态
+   ======================================= */
+
+.player-active {
+  box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+}
+
+.player-thinking {
+  animation: thinking 1.5s ease-in-out infinite;
+}
+
+@keyframes thinking {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* =======================================
+   MOBILE ADAPTATIONS - 移动端适配
+   ======================================= */
+
+@media (max-width: 768px) {
+  .player-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .player-info {
+    padding: var(--space-2);
+  }
+
+  .player-name {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* =======================================
+   932x430 RESOLUTION - 彻底移除容器背景
+   ======================================= */
+
+@media screen and (width: 932px) and (height: 430px) {
+  .player-info,
+  .player-info-simple {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+  }
+}
+
+/* =======================================
+   COUNTDOWN TIMER - 倒计时样式
+   ======================================= */
+
+/* 默认隐藏 */
+.countdown-timer {
+  display: none;
+}
+
+/* 添加visible类时显示 */
+.countdown-timer.visible {
+  display: flex;
+}
+
+.countdown-timer {
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg,
+    rgba(255, 193, 7, 0.95) 0%,
+    rgba(255, 152, 0, 0.95) 100%);
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.timer-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.timer-seconds {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  min-width: 24px;
+  text-align: center;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.countdown-timer.urgent {
+  background: linear-gradient(135deg,
+    rgba(244, 67, 54, 0.95) 0%,
+    rgba(211, 47, 47, 0.95) 100%);
+  animation: timer-urgent 0.5s ease-in-out infinite;
+}
+
+@keyframes timer-urgent {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* 南方玩家倒计时 - 流式布局，与其他按钮一起排列 */
+.south-timer {
+  /* 移除绝对定位，改为流式布局 */
+  /* position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); */
+
+  position: relative;
+  margin: 0 10px;  /* 与其他按钮的间距 */
+  transform: none;
+}
+
+.opponent-timer {
+  margin-top: 8px;
+  padding: 4px 8px;
+}
+
+.opponent-timer .timer-icon {
+  font-size: 14px;
+}
+
+.opponent-timer .timer-seconds {
+  font-size: 16px;
+  min-width: 18px;
+}

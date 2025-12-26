@@ -1,0 +1,401 @@
+/**
+ * 掼蛋游戏 - 游戏布局样式
+ * 包含游戏主容器、玩家位置、手牌区域等布局相关样式
+ */
+
+/* =======================================
+   GAME TABLE - 游戏主容器
+   ======================================= */
+
+.game-table {
+  width: 97vw;
+  height: 95vh;
+  display: grid;
+  grid-template-areas:
+    "north north north"
+    "west center east"
+    "south south south";
+  grid-template-rows: 1fr 2fr 1fr;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 10px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background: radial-gradient(ellipse at center,
+    rgba(39, 174, 96, 0.8) 0%,
+    rgba(22, 160, 133, 0.9) 30%,
+    rgba(52, 73, 94, 0.95) 60%,
+    rgba(44, 62, 80, 1) 100%);
+  overflow: hidden;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+/* =======================================
+   TOP INFO BAR - 顶部信息栏
+   ======================================= */
+
+.top-info-bar {
+  background: linear-gradient(135deg,
+    rgba(52, 73, 94, 0.95) 0%,
+    rgba(44, 62, 80, 0.9) 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-6);
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  justify-content: space-between;
+  z-index: var(--z-game-ui);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(15px);
+  width: 100%;
+}
+
+.info-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.info-display:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.coin-display {
+  color: #f39c12;
+  text-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+}
+
+.level-display {
+  color: var(--color-primary);
+  text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.score-display {
+  color: var(--color-success);
+  text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.settings-btn {
+  background: linear-gradient(135deg,
+    rgba(52, 152, 219, 0.8) 0%,
+    rgba(41, 128, 185, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.settings-btn:hover {
+  background: linear-gradient(135deg,
+    rgba(52, 152, 219, 0.9) 0%,
+    rgba(41, 128, 185, 0.9) 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* =======================================
+   TEAM INFO BAR - 团队信息栏
+   ======================================= */
+
+.team-info-bar {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg,
+    rgba(52, 73, 94, 0.95) 0%,
+    rgba(44, 62, 80, 0.9) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  z-index: var(--z-game-ui);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+}
+
+.team-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.team-label {
+  font-size: 0.75rem;
+  color: #bdc3c7;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.team-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.team-a { color: var(--color-primary); }
+.team-b { color: var(--color-danger); }
+
+/* =======================================
+   PLAYER POSITIONS - 玩家位置布局
+   ======================================= */
+
+.player-position {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* 北方玩家（对手） */
+.player-north {
+  position: absolute;
+  top: 5%;
+  left: calc(50% - 240px);
+  transform: translateX(0);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  width: 120px;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+/* 南方玩家（自己） */
+.player-south {
+  grid-area: south;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 100%;
+  z-index: 10;
+}
+
+/* 西方玩家（队友） */
+.player-west {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  left: 20px;
+  width: 120px;
+  z-index: 5;
+}
+
+/* 东方玩家（对手） */
+.player-east {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: var(--space-3);
+  right: 20px;
+  width: 120px;
+  z-index: 5;
+}
+
+/* =======================================
+   AI PLAYER HAND CARDS - AI玩家手牌显示
+   ======================================= */
+
+.ai-hand-cards {
+  position: relative;
+  width: 50px;
+  height: 70px;
+}
+
+.ai-card-back {
+  position: absolute;
+  width: 50px;
+  height: 70px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border: 2px solid #d4af37;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #d4af37;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.ai-card-back:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.ai-card-back:nth-child(1) { z-index: 3; }
+.ai-card-back:nth-child(2) {
+  z-index: 2;
+  transform: translate(3px, 3px);
+}
+.ai-card-back:nth-child(3) {
+  z-index: 1;
+  transform: translate(6px, 6px);
+}
+
+/* =======================================
+   PLAYER HAND CARDS - 玩家手牌区域
+   ======================================= */
+
+.player-hand-cards {
+  display: flex;
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  justify-content: center;
+  align-items: flex-end;
+  flex: 1;
+  min-height: 90px;
+  overflow: visible;
+  z-index: 100;
+}
+
+/* =======================================
+   CENTRAL PLAY AREA - 中央出牌区域
+   ======================================= */
+
+.central-play-area {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 12px;
+  position: relative;
+}
+
+.played-cards-area,
+.last-play-area {
+  padding: 8px;
+  margin: 4px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  min-height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =======================================
+   PLAY AREAS - 各方向出牌区域
+   ======================================= */
+
+.north-plays {
+  grid-area: north;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.south-plays {
+  grid-area: south;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.west-plays {
+  grid-area: west;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.east-plays {
+  grid-area: east;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* =======================================
+   CONTROL PANEL - 控制面板
+   ======================================= */
+
+.control-panel {
+  position: fixed;
+  bottom: 0;
+  right: 15px;
+  background: linear-gradient(135deg,
+    rgba(52, 73, 94, 0.95) 0%,
+    rgba(44, 62, 80, 0.9) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  z-index: var(--z-game-ui);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(15px);
+  min-width: 200px;
+}
+
+.control-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* =======================================
+   HAND ACTION BUTTONS - 手牌上方操作按钮
+   ======================================= */
+
+.hand-action-buttons {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg,
+    rgba(52, 73, 94, 0.9) 0%,
+    rgba(44, 62, 80, 0.85) 100%);
+  border-radius: var(--radius-2xl);
+  backdrop-filter: blur(10px);
+  z-index: var(--z-game-ui);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-large {
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--font-size-base);
+  min-width: 100px;
+}

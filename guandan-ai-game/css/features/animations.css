@@ -1,0 +1,178 @@
+/**
+ * 掼蛋游戏 - 动画定义
+ * 包含所有游戏动画效果
+ */
+
+/* =======================================
+   SHAKE ANIMATION - 抖动动画
+   ======================================= */
+
+@keyframes shake {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translate(-50%, -50%) translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translate(-50%, -50%) translateX(5px);
+  }
+}
+
+/* =======================================
+   CARD ANIMATIONS - 牌面动画
+   ======================================= */
+
+/* 发牌动画 */
+@keyframes dealCard {
+  0% {
+    opacity: 0;
+    transform: translateY(-100px) rotate(-180deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* 出牌动画 */
+@keyframes playCard {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.05);
+  }
+  100% {
+    transform: translateY(-12px) scale(1);
+  }
+}
+
+/* 选牌动画 */
+@keyframes selectCard {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-12px) scale(1.05);
+  }
+}
+
+/* =======================================
+   UI ANIMATIONS - UI动画
+   ======================================= */
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 滑入动画 */
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 缩放动画 */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 弹跳动画 */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* =======================================
+   UTILITY CLASSES - 动画工具类
+   ======================================= */
+
+/* 抖动效果类 */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* 淡入效果类 */
+.fade-in {
+  animation: fadeIn var(--duration-normal, 0.3s) var(--ease-out, ease-out);
+}
+
+/* 滑入效果类 */
+.slide-in {
+  animation: slideIn var(--duration-normal, 0.3s) var(--ease-out, ease-out);
+}
+
+/* 缩放效果类 */
+.scale-in {
+  animation: scaleIn var(--duration-fast, 0.2s) var(--ease-out, ease-out);
+}
+
+/* 脉冲效果类 */
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 弹跳效果类 */
+.bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+/* =======================================
+   REDUCED MOTION SUPPORT - 减少动画模式
+   ======================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  /* 禁用所有动画 */
+  .shake,
+  .fade-in,
+  .slide-in,
+  .scale-in,
+  .pulse,
+  .bounce {
+    animation: none !important;
+    transition: none !important;
+  }
+}

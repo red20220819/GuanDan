@@ -1,0 +1,174 @@
+/**
+ * 掼蛋游戏 - 通用响应式样式
+ * 包含通用的媒体查询和响应式适配
+ */
+
+/* =======================================
+   MOBILE DEVICES - 移动设备通用适配
+   ======================================= */
+
+@media (max-width: 768px) {
+  /* 游戏容器调整 */
+  .game-table {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 5px;
+    gap: 5px;
+  }
+
+  /* 玩家位置调整 */
+  .player-north,
+  .player-west,
+  .player-east {
+    width: 80px;
+  }
+
+  /* 手牌区域调整 */
+  .player-hand-cards {
+    min-height: 70px;
+  }
+
+  /* 控制面板调整 */
+  .control-panel {
+    right: 10px;
+    bottom: 10px;
+    min-width: 150px;
+    padding: 10px;
+  }
+
+  /* 按钮调整 */
+  .btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    min-height: 36px;
+  }
+
+  .control-buttons {
+    gap: 6px;
+  }
+}
+
+/* =======================================
+   TABLET DEVICES - 平板设备适配
+   ======================================= */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* 游戏容器调整 */
+  .game-table {
+    width: 95vw;
+    height: 93vh;
+  }
+
+  /* 牌面尺寸调整 */
+  .player-card {
+    width: 60px;
+    height: 84px;
+  }
+}
+
+/* =======================================
+   LARGE SCREENS - 大屏幕适配
+   ======================================= */
+
+@media (min-width: 1921px) {
+  /* 游戏容器限制 */
+  .game-table {
+    max-width: 1800px;
+    max-height: 1000px;
+    margin: 0 auto;
+  }
+
+  /* 牌面尺寸放大 */
+  .player-card {
+    width: 80px;
+    height: 112px;
+  }
+}
+
+/* =======================================
+   LANDSCAPE ORIENTATION - 横屏通用适配
+   ======================================= */
+
+@media screen and (orientation: landscape) {
+  /* 确保游戏容器使用网格布局 */
+  .game-table {
+    display: grid !important;
+    grid-template-areas:
+      "north north north"
+      "west center east"
+      "south south south";
+    grid-template-rows: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr;
+  }
+}
+
+/* =======================================
+   SAFE AREA SUPPORT - 安全区域支持（刘海屏等）
+   ======================================= */
+
+@supports (padding: max(0px)) {
+  .game-table {
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .control-panel {
+    right: max(20px, env(safe-area-inset-right));
+    bottom: max(20px, env(safe-area-inset-bottom));
+  }
+}
+
+/* =======================================
+   HIGH DPI DISPLAYS - 高DPI屏幕适配
+   ======================================= */
+
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+  /* 字体渲染优化 */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 边框优化 */
+  .player-card {
+    border-width: 0.5px;
+  }
+}
+
+/* =======================================
+   DARK MODE - 暗色模式支持
+   ======================================= */
+
+@media (prefers-color-scheme: dark) {
+  /* 游戏背景暗色调整 */
+  .game-table {
+    background: radial-gradient(ellipse at center,
+      rgba(20, 30, 48, 0.9) 0%,
+      rgba(36, 59, 85, 0.95) 60%,
+      rgba(20, 30, 48, 1) 100%);
+  }
+
+  /* 毛玻璃效果暗色调整 */
+  .glass-effect {
+    background: rgba(30, 30, 30, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* =======================================
+   REDUCED MOTION - 减少动画模式
+   ======================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .game-table,
+  .player-card,
+  .btn,
+  .control-panel {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,364 @@
+/**
+ * 掼蛋游戏 - 牌面统一样式
+ * 合并了card-base.css和card-play.css
+ * 为手牌和出牌区域提供统一的牌面样式
+ */
+
+/* =======================================
+   BASE CARD STYLES - 基础牌面样式
+   ======================================= */
+
+/* 基础牌面样式类 - 适用于所有牌面 */
+.card-base,
+.player-card,
+.hand-card {
+  /* 使用统一样式变量 */
+  width: var(--card-base-width);
+  height: var(--card-base-height);
+
+  /* 基础外观 */
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+  border: 1px solid #373836;
+  border-radius: var(--radius-md);
+
+  /* 布局和定位 */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 动画和过渡 */
+  transition: all var(--card-transition-duration) var(--card-transition-timing);
+
+  /* 阴影效果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+  /* 性能优化 */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* =======================================
+   CARD CONTENT - 牌面内容
+   ======================================= */
+
+/* 牌面内容基础样式 */
+.card-base .card-content,
+.player-card .card-content,
+.hand-card .card-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 牌面角标区域 */
+.card-base .card-top-left,
+.card-base .card-bottom-right,
+.player-card .card-top-left,
+.player-card .card-bottom-right,
+.hand-card .card-top-left,
+.hand-card .card-bottom-right {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  z-index: 1;
+}
+
+.card-base .card-top-left,
+.player-card .card-top-left,
+.hand-card .card-top-left {
+  top: 3px;
+  left: 3px;
+}
+
+.card-base .card-bottom-right,
+.player-card .card-bottom-right,
+.hand-card .card-bottom-right {
+  bottom: 3px;
+  right: 3px;
+  transform: rotate(180deg);
+}
+
+/* 统一牌面文字样式 */
+.card-base .card-rank,
+.player-card .card-rank,
+.hand-card .card-rank {
+  /* 使用统一样式变量 */
+  font-size: var(--card-rank-size);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--card-letter-spacing);
+
+  /* 文字样式 */
+  color: inherit;
+  text-align: center;
+  line-height: 1;
+  margin-bottom: -5px;
+}
+
+.card-base .card-suit,
+.player-card .card-suit,
+.hand-card .card-suit {
+  /* 使用统一样式变量 */
+  font-size: var(--card-suit-size);
+  font-weight: var(--font-weight-bold);
+
+  /* 文字样式 */
+  color: inherit;
+  text-align: center;
+  line-height: 1;
+}
+
+/* =======================================
+   CARD COLORS - 牌面颜色
+   ======================================= */
+
+/* 牌面颜色区分 */
+.card-base.red,
+.player-card.red,
+.hand-card.red {
+  color: var(--color-card-red);
+}
+
+.card-base.black,
+.player-card.black,
+.hand-card.black {
+  color: var(--color-card-black);
+}
+
+/* 确保牌面颜色正确 */
+.player-card.red {
+  color: #DC143C !important;
+}
+
+.player-card.black {
+  color: #000 !important;
+}
+
+/* =======================================
+   SPECIAL CARDS - 特殊牌型
+   ======================================= */
+
+/* 大小王文字处理 */
+.card-base .card-rank.joker-text,
+.player-card .card-rank.joker-text,
+.hand-card .card-rank.joker-text {
+  font-size: 13px;
+  transform: translateX(-4px);
+  letter-spacing: -0.5px;
+}
+
+/* "10"数字的特殊处理 */
+.card-base .card-rank[data-rank="10"],
+.player-card .card-rank[data-rank="10"],
+.hand-card .card-rank[data-rank="10"] {
+  transform: none;
+  letter-spacing: -3px;
+  white-space: nowrap;
+  display: inline-block;
+  width: auto;
+  padding: 0;
+}
+
+/* 级牌"配"标记 */
+.card-base .level-card-indicator,
+.player-card .level-card-indicator,
+.hand-card .level-card-indicator {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--color-error);
+}
+
+/* 大小王图片容器 */
+.card-base .joker-image-container,
+.player-card .joker-image-container,
+.hand-card .joker-image-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.card-base .joker-image,
+.player-card .joker-image,
+.hand-card .joker-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* =======================================
+   PLAY AREA CARDS - 出牌区域特定样式
+   ======================================= */
+
+/* 出牌区域基础样式 */
+.plays-group .player-card {
+  /* 继承基础样式，添加特定属性 */
+  margin-left: var(--card-uniform-overlap);
+  z-index: calc(10 * var(--card-index, 1));
+}
+
+/* 第一张牌不重叠 */
+.plays-group .player-card:first-child {
+  margin-left: 0;
+}
+
+/* 最新出牌组突出显示 */
+.latest-group {
+  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+}
+
+.latest-group .player-card {
+  animation: latestPulse 2s ease-in-out infinite alternate;
+}
+
+/* 最新出牌脉冲动画 */
+@keyframes latestPulse {
+  0% {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+  100% {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 20px rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* =======================================
+   PLAY AREA POSITIONING - 出牌区域定位
+   ======================================= */
+
+/* 北方出牌区域 */
+.north-plays {
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* 南方出牌区域 */
+.south-plays {
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* 西方出牌区域 - 默认垂直，932x430会在responsive/932x430.css中覆盖 */
+.west-plays {
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* 东方出牌区域 - 默认垂直，932x430会在responsive/932x430.css中覆盖 */
+.east-plays {
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* =======================================
+   CARD INTERACTIONS - 牌面交互效果
+   ======================================= */
+
+/* 悬浮效果 */
+.card-base:hover,
+.player-card:hover,
+.hand-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+  border-color: #3498db;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 选中效果 */
+.card-base.selected,
+.player-card.selected,
+.hand-card.selected {
+  transform: translateY(-12px) scale(1.05);
+  border-color: #f39c12;
+  box-shadow: 0 8px 25px rgba(243, 156, 18, 0.6);
+  z-index: 9999;
+}
+
+/* 划选效果 */
+.card-base.brushing,
+.player-card.brushing,
+.hand-card.brushing {
+  transform: translateY(-15px) scale(1.08);
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+  border-color: #2196F3;
+  border-width: 3px;
+}
+
+/* =======================================
+   ACCESSIBILITY - 可访问性
+   ======================================= */
+
+/* 焦点样式 */
+.card-base:focus,
+.player-card:focus,
+.hand-card:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .card-base,
+  .player-card,
+  .hand-card {
+    border-width: 2px;
+  }
+
+  .card-base.red,
+  .player-card.red,
+  .hand-card.red {
+    color: #d32f2f;
+  }
+
+  .card-base.black,
+  .player-card.black,
+  .hand-card.black {
+    color: #000000;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  .card-base,
+  .player-card,
+  .hand-card {
+    transition: none;
+  }
+
+  .card-base:hover,
+  .player-card:hover,
+  .hand-card:hover,
+  .card-base.selected,
+  .player-card.selected,
+  .hand-card.selected,
+  .card-base.brushing,
+  .player-card.brushing,
+  .hand-card.brushing {
+    transform: none;
+  }
+
+  .latest-group {
+    filter: none;
+  }
+
+  .latest-group .player-card {
+    animation: none;
+  }
+}

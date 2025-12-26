@@ -1,0 +1,132 @@
+/**
+ * 掼蛋游戏 - 手机横屏增强样式
+ * 只包含手机横屏特有的样式调整
+ */
+
+/* 手机横屏布局激活 */
+@media screen and (max-height: 640px) and (orientation: landscape) {
+    /* 确保游戏容器显示 */
+    .game-table {
+        display: grid !important;
+    }
+
+    /* 调整背景渐变 */
+    .game-table {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+
+    /* 顶部信息栏在手机横屏时隐藏 */
+    .top-info-bar,
+    .team-info-bar {
+        display: none;
+    }
+
+    /* 玩家信息调整 */
+    .player-info {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* 北家使用特殊的绿色毛玻璃 */
+    .player-north .player-info {
+        background: rgba(52, 199, 89, 0.15);
+        border-color: rgba(52, 199, 89, 0.35);
+    }
+
+    /* 西家使用灰色 */
+    .player-west .player-info {
+        background: rgba(142, 142, 147, 0.15);
+        border-color: rgba(142, 142, 147, 0.35);
+    }
+
+    /* 东家使用橙色 */
+    .player-east .player-info {
+        background: rgba(255, 149, 0, 0.15);
+        border-color: rgba(255, 149, 0, 0.35);
+    }
+
+    /* 南家使用蓝色 */
+    .player-south .player-info {
+        background: rgba(0, 122, 255, 0.15);
+        border-color: rgba(0, 122, 255, 0.35);
+    }
+
+    /* 统一的玩家头像样式 */
+    .player-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 不同玩家的头像颜色 */
+    .player-north .player-avatar {
+        background: linear-gradient(135deg, var(--ios-green), #30b858);
+    }
+
+    .player-west .player-avatar {
+        background: linear-gradient(135deg, var(--ios-gray), #6c757d);
+    }
+
+    .player-east .player-avatar {
+        background: linear-gradient(135deg, var(--ios-orange), #ff9800);
+    }
+
+    .player-south .player-avatar {
+        background: linear-gradient(135deg, var(--ios-blue), #4a90e2);
+    }
+
+    /* 手牌区域调整 */
+    .hand-cards {
+        max-height: 20vmin;
+    }
+
+    .hand-card {
+        width: 5.5vmin;
+        height: 7.7vmin;
+        font-size: 2.5vmin;
+    }
+
+    /* 控制按钮尺寸调整 */
+    .control-btn,
+    .action-btn {
+        min-width: 48px;
+        min-height: 48px;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    /* 安全区域适配 */
+    @supports (padding: max(0px)) {
+        .game-table {
+            padding-left: max(10px, env(safe-area-inset-left));
+            padding-right: max(10px, env(safe-area-inset-right));
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* 竖屏时隐藏横屏样式 */
+@media screen and (orientation: portrait) and (max-width: 639px) {
+    .game-table {
+        display: flex !important;
+    }
+}
+
+/* 桌面横屏保持原有布局 */
+@media screen and (orientation: landscape) and (min-height: 641px) {
+    .game-table {
+        display: grid !important;
+        grid-template-areas:
+            "north north north"
+            "west center east"
+            "south south south";
+        grid-template-rows: 1fr 2fr 1fr;
+        grid-template-columns: 1fr 2fr 1fr;
+    }
+}
