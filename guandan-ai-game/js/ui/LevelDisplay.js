@@ -14,6 +14,9 @@ class LevelDisplay {
 
         // 初始化显示
         this.updateDisplay();
+
+        // 初始化左上角级数显示
+        this.updateTeamLevelsDisplay();
     }
 
     /**
@@ -55,6 +58,9 @@ class LevelDisplay {
 
         const teamStatus = this.levelManager.getAllTeamStatus();
         this.displayTeamLevels(teamStatus);
+
+        // 更新左上角级数显示
+        this.updateTeamLevelsDisplay();
     }
 
     /**
@@ -82,6 +88,56 @@ class LevelDisplay {
             10: '10', 11: 'J', 12: 'Q', 13: 'K', 14: 'A'
         };
         return levelNames[level] || level;
+    }
+
+    /**
+     * 更新左上角队伍级数显示
+     */
+    updateTeamLevelsDisplay() {
+        if (!this.levelManager) return;
+
+        const teamStatus = this.levelManager.getAllTeamStatus();
+        const dealerTeam = this.levelManager.getDealerTeam();
+
+        // 更新A队级数
+        const teamALevelElement = document.getElementById('teamALevelNumber');
+        if (teamALevelElement) {
+            teamALevelElement.textContent = this.getLevelText(teamStatus.teamA.level);
+        }
+
+        // 更新B队级数
+        const teamBLevelElement = document.getElementById('teamBLevelNumber');
+        if (teamBLevelElement) {
+            teamBLevelElement.textContent = this.getLevelText(teamStatus.teamB.level);
+        }
+
+        // 更新庄家指示器
+        this.updateDealerIndicator(dealerTeam);
+    }
+
+    /**
+     * 更新庄家指示器
+     */
+    updateDealerIndicator(dealerTeam) {
+        const teamAIndicator = document.getElementById('teamAActiveIndicator');
+        const teamBIndicator = document.getElementById('teamBActiveIndicator');
+        const teamADisplay = document.getElementById('teamALevelDisplay');
+        const teamBDisplay = document.getElementById('teamBLevelDisplay');
+
+        // 移除所有庄家标记
+        if (teamAIndicator) teamAIndicator.classList.remove('active');
+        if (teamBIndicator) teamBIndicator.classList.remove('active');
+        if (teamADisplay) teamADisplay.classList.remove('is-dealer');
+        if (teamBDisplay) teamBDisplay.classList.remove('is-dealer');
+
+        // 添加庄家标记
+        if (dealerTeam === 'A') {
+            if (teamAIndicator) teamAIndicator.classList.add('active');
+            if (teamADisplay) teamADisplay.classList.add('is-dealer');
+        } else if (dealerTeam === 'B') {
+            if (teamBIndicator) teamBIndicator.classList.add('active');
+            if (teamBDisplay) teamBDisplay.classList.add('is-dealer');
+        }
     }
 
     /**
@@ -128,6 +184,9 @@ class LevelDisplay {
         console.log('[LevelDisplay] 升级:', detail);
         this.updateDisplay();
         this.showUpgradeAnimation(detail);
+
+        // 更新左上角级数显示
+        this.updateTeamLevelsDisplay();
     }
 
     /**
@@ -189,37 +248,6 @@ class LevelDisplay {
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
 
-        // 添加样式
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            z-index: 1000;
-            animation: slideDown 0.3s ease-out;
-        `;
-
-        // 设置颜色
-        switch(type) {
-            case 'success':
-                notification.style.background = '#d4edda';
-                notification.style.color = '#155724';
-                notification.style.border = '1px solid #c3e6cb';
-                break;
-            case 'error':
-                notification.style.background = '#f8d7da';
-                notification.style.color = '#721c24';
-                notification.style.border = '1px solid #f5c6cb';
-                break;
-            default:
-                notification.style.background = '#d1ecf1';
-                notification.style.color = '#0c5460';
-                notification.style.border = '1px solid #bee5eb';
-        }
-
         // 添加到页面
         document.body.appendChild(notification);
 
@@ -254,19 +282,9 @@ class LevelDisplay {
      * 创建胜利特效
      */
     createVictoryEffect(isWin) {
-        // 创建烟花效果或其他视觉特效
+        // 创建胜利特效
         const effect = document.createElement('div');
-        effect.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            background: ${isWin ? 'rgba(40, 167, 69, 0.1)' : 'rgba(220, 53, 69, 0.1)'};
-            animation: fadeInOut 2s ease-out;
-        `;
+        effect.className = `victory-effect ${isWin ? 'victory-win' : 'victory-lose'}`;
 
         document.body.appendChild(effect);
 
@@ -278,86 +296,7 @@ class LevelDisplay {
     }
 }
 
-// 添加必要的CSS动画
-const style = document.createElement('style');
-style.textContent = `
-    .team-levels-container {
-        display: flex;
-        gap: 20px;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        margin: 10px 0;
-    }
-
-    .team-level {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 15px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .team-a {
-        border: 2px solid #28a745;
-    }
-
-    .team-b {
-        border: 2px solid #dc3545;
-    }
-
-    .team-label {
-        font-size: 14px;
-        opacity: 0.8;
-    }
-
-    .level-value {
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .a-gate-indicator {
-        font-size: 12px;
-        padding: 2px 6px;
-        background: #ffc107;
-        color: #000;
-        border-radius: 10px;
-        animation: pulse 1s infinite;
-    }
-
-    .at-a-gate {
-        background: rgba(255, 193, 7, 0.1) !important;
-        box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
-    }
-
-    .level-up-animation {
-        animation: levelUp 1s ease-out;
-    }
-
-    @keyframes levelUp {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.3); color: #28a745; }
-        100% { transform: scale(1); }
-    }
-
-    @keyframes slideDown {
-        0% { transform: translate(-50%, -100%); opacity: 0; }
-        100% { transform: translate(-50%, 0); opacity: 1; }
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-
-    @keyframes fadeInOut {
-        0% { opacity: 0; }
-        50% { opacity: 1; }
-        100% { opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
+// 动画样式已移至 css/features/animations.css
 
 // 导出类
 if (typeof module !== 'undefined' && module.exports) {

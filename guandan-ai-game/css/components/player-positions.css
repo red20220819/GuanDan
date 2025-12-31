@@ -198,8 +198,13 @@
   display: none;
 }
 
-/* 添加visible类时显示 */
-.countdown-timer.visible {
+/* 南方玩家倒计时默认显示（由容器hand-action-buttons控制显示/隐藏） */
+.south-timer {
+  display: flex;
+}
+
+/* 其他玩家倒计时通过visible类显示 */
+.countdown-timer:not(.south-timer).visible {
   display: flex;
 }
 

@@ -227,10 +227,10 @@
 /* 最新出牌脉冲动画 */
 @keyframes latestPulse {
   0% {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 10px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 5px rgba(255, 215, 0, 0.3);
   }
   100% {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 20px rgba(255, 215, 0, 0.6);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 10px rgba(255, 215, 0, 0.6);
   }
 }
 

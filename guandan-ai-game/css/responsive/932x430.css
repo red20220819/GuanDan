@@ -390,11 +390,7 @@
     transition: none !important;
   }
 
-  .player-south .player-card.selected {
-    transform: translateY(-12px) !important;
-    z-index: auto !important;  /* 不改变层级 */
-    transition: none !important;  /* 删除选中过渡 */
-  }
+  /* 南方玩家手牌选中样式移到后面统一定义 */
 
   /* ========================================
      南方手牌王牌文字 - 更紧凑
@@ -479,6 +475,8 @@
     /* 文字位置偏移 - 独立控制 */
     padding-left: calc(var(--action-btn-text-offset, 0px)) !important;
     padding-right: 0 !important;
+    /* 白色描边 - 更粗一点 */
+    border: 3px solid white !important;
     /* 其他样式 */
     border-radius: var(--action-btn-border-radius) !important;
     display: inline-flex !important;
@@ -486,6 +484,66 @@
     justify-content: center !important;
     text-align: center !important;
     box-sizing: border-box !important;
+  }
+
+  /* 按钮文字外部轮廓描边 - 颜色略深 */
+  .hand-action-buttons #passBtn {
+    text-shadow:
+      -1px -1px 0 #a86400,
+      1px -1px 0 #a86400,
+      -1px 1px 0 #a86400,
+      1px 1px 0 #a86400,
+      -1px 0 0 #a86400,
+      1px 0 0 #a86400,
+      0 -1px 0 #a86400,
+      0 1px 0 #a86400;
+  }
+
+  .hand-action-buttons #hintBtn {
+    text-shadow:
+      -1px -1px 0 #1a5fb4,
+      1px -1px 0 #1a5fb4,
+      -1px 1px 0 #1a5fb4,
+      1px 1px 0 #1a5fb4,
+      -1px 0 0 #1a5fb4,
+      1px 0 0 #1a5fb4,
+      0 -1px 0 #1a5fb4,
+      0 1px 0 #1a5fb4;
+  }
+
+  .hand-action-buttons #playBtn {
+    text-shadow:
+      -1px -1px 0 #158c43,
+      1px -1px 0 #158c43,
+      -1px 1px 0 #158c43,
+      1px 1px 0 #158c43,
+      -1px 0 0 #158c43,
+      1px 0 0 #158c43,
+      0 -1px 0 #158c43,
+      0 1px 0 #158c43;
+  }
+
+  /* 按钮去掉hover特效，保留点击缩放 */
+  .hand-action-buttons .btn-large {
+    transition: transform 0.1s !important;
+  }
+
+  .hand-action-buttons .btn-large:hover:not(:disabled) {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .hand-action-buttons .btn-large:active {
+    transform: scale(0.8) !important;
+  }
+
+  /* 南方玩家手牌选中 - 保持原深色描边，无外发光 */
+  .player-south .player-card.selected {
+    transform: translateY(-12px) !important;
+    box-shadow: none !important;
+    border-color: var(--color-card-border) !important;
+    z-index: auto !important;
+    transition: none !important;
   }
 
   /* ========================================
@@ -725,5 +783,179 @@
   #eastTimer {
     left: var(--east-timer-left-932x430) !important;
     top: var(--east-timer-top-932x430) !important;
+  }
+
+  /* ========================================
+     级牌样式 - 932x430移动端适配
+     ======================================== */
+
+  /* 普通级牌 - 移动端黄色背景（高优先级，覆盖.player-south .player-card） */
+  #southCards .player-card.level-rank,
+  .player-south .player-card.level-rank,
+  .north-plays .player-card.level-rank,
+  .south-plays .player-card.level-rank,
+  .west-plays .player-card.level-rank,
+  .east-plays .player-card.level-rank {
+    background: linear-gradient(135deg, #f9f1ce 0%, #f4efd4 50%, #f9f1ce 100%) !important;
+  }
+
+  /* 出牌区域普通级牌 */
+  .north-plays .player-card.level-rank,
+  .south-plays .player-card.level-rank,
+  .west-plays .player-card.level-rank,
+  .east-plays .player-card.level-rank {
+    background: linear-gradient(135deg, #f9f1ce 0%, #f4efd4 50%, #f9f1ce 100%) !important;
+  }
+
+  /* ========================================
+     逢人配（红桃级牌）- 金色红桃叠加效果
+     ======================================== */
+
+  /* 逢人配左上角花色上叠加金色红桃 - 大小10px，居中 */
+  #southCards .player-card.wild-card .card-top-left .card-suit::after,
+  .player-south .player-card.wild-card .card-top-left .card-suit::after,
+  .north-plays .player-card.wild-card .card-top-left .card-suit::after,
+  .south-plays .player-card.wild-card .card-top-left .card-suit::after,
+  .west-plays .player-card.wild-card .card-top-left .card-suit::after,
+  .east-plays .player-card.wild-card .card-top-left .card-suit::after {
+    content: '♥';
+    position: absolute;
+    top: 68%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    color: #ffd700;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  /* 出牌区域逢人配边框效果 */
+  .north-plays .player-card.wild-card,
+  .south-plays .player-card.wild-card,
+  .west-plays .player-card.wild-card,
+  .east-plays .player-card.wild-card {
+    border: 1px solid #ff6b6b !important;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.3) !important;
+  }
+
+  /* ========================================
+     头游状态提示 - 932x430专用（独立元素）
+     ======================================== */
+
+  #headPlayerStatus {
+    position: fixed !important;
+    left: 50% !important;
+    bottom: 30px !important;
+    transform: translateX(-50%) !important;
+    padding: 10px 20px !important;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%) !important;
+    color: white !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4) !important;
+    z-index: 10000 !important;
+    display: none !important;
+    white-space: nowrap !important;
+  }
+
+  #headPlayerStatus.visible {
+    display: block !important;
+  }
+
+  /* ========================================
+     排名图标 - 头游/二游/三游/末游
+     ======================================== */
+
+  .rank-badge {
+    display: none !important;
+    position: absolute !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+  }
+
+  /* 北家排名图标 */
+  .north-avatar .rank-badge {
+    bottom: -5px !important;
+    right: -5px !important;
+  }
+
+  /* 西家排名图标 */
+  .west-avatar .rank-badge {
+    bottom: -5px !important;
+    right: -5px !important;
+  }
+
+  /* 东家排名图标 */
+  .east-avatar .rank-badge {
+    bottom: -5px !important;
+    right: -5px !important;
+  }
+
+  /* 南家排名图标 */
+  .south-avatar .rank-badge {
+    bottom: -5px !important;
+    right: -5px !important;
+  }
+
+  /* 排名显示 */
+  .rank-badge.rank-1 {
+    display: inline-block !important;
+  }
+
+  .rank-badge.rank-2 {
+    display: inline-block !important;
+  }
+
+  .rank-badge.rank-3 {
+    display: inline-block !important;
+  }
+
+  .rank-badge.rank-4 {
+    display: inline-block !important;
+  }
+
+  /* ========================================
+     剩余牌数显示 - 牌背徽章
+     ======================================== */
+
+  .card-count-badge {
+    display: none !important;
+    position: absolute !important;
+    width: 30px !important;
+    height: 40px !important;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%) !important;
+    border: 2px solid #ecf0f1 !important;
+    border-radius: 6px !important;
+    color: #fff !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    line-height: 35px !important;
+    text-align: center !important;
+    z-index: 10 !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* 北家：头像外侧右上角 */
+  .player-north .card-count-badge {
+    top: 0px !important;
+    right: -35px !important;
+  }
+
+  /* 西家：头像外侧右上角 */
+  .player-west .card-count-badge {
+    top: 0px !important;
+    right: -35px !important;
+  }
+
+  /* 东家：头像外侧左上角 */
+  .player-east .card-count-badge {
+    top: 0px !important;
+    left: -35px !important;
+  }
+
+  /* 显示条件：当有 show-count 类时显示 */
+  .card-count-badge.show-count {
+    display: block !important;
   }
 }

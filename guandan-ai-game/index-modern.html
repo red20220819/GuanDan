@@ -23,6 +23,9 @@
       <link rel="stylesheet" href="css/components/player-positions.css">
       <link rel="stylesheet" href="css/components/control-panel.css">
       <link rel="stylesheet" href="css/components/level-card.css">
+      <link rel="stylesheet" href="css/components/team-levels-bar.css">
+      <link rel="stylesheet" href="css/components/level-display.css">
+      <link rel="stylesheet" href="css/components/result-panel.css">
       <!-- 6. 响应式样式 -->
       <link rel="stylesheet" href="css/responsive/general.css">
       <link rel="stylesheet" href="css/responsive/mobile.css">
@@ -56,6 +59,9 @@
         <!-- 消息提示气泡 -->
         <div id="messageBubble" class="message-bubble"></div>
 
+        <!-- 头游状态提示（独立元素） -->
+        <div id="headPlayerStatus" class="head-player-status"></div>
+
 
         <!-- 记牌器弹窗 -->
         <div class="card-counter-modal d-none" id="cardCounterModal">
@@ -88,7 +94,89 @@
             <div class="modal-backdrop" id="cardCounterBackdrop"></div>
         </div>
 
+        <!-- 游戏结束统计面板 -->
+        <div class="game-result-modal d-none" id="gameResultModal">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h3>🏆 游戏结束</h3>
+                    <button class="modal-close-btn" id="closeGameResult">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="result-winner"></div>
+                    <div class="result-teams-level">
+                        <div class="team-level team-a">
+                            <span class="team-name">A队</span>
+                            <span class="team-level-value"></span>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="team-level team-b">
+                            <span class="team-name">B队</span>
+                            <span class="team-level-value"></span>
+                        </div>
+                    </div>
+                    <div class="result-rankings"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="viewRecordsBtn">📊 查看战绩</button>
+                    <button class="btn btn-primary" id="newGameBtn">🔄 继续游戏</button>
+                </div>
+            </div>
+            <div class="modal-backdrop" id="gameResultBackdrop"></div>
+        </div>
+
+        <!-- 历史战绩面板 -->
+        <div class="records-modal d-none" id="recordsModal">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h3>📊 历史战绩</h3>
+                    <button class="modal-close-btn" id="closeRecords">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="records-summary"></div>
+                    <div class="records-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" id="clearRecordsBtn">🗑️ 清空记录</button>
+                    <button class="btn btn-secondary" id="exportRecordsBtn">📤 导出</button>
+                </div>
+            </div>
+            <div class="modal-backdrop" id="recordsBackdrop"></div>
+        </div>
+
         <div class="game-table">
+            <!-- 队伍级数显示 - 左上角 -->
+            <div class="team-levels-bar" id="teamLevelsBar">
+                <!-- A队 -->
+                <div class="team-wrapper">
+                    <div class="team-level-card team-a-card" id="teamALevelDisplay">
+                        <div class="card-header">
+                            <span class="team-label">我方</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="level-number" id="teamALevelNumber">2</span>
+                        </div>
+                    </div>
+                    <div class="active-indicator active" id="teamAActiveIndicator">
+                        <span class="indicator-triangle"></span>
+                    </div>
+                </div>
+
+                <!-- B队 -->
+                <div class="team-wrapper">
+                    <div class="team-level-card team-b-card" id="teamBLevelDisplay">
+                        <div class="card-header">
+                            <span class="team-label">对方</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="level-number" id="teamBLevelNumber">2</span>
+                        </div>
+                    </div>
+                    <div class="active-indicator" id="teamBActiveIndicator">
+                        <span class="indicator-triangle"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- 顶部信息栏 -->
             <div class="top-info-bar">
                 <div class="info-display coin-display">
@@ -148,11 +236,12 @@
                     <div class="player-avatar-simple north-avatar">
                         N
                         <span class="team-badge opponent-badge">对手</span>
+                        <span class="rank-badge" id="northRankBadge"></span>
                     </div>
                     <!-- 北方玩家倒计时 -->
                     <div class="countdown-timer opponent-timer" id="northTimer">
                         <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
+                        <span class="timer-seconds">20</span>
                     </div>
                 </div>
             </div>
@@ -164,11 +253,12 @@
                     <div class="player-avatar-simple west-avatar">
                         W
                         <span class="team-badge teammate-badge">队友</span>
+                        <span class="rank-badge" id="westRankBadge"></span>
                     </div>
                     <!-- 西方玩家倒计时 -->
                     <div class="countdown-timer opponent-timer" id="westTimer">
                         <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
+                        <span class="timer-seconds">20</span>
                     </div>
                 </div>
                 <!-- 手牌 - 在右边 -->
@@ -184,11 +274,12 @@
                     <div class="player-avatar-simple east-avatar">
                         E
                         <span class="team-badge opponent-badge">对手</span>
+                        <span class="rank-badge" id="eastRankBadge"></span>
                     </div>
                     <!-- 东方玩家倒计时 -->
                     <div class="countdown-timer opponent-timer" id="eastTimer">
                         <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
+                        <span class="timer-seconds">20</span>
                     </div>
                 </div>
                 <!-- 手牌 - 在右边 -->
@@ -203,6 +294,7 @@
                 <div class="player-info-simple">
                     <div class="player-avatar-simple south-avatar">
                         S
+                        <span class="rank-badge" id="southRankBadge"></span>
                     </div>
                 </div>
                 <!-- 主玩家信息面板 - 隐藏但保留功能 -->
@@ -221,19 +313,19 @@
                 </div>
                 <!-- 南方手牌上方操作按钮区域（独立容器） -->
                 <div class="hand-action-buttons">
-                    <button class="btn btn-primary btn-large" id="playBtn" onclick="playCards()" disabled>
-                        出牌
+                    <button class="btn btn-warning btn-large" id="passBtn" onclick="passTurn()" disabled>
+                        不要
                     </button>
                     <!-- 南方玩家倒计时 -->
                     <div class="countdown-timer south-timer" id="southTimer">
                         <span class="timer-icon">⏰</span>
-                        <span class="timer-seconds">15</span>
+                        <span class="timer-seconds">20</span>
                     </div>
                     <button class="btn btn-secondary btn-large" id="hintBtn" onclick="showHint()">
                         提示
                     </button>
-                    <button class="btn btn-warning btn-large" id="passBtn" onclick="passTurn()" disabled>
-                        不要
+                    <button class="btn btn-primary btn-large" id="playBtn" onclick="playCards()" disabled>
+                        出牌
                     </button>
                 </div>
                 <div class="player-hand-cards" id="southCards">
@@ -251,7 +343,7 @@
 
                 <!-- 中央状态显示 -->
                 <div id="playAreaCenter">
-                    <div id="playAreaStatus">等待出牌...</div>
+                    <div id="playAreaStatus"></div>
                 </div>
 
                 <!-- 东位出牌组 - 独立在右侧 -->
@@ -377,11 +469,12 @@
                 // 倒计时配置
                 this.countdownConfig = {
                     enabled: true,
-                    duration: 15,
-                    warningThreshold: 5,
+                    duration: 20,  // 倒计时时长20秒
+                    warningThreshold: 5,  // 最后5秒显示警告
                     autoPassOnTimeout: true
                 };
                 this.countdownTimers = { south: null, north: null, west: null, east: null };
+                this.countdownTimeoutIds = { south: null, north: null, west: null, east: null }; // 倒计时结束后的timeout ID
                 this.countdownRemaining = { south: 0, north: 0, west: 0, east: 0 };
 
                 // 音频系统
@@ -409,20 +502,63 @@
                     return { rank: 'JOKER', suit: '', color: 'red', isJoker: true };
                 }
 
-                // 检查是否为逢人配（红桃级牌）
-                const isLevelCard = this.gameEngine && this.gameEngine.ruleEngine &&
-                                  this.gameEngine.ruleEngine.isLevelCard(card);
+                // 检查是否为普通级牌（所有花色的当前级别牌）
+                const isAnyLevelCard = this.gameEngine && this.gameEngine.ruleEngine &&
+                                       this.gameEngine.ruleEngine.isAnyLevelCard(card);
+
+                // 检查是否为逢人配（红桃级牌/万能牌）
+                const isWildCard = this.gameEngine && this.gameEngine.ruleEngine &&
+                                  this.gameEngine.ruleEngine.isWildCard(card);
 
                 return {
                     rank: card.rank,
                     suit: card.suit,
                     color: card.isRed ? 'red' : 'black',
                     isJoker: false,
-                    isLevelCard: isLevelCard
+                    isLevelCard: isWildCard,      // 向后兼容
+                    isAnyLevelCard: isAnyLevelCard, // 新增：普通级牌标识
+                    isWildCard: isWildCard         // 新增：逢人配标识
                 };
             }
 
+            // 调试函数：检查级牌识别
+            debugLevelCards() {
+                console.log('=== 级牌识别调试 ===');
+                console.log('当前级别:', this.currentLevel);
+                console.log('规则引擎级别:', this.ruleEngine?.currentLevel);
+
+                // 检查南家手牌中的级牌
+                const southCards = this.players.south.cards;
+                console.log('南家手牌数:', southCards.length);
+
+                southCards.forEach(card => {
+                    const isAnyLevelCard = this.ruleEngine.isAnyLevelCard(card);
+                    const isWildCard = this.ruleEngine.isWildCard(card);
+                    if (isAnyLevelCard || isWildCard) {
+                        console.log(`级牌: ${card.suit}${card.rank}`, {
+                            isAnyLevelCard,
+                            isWildCard,
+                            cardRank: card.rank,
+                            cardRankType: typeof card.rank,
+                            expectedRank: this.ruleEngine.currentLevel.toString()
+                        });
+                    }
+                });
+
+                // 检查DOM中的类名
+                const cardElements = document.querySelectorAll('#southCards .player-card');
+                console.log('DOM中牌元素数:', cardElements.length);
+                cardElements.forEach((el, i) => {
+                    if (el.classList.contains('level-rank') || el.classList.contains('wild-card')) {
+                        console.log(`第${i}张牌的类名:`, el.className);
+                    }
+                });
+            }
+
             initializeGame() {
+                // 初始化战绩系统
+                this.initRecordsSystem();
+
                 // 停止所有倒计时
                 this.stopAllCountdowns();
 
@@ -466,6 +602,9 @@
 
             this.gameState = 'playing';
             this.updateUI();
+
+            // 启动首出玩家倒计时
+            this.startCountdown(this.currentPlayer);
 
             // 如果首出玩家是AI，自动出牌
             if (this.players[this.currentPlayer].isAI) {
@@ -597,6 +736,7 @@
         this.updatePlayArea();
         this.updateInfoBars();
         this.updateControlButtons();
+        this.updateCardCountDisplay();
         // 同步选中状态
         this.syncSelectedState();
     }
@@ -697,6 +837,14 @@
                         const display = this.getCardDisplay(card);
                         cardElement.className = `player-card ${display.color}`;
 
+                        // 添加级牌相关类名
+                        if (display.isAnyLevelCard) {
+                            cardElement.classList.add('level-rank');  // 普通级牌：淡黄色背景
+                        }
+                        if (display.isWildCard) {
+                            cardElement.classList.add('wild-card');   // 逢人配：特殊标识
+                        }
+
                         // 生成牌的HTML内容
                         let cardHTML = '<div class="card-content">';
 
@@ -733,15 +881,14 @@
                                 </div>
                             `;
 
-                            // 如果是逢人配，修改左上角显示
-                            if (display.isLevelCard) {
-                                cardElement.classList.add('level-card');
+                            // 如果是逢人配，修改左上角显示为🔴标记
+                            if (display.isWildCard) {
                                 // 修改左上角，将花色替换为红色圆圈内的"配"标记
                                 cardHTML = cardHTML.replace(
                                     /<div class="card-top-left">\s*<div class="card-rank">[^<]*<\/div>\s*<div class="card-suit">[^<]*<\/div>\s*<\/div>/g,
                                     `<div class="card-top-left">
                                         <div class="card-rank">${display.rank}</div>
-                                        <div class="card-suit level-card-indicator">配</div>
+                                        <div class="card-suit wild-card-indicator">配</div>
                                     </div>`
                                 );
                             }
@@ -1287,15 +1434,8 @@
                     }
                 });
 
-                // 更新中央状态
+                // 隐藏中央状态（已有倒计时，不需要文字提示）
                 const centerArea = document.getElementById('playAreaCenter');
-                if (this.currentRoundCards.length === 0) {
-                    centerArea.innerHTML = '<div id="playAreaStatus">等待出牌...</div>';
-                    centerArea.style.display = 'block';
-                    return;
-                }
-
-                // 隐藏中央状态
                 centerArea.style.display = 'none';
 
                 // 按出牌位置分配到中央区域的各位置
@@ -1322,6 +1462,14 @@
                         const cardElement = document.createElement('div');
                         const display = this.getCardDisplay(card);
                         cardElement.className = `player-card ${display.color}`;
+
+                        // 添加级牌相关类名
+                        if (display.isAnyLevelCard) {
+                            cardElement.classList.add('level-rank');  // 普通级牌：淡黄色背景
+                        }
+                        if (display.isWildCard) {
+                            cardElement.classList.add('wild-card');   // 逢人配：特殊标识
+                        }
 
                         // 生成牌的HTML内容
                         let cardHTML = '<div class="card-content">';
@@ -1359,15 +1507,14 @@
                                 </div>
                             `;
 
-                            // 如果是逢人配，修改左上角显示
-                            if (display.isLevelCard) {
-                                cardElement.classList.add('level-card');
+                            // 如果是逢人配，修改左上角显示为🔴标记
+                            if (display.isWildCard) {
                                 // 修改左上角，将花色替换为红色圆圈内的"配"标记
                                 cardHTML = cardHTML.replace(
                                     /<div class="card-top-left">\s*<div class="card-rank">[^<]*<\/div>\s*<div class="card-suit">[^<]*<\/div>\s*<\/div>/g,
                                     `<div class="card-top-left">
                                         <div class="card-rank">${display.rank}</div>
-                                        <div class="card-suit level-card-indicator">配</div>
+                                        <div class="card-suit wild-card-indicator">配</div>
                                     </div>`
                                 );
                             }
@@ -1423,8 +1570,6 @@
                         btnsContainer.classList.add('buttons-visible');
                     } else {
                         btnsContainer.classList.remove('buttons-visible');
-                        // 隐藏按钮时，同时隐藏倒计时（确保同步消失）
-                        this.hideCountdown('south');
                     }
                 }
 
@@ -1449,6 +1594,11 @@
                     console.log(`  - canPlay: ${canPlay} (选中的牌是否能打出)`);
                 }
 
+                // 检查是否必须出牌（首轮或最大）
+                const lastPlay = this.getLastPlay();
+                const mustPlay = !lastPlay || !lastPlay.cards || lastPlay.cards.length === 0;
+                console.log(`  - mustPlay: ${mustPlay} (是否必须出牌: ${mustPlay ? '是' : '否'})`);
+
                 // 安全地设置按钮属性（变量已在函数开头声明）
                 if (playBtn) {
                     playBtn.disabled = !isPlayerTurn || this.selectedCards.length === 0 || !canPlay;
@@ -1456,7 +1606,9 @@
                 }
 
                 if (passBtn) {
-                    passBtn.disabled = !isPlayerTurn;
+                    // 只有在不是玩家回合，或者必须出牌时，才禁用"不要"按钮
+                    passBtn.disabled = !isPlayerTurn || mustPlay;
+                    console.log(`  - passBtn.disabled: ${passBtn.disabled} (禁用原因: ${!isPlayerTurn ? '不是玩家回合' : mustPlay ? '必须出牌' : '未知错误'})`);
                 }
 
                 if (hintBtn) {
@@ -1887,6 +2039,12 @@
             playCards() {
                 if (this.selectedCards.length === 0) return;
 
+                // 清除倒计时timeout（防止与倒计时结束后的自动操作冲突）
+                if (this.countdownTimeoutIds.south) {
+                    clearTimeout(this.countdownTimeoutIds.south);
+                    this.countdownTimeoutIds.south = null;
+                }
+
                 // 获取上一手牌
                 let lastPlay = null;
                 if (this.currentRoundCards.length > 0) {
@@ -1980,21 +2138,25 @@
                     this.currentHintIndex = 0;
                     this.availableHints = [];
 
-                    // 更新UI
-                    this.updateUI();
+                    // 切换到下一个玩家（会更新UI并处理倒计时）
+                    this.switchToNextPlayer();
 
                     // 检查游戏是否结束
                     if (this.checkGameEnd()) {
                         return;
                     }
-
-                    // 切换到下一个玩家
-                    this.switchToNextPlayer();
                 }, totalAnimationTime + 200); // 额外200ms缓冲时间
             }
 
             passTurn() {
-                this.selectedCards = [];
+                // 清除倒计时timeout（防止与倒计时结束后的自动操作冲突）
+                if (this.countdownTimeoutIds.south) {
+                    clearTimeout(this.countdownTimeoutIds.south);
+                    this.countdownTimeoutIds.south = null;
+                }
+
+                // 清空选中的牌（包括移除DOM样式）
+                this.clearSelection();
 
                 // 重置提示状态
                 this.isHintMode = false;
@@ -2045,29 +2207,67 @@
                     return;
                 }
 
-                // 检查当前玩家是否手牌为0，如果是则自动过牌
-                if (currentPlayerObj.cards && currentPlayerObj.cards.length === 0) {
-                    console.log(`[switchToNextPlayer] ${this.currentPlayer} 手牌为0，自动过牌`);
-                    this.roundPassedPlayers.add(this.currentPlayer);
-                }
+                // 注意：手牌为0的玩家不应该被添加到roundPassedPlayers
+                // 他们会在activePlayers过滤时被自动排除
+                // 轮次结束时会在第2155-2165行处理接风规则
 
-                // 如果所有其他玩家都过牌了，清理桌面
+                // 如果所有其他玩家都过牌了，清理桌面，新一轮开始
                 const activePlayers = order.filter(p => {
                     const player = this.players[p];
                     return player && player.cards && player.cards.length > 0;
                 });
-                const passedActivePlayers = activePlayers.filter(p => this.roundPassedPlayers.has(p));
 
-                if (passedActivePlayers.length >= activePlayers.length - 1 && activePlayers.length > 0) {
-                    console.log('[轮次结束] 所有其他活跃玩家都过牌，轮次结束');
+                // 获取最后出牌的玩家
+                const lastPlayPlayer = this.getLastPlayPlayer();
+
+                console.log(`[switchToNextPlayer] 调试信息:`);
+                console.log(`  - 当前玩家: ${this.currentPlayer}`);
+                console.log(`  - 最后出牌者: ${lastPlayPlayer}`);
+                console.log(`  - 活跃玩家: ${activePlayers.join(', ')}`);
+                console.log(`  - 过牌玩家: ${Array.from(this.roundPassedPlayers).join(', ')}`);
+
+                // *** 简化的轮次结束逻辑 ***
+                // 轮次结束的触发条件：当所有其他活跃玩家都pass时，最后出牌者可以开始新一轮
+                // 注意：不需要检查currentPlayer === lastPlayPlayer，因为currentPlayer会随着轮转而变化
+                const otherActivePlayers = activePlayers.filter(p => p !== lastPlayPlayer);
+                const allOtherActivePassed = otherActivePlayers.length > 0 &&
+                    otherActivePlayers.every(p => this.roundPassedPlayers.has(p));
+
+                // 判断是否应该触发轮次结束：所有其他活跃玩家都pass了
+                const shouldEndRound = allOtherActivePassed;
+
+                console.log(`  - 其他活跃玩家（排除最后出牌者）: ${otherActivePlayers.join(', ')}`);
+                console.log(`  - 所有其他活跃玩家都pass: ${allOtherActivePassed}`);
+                console.log(`  - 应该结束轮次: ${shouldEndRound}`);
+
+                if (shouldEndRound) {
+                    console.log('[轮次结束] ========== 轮次结束！清理桌面，新一轮开始 ==========');
                     // 先获取最后出牌的玩家，再清空轮次记录
                     const lastPlayer = this.getLastPlayPlayer();
+                    console.log(`[轮次结束] 最后出牌者: ${lastPlayer}`);
+                    console.log(`[轮次结束] 清空前currentRoundCards长度: ${this.currentRoundCards.length}`);
                     this.currentRoundCards = [];
-                    this.currentPlayer = lastPlayer;
+                    console.log(`[轮次结束] 清空后currentRoundCards长度: ${this.currentRoundCards.length}`);
 
-                    // 如果找不到最后出牌的玩家，选择第一个活跃玩家
-                    if (!this.currentPlayer) {
-                        console.warn('[轮次结束] 找不到最后出牌的玩家，选择第一个活跃玩家');
+                    // 检查是否触发"接风"规则：最后出牌者手牌为0
+                    if (lastPlayer) {
+                        const lastPlayerCards = this.players[lastPlayer]?.cards?.length || 0;
+                        if (lastPlayerCards === 0) {
+                            // 接风：由最后出牌者的下家先出牌
+                            const lastPlayerIndex = order.indexOf(lastPlayer);
+                            const nextPlayerIndex = (lastPlayerIndex + 1) % 4;
+                            this.currentPlayer = order[nextPlayerIndex];
+                            console.log(`[接风] ${lastPlayer} 出完牌成为头游，下家 ${this.currentPlayer} 获得出牌权`);
+                        } else {
+                            // 常规：由最后出牌者继续出牌
+                            this.currentPlayer = lastPlayer;
+                            console.log(`[轮次结束] 由最后出牌者 ${this.currentPlayer} 继续出牌`);
+                        }
+                    }
+
+                    // 如果找不到最后出牌的玩家，或选中的玩家没有牌，选择第一个活跃玩家
+                    if (!this.currentPlayer || this.players[this.currentPlayer]?.cards?.length === 0) {
+                        console.warn('[轮次结束] 找不到合适的玩家，选择第一个活跃玩家');
                         if (activePlayers.length > 0) {
                             this.currentPlayer = activePlayers[0];
                             console.log(`[轮次结束] 选择活跃玩家: ${this.currentPlayer}`);
@@ -2083,14 +2283,11 @@
                     // 停止所有倒计时
                     this.stopAllCountdowns();
 
-                    // 如果最后出牌的是南家，让南家继续出牌
+                    // 启动下一个玩家的倒计时
                     if (this.currentPlayer === 'south') {
-                        console.log('[轮次结束] 南家获得新一轮出牌权');
-                        this.showMessage('你获得新一轮出牌权！');
                         this.startCountdown('south');
                     } else {
-                        // AI继续出牌
-                        console.log(`[轮次结束] ${this.currentPlayer} 获得新一轮出牌权`);
+                        console.log(`[轮次结束] ${this.currentPlayer} 获得出牌权`);
                         this.startCountdown(this.currentPlayer);
                         setTimeout(() => this.aiAutoPlay(), 1000);
                     }
@@ -2116,14 +2313,31 @@
                 if (!nextPlayer) {
                     console.error('[switchToNextPlayer] 错误：找不到下一个玩家，强制清理桌面');
                     this.currentRoundCards = [];
-                    this.currentPlayer = this.getLastPlayPlayer();
+                    const lastPlayer = this.getLastPlayPlayer();
 
-                    // 如果找不到最后出牌的玩家，随机选择一个活跃玩家
-                    if (!this.currentPlayer) {
+                    console.log(`[强制清理] lastPlayer=${lastPlayer}`);
+
+                    // 检查是否触发"接风"规则
+                    if (lastPlayer) {
+                        const lastPlayerCards = this.players[lastPlayer]?.cards?.length || 0;
+                        if (lastPlayerCards === 0) {
+                            // 接风：由最后出牌者的下家先出牌
+                            const lastPlayerIndex = order.indexOf(lastPlayer);
+                            const nextPlayerIndex = (lastPlayerIndex + 1) % 4;
+                            this.currentPlayer = order[nextPlayerIndex];
+                            console.log(`[强制清理-接风] ${lastPlayer} 出完牌，下家 ${this.currentPlayer} 获得出牌权`);
+                        } else {
+                            this.currentPlayer = lastPlayer;
+                            console.log(`[强制清理] 由最后出牌者 ${this.currentPlayer} 继续出牌`);
+                        }
+                    }
+
+                    // 如果找不到最后出牌的玩家，或lastPlayer没有牌，选择第一个活跃玩家
+                    if (!this.currentPlayer || this.players[this.currentPlayer]?.cards?.length === 0) {
                         const activePlayers = order.filter(p => this.players[p] && this.players[p].cards.length > 0);
                         if (activePlayers.length > 0) {
                             this.currentPlayer = activePlayers[0];
-                            console.log(`[强制清理] 随机选择活跃玩家: ${this.currentPlayer}`);
+                            console.log(`[强制清理] 选择活跃玩家: ${this.currentPlayer}`);
                         } else {
                             console.error('[强制清理] 没有活跃玩家，游戏可能已结束');
                             return;
@@ -2136,14 +2350,11 @@
                     // 停止所有倒计时
                     this.stopAllCountdowns();
 
-                    // 如果最后出牌的是南家，让南家继续出牌
+                    // 启动下一个玩家的倒计时
                     if (this.currentPlayer === 'south') {
-                        console.log('[强制清理] 南家获得新一轮出牌权');
-                        this.showMessage('你获得新一轮出牌权！');
                         this.startCountdown('south');
                     } else {
-                        // AI继续出牌
-                        console.log(`[强制清理] ${this.currentPlayer} 获得新一轮出牌权`);
+                        console.log(`[强制清理] ${this.currentPlayer} 获得出牌权`);
                         this.startCountdown(this.currentPlayer);
                         setTimeout(() => this.aiAutoPlay(), 1000);
                     }
@@ -2170,8 +2381,11 @@
                     return;
                 }
 
-                // 如果是南家玩家，检查是否需要自动过牌
-                if (this.currentPlayer === 'south' && !this.players[this.currentPlayer].isAI) {
+                // 检查是否需要自动过牌（针对南家）
+                if (nextPlayer === 'south' && !this.players[nextPlayer].isAI) {
+                    console.log(`[自动过牌检查] 切换到south，开始检查`);
+                    console.log(`[自动过牌检查] 开始检查，currentPlayer=${this.currentPlayer}`);
+
                     // 获取当前桌面上最大的牌
                     let currentMaxPlay = null;
                     if (this.currentRoundCards.length > 0) {
@@ -2194,6 +2408,8 @@
                         currentMaxPlay = maxPlay;
                     }
 
+                    console.log(`[自动过牌检查] currentMaxPlay=${currentMaxPlay ? currentMaxPlay.cards.map(c => c.rank).join(',') : 'null'}`);
+
                     // 如果有桌面上的牌，检查南家是否能管住
                     if (currentMaxPlay) {
                         const possiblePlays = this.findAllPossiblePlays(this.players.south.cards, currentMaxPlay);
@@ -2204,7 +2420,6 @@
                         if (possiblePlays.length === 0) {
                             // 南家无法管住，自动过牌
                             console.log('[自动过牌] 南家无法管住，自动过牌');
-                            this.showMessage('你没有能管住的牌，自动过牌', 'info');
 
                             // 延迟1秒后自动过牌
                             setTimeout(() => {
@@ -2819,6 +3034,9 @@
                         if (!this.finishedPlayers.includes(position)) {
                             this.finishedPlayers.push(position);
                             console.log(`${position} 完成游戏，当前排名: ${this.finishedPlayers.join(', ')}`);
+
+                            // 更新排名图标显示
+                            this.updateRankBadge(position, this.finishedPlayers.length);
                         }
                     }
                 }
@@ -2827,15 +3045,24 @@
                 if (this.finishedPlayers.length === 1 && !this.gameEnded) {
                     const firstPlace = this.finishedPlayers[0];
                     console.log(`${firstPlace} 获得头游！`);
-                    this.showMessage(`${this.players[firstPlace].name} 获得头游！`, 'info');
+                    // 显示头游提示（持续显示，直到游戏结束）
+                    this.showHeadPlayerStatus(`${this.players[firstPlace].name} 头游`);
 
                     // 头游产生后，继续游戏直到确定二游
                     return false;
                 }
 
-                // 检查是否所有玩家都完成游戏
-                if (this.finishedPlayers.length === 4) {
-                    console.log('所有玩家完成游戏，游戏结束！');
+                // 检查是否已有3名玩家完成（此时剩余玩家自动成为末游）
+                if (this.finishedPlayers.length === 3) {
+                    // 找出未完成的玩家（末游）
+                    const allPositions = ['south', 'west', 'north', 'east'];
+                    const lastPlayer = allPositions.find(pos => !this.finishedPlayers.includes(pos));
+                    if (lastPlayer) {
+                        this.finishedPlayers.push(lastPlayer);
+                        this.updateRankBadge(lastPlayer, 4);
+                        console.log(`${lastPlayer} 自动成为末游（第4名）`);
+                    }
+                    console.log('3名玩家已完成，游戏结束！');
                     this.gameEnded = true;
                     this.endGame();
                     return true;
@@ -2847,6 +3074,9 @@
             // 游戏结束处理
             endGame() {
                 this.gameState = 'ended';
+
+                // 隐藏头游提示
+                this.hideHeadPlayerStatus();
 
                 // 确定最终排名
                 this.gameRankings = [...this.finishedPlayers]; // [头游, 二游, 三游, 末游]
@@ -2864,12 +3094,9 @@
                 // 显示结果
                 this.showGameResult(result);
 
-                // 询问是否开始新游戏
-                setTimeout(() => {
-                    if (confirm(`游戏结束！\n${result.description}\n是否开始新的一局？`)) {
-                        this.startNewGame();
-                    }
-                }, 2000);
+                // 保存游戏记录并显示结��面板
+                this.saveGameRecord(result);
+                this.showGameResultModal(result);
             }
 
             // 判定游戏结果
@@ -3028,6 +3255,10 @@
 
             // 开始新游戏
             startNewGame() {
+                // 关闭可能打开的模态框
+                document.getElementById('gameResultModal')?.classList.add('d-none');
+                document.getElementById('recordsModal')?.classList.add('d-none');
+
                 this.isFirstGame = false;
                 this.currentRoundCards = [];
                 this.lastPlayer = null;
@@ -3038,6 +3269,9 @@
                 this.gameRankings = [];
                 this.gameEnded = false;
                 this.finishedPlayers = [];
+
+                // 清除所有排名图标
+                this.clearAllRankBadges();
 
                 // 清空所有玩家手牌
                 for (let pos in this.players) {
@@ -3254,6 +3488,11 @@
 
             // 辅助函数：获取牌面值大小
             getRankValue(rank) {
+                // 级牌特殊处理：级牌值101，在小王(102)和A(14)之间
+                if (rank === this.ruleEngine.currentLevel.toString()) {
+                    return 101;
+                }
+
                 // 掼蛋规则：A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2
                 const rankOrder = {
                     '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
@@ -4281,12 +4520,11 @@
                     return;
                 }
 
-                // 无牌可出
+                // 无牌可出 - 自动过牌
                 if (this.availableHints.length === 0) {
-                    this.showMessage("没有能管住的牌，自动过牌", 'info');
                     setTimeout(() => {
                         this.passTurn();
-                    }, 1000);
+                    }, 500);
                     return;
                 }
 
@@ -4322,11 +4560,6 @@
                         this.selectCardByIndex(cardIndex);
                     }
                 });
-
-                // 显示提示信息
-                const currentIndexText = this.availableHints.length > 1 ?
-                    ` (${this.currentHintIndex + 1}/${this.availableHints.length})` : '';
-                this.showMessage(`提示${currentIndexText}: ${hint.description}`, 'info');
 
                 // 强制更新UI（特别是出牌按钮状态）
                 this.updateControlButtons();
@@ -4968,6 +5201,97 @@
                 }
             }
 
+            // 显示头游状态提示
+            showHeadPlayerStatus(message) {
+                const statusElement = document.getElementById('headPlayerStatus');
+                if (statusElement) {
+                    statusElement.textContent = message;
+                    statusElement.classList.add('visible');
+                }
+            }
+
+            // 隐藏头游状态提示
+            hideHeadPlayerStatus() {
+                const statusElement = document.getElementById('headPlayerStatus');
+                if (statusElement) {
+                    statusElement.classList.remove('visible');
+                }
+            }
+
+            // 更新排名图标显示
+            updateRankBadge(position, rank) {
+                const rankBadge = document.getElementById(`${position}RankBadge`);
+                if (!rankBadge) return;
+
+                // 排名图标：🥇 🥈 🥉 🏅
+                const rankIcons = ['🥇', '🥈', '🥉', '🏅'];
+                const rankNames = ['头游', '二游', '三游', '末游'];
+
+                // 设置排名图标
+                rankBadge.textContent = rankIcons[rank - 1];
+                rankBadge.className = `rank-badge rank-${rank}`;
+
+                console.log(`[排名图标] ${position} 获得${rankNames[rank - 1]}`);
+            }
+
+            // 清除所有排名图标
+            clearAllRankBadges() {
+                const positions = ['south', 'west', 'north', 'east'];
+                positions.forEach(pos => {
+                    const rankBadge = document.getElementById(`${pos}RankBadge`);
+                    if (rankBadge) {
+                        rankBadge.textContent = '';
+                        rankBadge.className = 'rank-badge';
+                    }
+                });
+                console.log('[排名图标] 已清除所有排名图标');
+            }
+
+            // ========================================
+            // CARD COUNT DISPLAY - 剩余牌数显示
+            // ========================================
+
+            // 初始化剩余牌数徽章元素
+            initCardCountBadges() {
+                const positions = ['north', 'west', 'east'];
+
+                positions.forEach(pos => {
+                    // 检查是否已存在
+                    if (document.getElementById(`${pos}CardCount`)) return;
+
+                    const avatar = document.querySelector(`.player-${pos} .player-avatar-simple`);
+                    if (!avatar) return;
+
+                    const badge = document.createElement('span');
+                    badge.id = `${pos}CardCount`;
+                    badge.className = 'card-count-badge';
+                    avatar.appendChild(badge);
+                });
+
+                console.log('[剩余牌数] 徽章元素已初始化');
+            }
+
+            // 更新剩余牌数显示
+            updateCardCountDisplay() {
+                const positions = ['north', 'west', 'east'];
+
+                positions.forEach(pos => {
+                    const badge = document.getElementById(`${pos}CardCount`);
+                    if (!badge) return;
+
+                    const cardCount = this.players[pos].cards.length;
+
+                    // 剩余10张或更少才显示
+                    if (cardCount > 0 && cardCount <= 10) {
+                        badge.textContent = cardCount;
+                        badge.classList.add('show-count');
+                    } else {
+                        badge.textContent = '';
+                        badge.classList.remove('show-count');
+                    }
+                });
+            }
+
             // ========================================
             // COUNTDOWN TIMER - 倒计时管理方法
             // ========================================
@@ -4977,6 +5301,14 @@
 
                 this.stopCountdown(player);
                 this.countdownRemaining[player] = this.countdownConfig.duration;
+
+                // 重置urgent类（新一轮倒计时开始）
+                const el = document.getElementById(player + 'Timer');
+                if (el) {
+                    el.classList.remove('urgent');
+                }
+
+                // 显示倒计时（南方玩家由容器控制，其他玩家由visible类控制）
                 this.showCountdown(player);
                 this.updateCountdownDisplay(player);
 
@@ -4991,10 +5323,17 @@
             }
 
             stopCountdown(player) {
+                // 清除倒计时interval
                 if (this.countdownTimers[player]) {
                     clearInterval(this.countdownTimers[player]);
                     this.countdownTimers[player] = null;
                 }
+                // 清除倒计时结束后的timeout（防止竞态条件）
+                if (this.countdownTimeoutIds[player]) {
+                    clearTimeout(this.countdownTimeoutIds[player]);
+                    this.countdownTimeoutIds[player] = null;
+                }
+                // 隐藏倒计时（南方玩家由容器控制，其他玩家由visible类控制）
                 this.hideCountdown(player);
             }
 
@@ -5005,15 +5344,18 @@
             }
 
             showCountdown(player) {
-                const el = document.getElementById(player + 'Timer');
-                if (el) el.classList.add('visible');
+                // 只对非南方玩家使用visible类控制
+                if (player !== 'south') {
+                    const el = document.getElementById(player + 'Timer');
+                    if (el) el.classList.add('visible');
+                }
             }
 
             hideCountdown(player) {
+                // 移除visible类（保留urgent类，直到倒计时重新开始）
                 const el = document.getElementById(player + 'Timer');
                 if (el) {
                     el.classList.remove('visible');
-                    el.classList.remove('urgent');
                 }
             }
 
@@ -5031,12 +5373,46 @@
 
             onCountdownTimeout(player) {
                 if (player === 'south' && this.countdownConfig.autoPassOnTimeout) {
-                    this.showMessage('倒计时结束，自动过牌', 'warning');
-                    setTimeout(() => {
-                        if (this.currentPlayer === 'south') {
-                            this.passTurn();
+                    // 判断是否为首出（当前轮次没有人出牌）
+                    const isFirstPlay = this.currentRoundCards.length === 0 ||
+                                        !this.currentRoundCards.some(play => play.cards && play.cards.length > 0);
+
+                    if (isFirstPlay) {
+                        // 首出：自动出最小的单牌
+                        const hand = this.players.south.cards;
+                        if (hand && hand.length > 0) {
+                            // 找出最小的一张牌（使用getRankValue正确处理级牌）
+                            let smallestCard = hand[0];
+                            let smallestValue = this.getRankValue(hand[0].rank);
+                            for (let card of hand) {
+                                const value = this.getRankValue(card.rank);
+                                if (value < smallestValue) {
+                                    smallestCard = card;
+                                    smallestValue = value;
+                                }
+                            }
+                            // 自动出这张最小的牌
+                            // 保存timeout ID，用于后续取消
+                            this.countdownTimeoutIds[player] = setTimeout(() => {
+                                // 再次检查是否还是当前玩家（防止竞态条件）
+                                if (this.currentPlayer === 'south' && this.gameState === 'playing') {
+                                    this.selectedCards = [smallestCard];
+                                    this.playCards();
+                                }
+                                this.countdownTimeoutIds[player] = null;
+                            }, 500);
                         }
-                    }, 500);
+                    } else {
+                        // 非首出：自动过牌
+                        // 保存timeout ID，用于后续取消
+                        this.countdownTimeoutIds[player] = setTimeout(() => {
+                            // 再次检查是否还是当前玩家（防止竞态条件）
+                            if (this.currentPlayer === 'south' && this.gameState === 'playing') {
+                                this.passTurn();
+                            }
+                            this.countdownTimeoutIds[player] = null;
+                        }, 500);
+                    }
                 }
             }
 
@@ -5079,9 +5455,246 @@
             }
 
   
-            showRecords() {
-                this.showMessage('战绩功能开发中...', 'info');
+            // ========================================
+            // GAME RESULT & RECORDS - 游戏结果与战绩
+            // ========================================
+
+            // 初始化战绩系统
+            initRecordsSystem() {
+                this.gameRecords = JSON.parse(localStorage.getItem('guandan_game_records') || '[]');
             }
+
+            // 保存游戏记录
+            saveGameRecord(result) {
+                const record = {
+                    gameId: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleDateString('zh-CN'),
+                    dateDetail: new Date().toLocaleString('zh-CN'),
+                    winner: result.winner.includes('己方') ? 'A' : 'B',
+                    resultType: result.type,
+                    levelsUp: result.levelsUp,
+                    rankings: result.rankings,
+                    teamALevelBefore: this.teamAScore,
+                    teamALevelAfter: result.winner.includes('己方') ? this.teamAScore + result.levelsUp : this.teamAScore,
+                    teamBLevelBefore: this.teamBScore,
+                    teamBLevelAfter: result.winner.includes('己方') ? this.teamBScore : this.teamBScore + result.levelsUp
+                };
+
+                this.gameRecords.unshift(record);
+
+                if (this.gameRecords.length > 100) {
+                    this.gameRecords = this.gameRecords.slice(0, 100);
+                }
+
+                localStorage.setItem('guandan_game_records', JSON.stringify(this.gameRecords));
+            }
+
+            // 显示游戏结果面板
+            showGameResultModal(result) {
+                const modal = document.getElementById('gameResultModal');
+                if (!modal) return;
+
+                // 胜负信息 - 简化为一行
+                const winnerDiv = modal.querySelector('.result-winner');
+                winnerDiv.textContent = result.description;
+                winnerDiv.classList.remove('winner-our', 'winner-enemy');
+                winnerDiv.classList.add(result.winner.includes('己方') ? 'winner-our' : 'winner-enemy');
+
+                // 队伍级数对比
+                const teamsLevelDiv = modal.querySelector('.result-teams-level');
+                const teamALevel = teamsLevelDiv.querySelector('.team-a .team-level-value');
+                const teamBLevel = teamsLevelDiv.querySelector('.team-b .team-level-value');
+                teamALevel.textContent = `${this.teamAScore}级`;
+                teamBLevel.textContent = `${this.teamBScore}级`;
+
+                // 玩家排名卡片 - 2x2网格
+                const rankingsDiv = modal.querySelector('.result-rankings');
+                const rankIcons = ['🥇', '🥈', '🥉', '🏅'];
+                const playerAvatars = { south: '👤', north: '🌸', west: '🤴', east: '💪' };
+                const allyPlayers = ['south', 'north'];
+                const enemyPlayers = ['west', 'east'];
+
+                rankingsDiv.innerHTML = result.rankings.map((pos, idx) => {
+                    const player = this.players[pos];
+                    const isAlly = allyPlayers.includes(pos);
+                    const rankClass = `rank-${idx + 1}`;
+
+                    return `
+                        <div class="player-result-card ${isAlly ? 'ally' : 'enemy'}">
+                            <div class="player-avatar">${playerAvatars[pos]}</div>
+                            <div class="player-info">
+                                <div class="player-name-row">
+                                    <span class="player-name">${player.name}</span>
+                                    <span class="player-rank-icon ${rankClass}">${rankIcons[idx]}</span>
+                                </div>
+                                <span class="player-cards-count">${player.cards.length}张</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                modal.classList.remove('d-none');
+                this.bindGameResultModalEvents();
+            }
+
+            // 绑定游戏结果面板事件
+            bindGameResultModalEvents() {
+                const modal = document.getElementById('gameResultModal');
+                const closeBtn = document.getElementById('closeGameResult');
+                const backdrop = document.getElementById('gameResultBackdrop');
+                const newGameBtn = document.getElementById('newGameBtn');
+                const viewRecordsBtn = document.getElementById('viewRecordsBtn');
+
+                const closeHandler = () => {
+                    modal.classList.add('d-none');
+                    closeBtn.removeEventListener('click', closeHandler);
+                    backdrop.removeEventListener('click', closeHandler);
+                    newGameBtn.removeEventListener('click', newGameHandler);
+                    viewRecordsBtn.removeEventListener('click', viewRecordsHandler);
+                };
+
+                const newGameHandler = () => {
+                    closeHandler();
+                    this.startNewGame();
+                };
+
+                const viewRecordsHandler = () => {
+                    closeHandler();
+                    this.showRecordsModal();
+                };
+
+                closeBtn.addEventListener('click', closeHandler);
+                backdrop.addEventListener('click', closeHandler);
+                newGameBtn.addEventListener('click', newGameHandler);
+                viewRecordsBtn.addEventListener('click', viewRecordsHandler);
+            }
+
+            // 显示历史战绩面板
+            showRecordsModal() {
+                const modal = document.getElementById('recordsModal');
+                if (!modal) {
+                    this.showMessage('战绩面板组件未找到', 'error');
+                    return;
+                }
+
+                const stats = this.calculateRecordsStats();
+
+                // 统计摘要 - 使用CSS类控制颜色
+                const summaryDiv = modal.querySelector('.records-summary');
+                const winRateClass = stats.winRate >= 50 ? 'win-high' : 'win-low';
+
+                summaryDiv.innerHTML = `
+                    <div class="summary-card">
+                        <div class="summary-value">${stats.totalGames}</div>
+                        <div class="summary-label">总局数</div>
+                    </div>
+                    <div class="summary-card ${winRateClass}">
+                        <div class="summary-value">${stats.winRate}%</div>
+                        <div class="summary-label">胜率</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value">+${stats.totalLevelsUp}</div>
+                        <div class="summary-label">总升级</div>
+                    </div>
+                `;
+
+                // 历史记录列表 - 使用CSS类控制样式
+                const listDiv = modal.querySelector('.records-list');
+                if (this.gameRecords.length === 0) {
+                    listDiv.innerHTML = '<div class="records-empty">暂无游戏记录</div>';
+                } else {
+                    listDiv.innerHTML = this.gameRecords.map(record => {
+                        const isWin = record.winner === 'A';
+                        const resultClass = isWin ? 'win' : 'lose';
+                        const resultText = isWin ? '🏆 胜利' : '❌ 失败';
+                        return `
+                            <div class="record-item ${resultClass}">
+                                <div class="record-main">
+                                    <div class="record-title">${resultText} - ${record.resultType}</div>
+                                    <div class="record-date">${record.dateDetail}</div>
+                                </div>
+                                <div class="record-result">
+                                    <div class="record-levels">+${record.levelsUp}级</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                modal.classList.remove('d-none');
+                this.bindRecordsModalEvents();
+            }
+
+            // 绑定战绩面板事件
+            bindRecordsModalEvents() {
+                const modal = document.getElementById('recordsModal');
+                const closeBtn = document.getElementById('closeRecords');
+                const backdrop = document.getElementById('recordsBackdrop');
+                const clearBtn = document.getElementById('clearRecordsBtn');
+                const exportBtn = document.getElementById('exportRecordsBtn');
+
+                const closeHandler = () => {
+                    modal.classList.add('d-none');
+                    closeBtn.removeEventListener('click', closeHandler);
+                    backdrop.removeEventListener('click', closeHandler);
+                    clearBtn.removeEventListener('click', clearHandler);
+                    exportBtn.removeEventListener('click', exportHandler);
+                };
+
+                const clearHandler = () => {
+                    if (confirm('确定要清空所有战绩记录吗？')) {
+                        this.gameRecords = [];
+                        localStorage.removeItem('guandan_game_records');
+                        this.showMessage('战绩记录已清空', 'success');
+                        this.showRecordsModal();
+                    }
+                };
+
+                const exportHandler = () => {
+                    const dataStr = JSON.stringify(this.gameRecords, null, 2);
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `掼蛋战绩_${new Date().toLocaleDateString('zh-CN')}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    this.showMessage('战绩导出成功', 'success');
+                };
+
+                closeBtn.addEventListener('click', closeHandler);
+                backdrop.addEventListener('click', closeHandler);
+                clearBtn.addEventListener('click', clearHandler);
+                exportBtn.addEventListener('click', exportHandler);
+            }
+
+            // 计算战绩统计
+            calculateRecordsStats() {
+                const totalGames = this.gameRecords.length;
+                if (totalGames === 0) {
+                    return { totalGames: 0, winRate: 0, totalLevelsUp: 0 };
+                }
+
+                const wins = this.gameRecords.filter(r => r.winner === 'A').length;
+                const totalLevelsUp = this.gameRecords.reduce((sum, r) => {
+                    return sum + (r.winner === 'A' ? r.levelsUp : 0);
+                }, 0);
+
+                return {
+                    totalGames,
+                    wins,
+                    losses: totalGames - wins,
+                    winRate: Math.round((wins / totalGames) * 100),
+                    totalLevelsUp
+                };
+            }
+
+            // 更新后的showRecords方法
+            showRecords() {
+                this.showRecordsModal();
+            }
+
 
             restartGame() {
                 if (confirm('确定要重新开始游戏吗？')) {
@@ -5608,6 +6221,10 @@
                     game.initializeGame();
                     this.log('[游戏引擎] 游戏初始化完成');
 
+                    // 初始化剩余牌数显示徽章
+                    game.initCardCountBadges();
+                    this.log('[游戏引擎] 剩余牌数徽章初始化完成');
+
                     // 测试按钮是否存在
                     const sortBtn = document.getElementById('sortBtn');
                     console.log('[初始化] sortBtn按钮:', sortBtn);
@@ -5615,16 +6232,18 @@
 
                     // 添加空白区域点击事件 - 清空选中的手牌
                     document.getElementById('gameContainer').addEventListener('click', (e) => {
-                        // 检查点击的是否为空白区域（不是手牌或其他按钮）
+                        // 检查点击的是否为牌
                         const isCard = e.target.classList.contains('player-card') ||
                                       e.target.closest('.player-card');
+                        // 检查是否点击了按钮
                         const isButton = e.target.tagName === 'BUTTON' || e.target.closest('button');
+                        // 检查是否点击了控制区域（不包括southCards）
                         const isControl = e.target.closest('.control-buttons') ||
                                          e.target.closest('.player-info') ||
-                                         e.target.closest('.opponent-area') ||
-                                         e.target.closest('#southCards');
+                                         e.target.closest('.opponent-area');
 
-                        // 如果点击的不是牌、按钮或控制区域，且当前有选中的牌
+                        // 如果点击的不是牌、不是按钮、不是控制区域，且当前有选中的牌
+                        // 包括点击southCards容器内的空白处
                         if (!isCard && !isButton && !isControl && game && game.selectedCards.length > 0) {
                             // 延迟清空，避免与卡片点击冲突
                             setTimeout(() => {
@@ -5634,6 +6253,52 @@
                             }, 100);
                         }
                     });
+
+                    // 添加全局调试函数
+                    window.debugLevelCards = () => {
+                        if (game && game.debugLevelCards) {
+                            game.debugLevelCards();
+                        } else {
+                            console.error('游戏实例或调试函数不存在');
+                        }
+                    };
+
+                    console.log('[调试] 已添加全局调试函数: debugLevelCards()');
+                    console.log('[调试] 在浏览器控制台输入 debugLevelCards() 来检查级牌识别状态');
+
+                    // 自动运行调试检查
+                    setTimeout(() => {
+                        console.log('%c=== 自动调试检查 ===', 'color: red; font-size: 16px; font-weight: bold;');
+                        console.log('当前游戏级别:', game.currentLevel);
+                        console.log('规则引擎级别:', game.ruleEngine.currentLevel);
+
+                        // 检查一张2的牌
+                        const sampleCard = game.players.south.cards.find(c => c.rank === '2');
+                        if (sampleCard) {
+                            console.log('示例牌 (2):', sampleCard);
+                            console.log('isAnyLevelCard:', game.ruleEngine.isAnyLevelCard(sampleCard));
+                            console.log('isWildCard:', game.ruleEngine.isWildCard(sampleCard));
+                        }
+
+                        // 检查DOM
+                        const cardElements = document.querySelectorAll('#southCards .player-card');
+                        console.log('DOM中牌元素数:', cardElements.length);
+
+                        let levelRankCount = 0;
+                        let wildCardCount = 0;
+                        cardElements.forEach((el, i) => {
+                            if (el.classList.contains('level-rank')) levelRankCount++;
+                            if (el.classList.contains('wild-card')) wildCardCount++;
+                            if (el.classList.contains('level-rank') || el.classList.contains('wild-card')) {
+                                console.log(`第${i}张牌:`, el.className);
+                            }
+                        });
+
+                        console.log('level-rank类数量:', levelRankCount);
+                        console.log('wild-card类数量:', wildCardCount);
+                        console.log('预期: 应该有8张level-rank (4种花色×2副牌)');
+                        console.log('预期: 应该有2张wild-card (红桃×2副牌)');
+                    }, 2000);
 
                 } catch (error) {
                     this.handleError(error, '游戏初始化');

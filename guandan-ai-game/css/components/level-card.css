@@ -1,22 +1,72 @@
-/* 逢人配（级牌）特殊样式 */
+/* ============================================
+   级牌特殊样式
+   ============================================ */
 
-/* 逢人配牌的整体样式 */
-.player-card.level-card {
-    border: 2px solid #ff6b6b;
-    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-    background: linear-gradient(135deg, #fff 0%, #ffcccc 100%);
+/* 普通级牌 - 黄色背景（当前级别的所有牌） */
+.player-card.level-rank,
+div.player-card.level-rank {
+    background: linear-gradient(135deg, #f9f1ce 0%, #f4efd4 50%, #f9f1ce 100%) !important;
+    /* 保持原有深色描边 */
+    border: 1px solid #373836 !important;
 }
 
-/* 逢人配左上角标记 - 替换花色 */
-/* 使用更高优先级的选择器覆盖 flex 布局影响 */
+/* 普通级牌悬停效果 */
+.player-card.level-rank:hover,
+div.player-card.level-rank:hover {
+    background: linear-gradient(135deg, #f4efd4 0%, #f9f1ce 100%) !important;
+    box-shadow: 0 5px 15px rgba(244, 239, 212, 0.6);
+}
+
+/* 普通级牌选中效果 */
+.player-card.level-rank.selected,
+div.player-card.level-rank.selected {
+    background: linear-gradient(135deg, #f9f1ce 0%, #f4efd4 100%) !important;
+    box-shadow: 0 8px 20px rgba(244, 239, 212, 0.7);
+    /* 保持原有深色描边 */
+    border: 1px solid #373836 !important;
+}
+
+/* ============================================
+   逢人配（红桃级牌/万能牌）特殊样式
+   ============================================ */
+
+/* 逢人配 - 在普通级牌基础上增强样式 */
+.player-card.wild-card {
+    /* 保持原有深色描边 */
+    border: 1px solid #373836;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+/* 向后兼容：保留 level-card 类名的样式 */
+.player-card.level-card {
+    border: 1px solid #373836;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+/* ============================================
+   逢人配金色红桃叠加效果
+   ============================================ */
+
+/* 逢人配左上角花色上叠加金色红桃 - 大小10px，居中 */
+.player-card.wild-card .card-top-left .card-suit::after {
+    content: '♥';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: #ffd700;
+    z-index: 100;
+    pointer-events: none;
+}
+
+/* 向后兼容：保留 level-card-indicator 的样式 */
 .player-card.level-card .card-top-left,
 .player-card.level-card .card-top-left .card-suit.level-card-indicator {
-    /* 覆盖父容器的 align-items: center */
     align-self: flex-start !important;
     justify-self: flex-start !important;
 }
 
-/* 逢人配左上角标记的具体样式 */
 div.player-card.level-card div.card-top-left div.card-suit.level-card-indicator {
     display: inline-block !important;
     width: 20px !important;
@@ -39,34 +89,38 @@ div.player-card.level-card div.card-top-left div.card-suit.level-card-indicator 
     transform: none !important;
     writing-mode: horizontal-tb !important;
     text-orientation: mixed !important;
-    /* 关键：脱离 flex 布局流 */
     flex: none !important;
     align-self: flex-start !important;
     margin: 0 !important;
 }
 
-/* 右下角的逢人配标记隐藏 */
+/* 右下角的逢人配标记隐藏（旧版逻辑，保留兼容） */
 .player-card .card-bottom-right .card-suit.level-card-indicator {
     display: none !important;
 }
 
 /* 逢人配牌的字体颜色特殊处理 */
+.player-card.wild-card.red,
 .player-card.level-card.red {
     color: #d32f2f;
 }
 
+.player-card.wild-card.black,
 .player-card.level-card.black {
     color: #d32f2f;
 }
 
 /* 逢人配牌选中时的效果 */
+.player-card.wild-card.selected,
 .player-card.level-card.selected {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(255, 107, 107, 0.5);
-    border-color: #ff4444;
+    /* 保持原有深色描边 */
+    border: 1px solid #373836;
 }
 
 /* 逢人配牌悬停效果 */
+.player-card.wild-card:hover,
 .player-card.level-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);

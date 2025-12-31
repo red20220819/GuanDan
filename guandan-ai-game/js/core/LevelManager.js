@@ -199,6 +199,25 @@ class LevelManager {
     }
 
     /**
+     * 获取庄家队伍
+     * 规则：当前级数较高的队伍，如果相同则返回A队（默认）
+     * @returns {string} 'A' 或 'B'
+     */
+    getDealerTeam() {
+        const teamALevel = this.teamLevels.A.level;
+        const teamBLevel = this.teamLevels.B.level;
+
+        if (teamALevel > teamBLevel) {
+            return 'A';
+        } else if (teamBLevel > teamALevel) {
+            return 'B';
+        } else {
+            // 级数相同时，默认返回A队
+            return 'A';
+        }
+    }
+
+    /**
      * 添加事件监听器
      * @param {string} eventType - 事件类型
      * @param {function} callback - 回调函数

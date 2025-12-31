@@ -1,0 +1,297 @@
+/* ============================================
+   队伍级数显示栏 - 卡片式设计
+   ============================================ */
+
+/* 外层容器 */
+.team-levels-bar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0;
+    /* 移除背景、边框、阴影等装饰 */
+    z-index: var(--z-game-ui);
+}
+
+/* 队伍包装容器 - 包含卡片和三角形 */
+.team-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+/* ============================================
+   队伍卡片 - 上下分层设计
+   ============================================ */
+
+.team-level-card {
+    /* 卡片整体布局 */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    /* 卡片尺寸 */
+    width: 70px;
+    height: 90px;
+
+    /* 圆角和阴影 */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    /* 过渡效果 */
+    transition: all 0.3s ease;
+}
+
+/* 卡片悬停效果 */
+.team-level-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   卡片头部 - 深色标签区域
+   ============================================ */
+
+.card-header {
+    /* 上半部分高度 */
+    height: 30px;
+
+    /* 布局和定位 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 字体样式 */
+    font-size: 13px;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+/* A队头部 - 橙色背景 */
+.team-a-card .card-header {
+    background: linear-gradient(135deg, #FF9500 0%, #FF8000 100%);
+}
+
+/* B队头部 - 蓝色背景 */
+.team-b-card .card-header {
+    background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+}
+
+/* 队伍标签文字 */
+.team-label {
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+/* ============================================
+   卡片主体 - 白色底 + 级数数字
+   ============================================ */
+
+.card-body {
+    /* 下半部分高度 */
+    flex: 1;
+
+    /* 布局和定位 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 白色背景 */
+    background: #FFFFFF;
+}
+
+/* 级数数字 */
+.level-number {
+    /* 字体样式 */
+    font-size: 32px;
+    font-weight: bold;
+    font-family: 'Arial Black', sans-serif;
+
+    /* 定位 */
+    z-index: 1;
+
+    /* 位置调整 - 正值向下移，负值向上移 */
+    transform: translateY(-6px);
+
+    /* 过渡效果 */
+    transition: color 0.2s ease;
+}
+
+/* A队级数颜色 - 橙色 */
+.team-a-card .level-number {
+    color: #FF9500;
+}
+
+/* B队级数颜色 - 蓝色 */
+.team-b-card .level-number {
+    color: #007AFF;
+}
+
+/* ============================================
+   Active Indicator - 底部三角指示器
+   ============================================ */
+
+.active-indicator {
+    /* 布局 - 始终占据空间 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 默认隐藏 - 仍占空间 */
+    visibility: hidden;
+
+    /* 尺寸 */
+    width: 24px;
+    height: 16px;
+}
+
+/* 激活状态 - 打级队伍显示三角形 */
+.active-indicator.active {
+    visibility: visible;
+}
+
+/* 三角形指示器 */
+.indicator-triangle {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid currentColor;
+}
+
+/* A队三角形 - 橙色 */
+.team-wrapper:has(.team-a-card) .indicator-triangle {
+    color: #FF9500;
+}
+
+/* B队三角形 - 蓝色 */
+.team-wrapper:has(.team-b-card) .indicator-triangle {
+    color: #007AFF;
+}
+
+/* ============================================
+   庄家状态 - 高亮边框效果
+   ============================================ */
+
+/* A队庄家状态 - 橙色边框 */
+.team-a-card.is-dealer {
+    box-shadow: 0 0 0 2px #FF9500, 0 4px 12px rgba(255, 149, 0, 0.3);
+    animation: pulse-border-orange 2s infinite;
+}
+
+/* B队庄家状态 - 蓝色边框 */
+.team-b-card.is-dealer {
+    box-shadow: 0 0 0 2px #007AFF, 0 4px 12px rgba(0, 122, 255, 0.3);
+    animation: pulse-border-blue 2s infinite;
+}
+
+/* ============================================
+   动画效果
+   ============================================ */
+
+/* 弹跳动画 */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+/* 橙色边框脉冲动画 */
+@keyframes pulse-border-orange {
+    0%, 100% {
+        box-shadow: 0 0 0 2px #FF9500, 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 3px #FF9500, 0 6px 16px rgba(255, 149, 0, 0.4);
+    }
+}
+
+/* 蓝色边框脉冲动画 */
+@keyframes pulse-border-blue {
+    0%, 100% {
+        box-shadow: 0 0 0 2px #007AFF, 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 3px #007AFF, 0 6px 16px rgba(0, 122, 255, 0.4);
+    }
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   响应式设计
+   ============================================ */
+
+@media (max-width: 768px) {
+    .team-levels-bar {
+        top: 5px;
+        left: 5px;
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .team-level-card {
+        width: 56px;
+        height: 72px;
+    }
+
+    .card-header {
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .level-number {
+        font-size: 24px;
+    }
+
+    .indicator-triangle {
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 10px solid currentColor;
+    }
+}
+
+/* 932x430分辨率专用优化 */
+@media screen and (width: 932px) and (height: 430px) {
+    .team-level-card {
+        width: 35px;
+        height: 45px;
+    }
+
+    .card-header {
+        height: 20px;
+        font-size: 10px;
+    }
+
+    .level-number {
+        font-size: 25px;
+    }
+
+    .active-indicator {
+        width: 20px;
+        height: 10px;
+    }
+
+    .indicator-triangle {
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-bottom: 5px solid currentColor;
+    }
+}

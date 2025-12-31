@@ -30,7 +30,18 @@ class AIPlayer {
      * 设置手牌（优化版本，延迟分析）
      */
     setHandCards(cards) {
+        // 复制手牌
         this.handCards = [...cards];
+
+        // 对手牌进行排序（从大到小），使用规则引擎获取权重
+        if (this.gameEngine && this.gameEngine.ruleEngine) {
+            this.handCards.sort((a, b) => {
+                const weightA = this.gameEngine.ruleEngine.getCardWeight(a);
+                const weightB = this.gameEngine.ruleEngine.getCardWeight(b);
+                return weightB - weightA; // 从大到小排序
+            });
+        }
+
         this.memory.updateHandCards(cards);
 
         // 延迟分析手牌，避免阻塞初始化
@@ -84,11 +95,15 @@ class AIPlayer {
             // 只查找基本的单张、对子、三张、炸弹
             for (let rank in rankGroups) {
                 const group = rankGroups[rank];
+                // 使用规则引擎获取牌权重（模块化，不内嵌）
+                const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                    this.ruleEngine.getCardWeight(group[0]) :
+                    this.getBasicCardValue(rank);
 
                 if (group.length >= 1) {
                     // 单张
                     cardTypes.singles.push({
-                        type: { type: 'single', power: this.getBasicCardValue(rank) },
+                        type: { type: 'single', power: cardWeight },
                         cards: [group[0]]
                     });
                 }
@@ -96,7 +111,7 @@ class AIPlayer {
                 if (group.length >= 2) {
                     // 对子
                     cardTypes.pairs.push({
-                        type: { type: 'pair', power: this.getBasicCardValue(rank) * 2 },
+                        type: { type: 'pair', power: cardWeight * 2 },
                         cards: [group[0], group[1]]
                     });
                 }
@@ -104,7 +119,7 @@ class AIPlayer {
                 if (group.length >= 3) {
                     // 三张
                     cardTypes.triples.push({
-                        type: { type: 'triple', power: this.getBasicCardValue(rank) * 3 },
+                        type: { type: 'triple', power: cardWeight * 3 },
                         cards: [group[0], group[1], group[2]]
                     });
                 }
@@ -112,7 +127,7 @@ class AIPlayer {
                 if (group.length >= 4) {
                     // 炸弹
                     cardTypes.bombs.push({
-                        type: { type: 'bomb', power: this.getBasicCardValue(rank) * 4 },
+                        type: { type: 'bomb', power: cardWeight * 4 },
                         cards: group.slice(0, 4)
                     });
                 }
@@ -220,16 +235,18 @@ class AIPlayer {
             strength += bomb.count * 50 + bomb.rank * 10;
         }
 
-        // 大牌加分（添加安全检查）
+        // 大牌加分（使用规则引擎获取权重）
         for (let card of this.handCards) {
             try {
-                // 使用基础牌值计算
-                const basicValue = this.getBasicCardValue(card.rank);
-                if (basicValue >= 13) { // A, 2, 王牌
-                    strength += basicValue * 5;
+                // 使用规则引擎获取牌权重（模块化，不内嵌）
+                const weight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                    this.ruleEngine.getCardWeight(card) :
+                    this.getBasicCardValue(card.rank);
+                if (weight >= 13) { // A, 级牌, 王牌
+                    strength += weight * 5;
                 }
             } catch (error) {
-                // 如果出错，使用基础牌值
+                // 降级处理
                 const basicValue = this.getBasicCardValue(card.rank);
                 if (basicValue >= 13) {
                     strength += basicValue * 5;
@@ -1133,8 +1150,12 @@ class AIStrategy {
                     }
                 });
                 if (biggerCards.length > 0) {
-                    // 选择最小的能打过的牌
-                    biggerCards.sort((a, b) => this.getBasicCardValue(a.rank) - this.getBasicCardValue(b.rank));
+                    // 选择最小的能打过的牌（使用规则引擎权重）
+                    biggerCards.sort((a, b) => {
+                        const weightA = this.gameEngine.ruleEngine.getCardWeight(a);
+                        const weightB = this.gameEngine.ruleEngine.getCardWeight(b);
+                        return weightA - weightB;
+                    });
                     return {
                         action: 'play',
                         cards: [biggerCards[0]],
@@ -1186,8 +1207,16 @@ class AIStrategy {
             const bombs = this.findBombs();
             console.log(`[AIPlayer] 检查炸弹，找到 ${bombs.length} 个炸弹`);
             if (bombs.length > 0) {
-                // 用最小的炸弹打
-                bombs.sort((a, b) => a.count - b.count || this.getBasicCardValue(a.rank) - this.getBasicCardValue(b.rank));
+                // 用最小的炸弹打（使用规则引擎权重）
+                bombs.sort((a, b) => {
+                    if (a.count !== b.count) {
+                        return a.count - b.count;
+                    }
+                    // 使用规则引擎获取权重
+                    const weightA = this.gameEngine.ruleEngine.getCardWeight(a.cards[0]);
+                    const weightB = this.gameEngine.ruleEngine.getCardWeight(b.cards[0]);
+                    return weightA - weightB;
+                });
                 console.log(`[AIPlayer] 出炸弹: ${bombs[0].cards.map(c => c.rank + c.suit).join(',')}`);
                 return {
                     action: 'play',
@@ -1232,10 +1261,13 @@ class AIStrategy {
                     console.warn('获取牌型失败，使用默认值');
                 }
 
+                // 使用规则引擎获取权重（模块化，不内嵌）
+                const cardWeight = this.getCardWeight(smallest);
+
                 return {
                     action: 'play',
                     cards: [smallest],
-                    type: cardType || { type: 'single', power: this.getBasicCardValue(smallest.rank) },
+                    type: cardType || { type: 'single', power: cardWeight },
                     reason: 'fallback_first_play'
                 };
             }
@@ -1535,10 +1567,15 @@ class AIDecisionEngine {
                     console.warn('获取牌型失败:', error);
                 }
 
+                // 使用规则引擎获取权重（模块化，不内嵌）
+                const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                    this.ruleEngine.getCardWeight(smallestSingle) :
+                    this.aiPlayer.getBasicCardValue(smallestSingle.rank);
+
                 return {
                     action: 'play',
                     cards: [smallestSingle],
-                    type: cardType || { type: 'single', power: this.aiPlayer.getBasicCardValue(smallestSingle.rank) },
+                    type: cardType || { type: 'single', power: cardWeight },
                     reason: 'default_first_play'
                 };
             }
@@ -1901,9 +1938,14 @@ class AIDecisionEngine {
                         console.warn('获取单张牌型失败:', error);
                     }
 
+                    // 使用规则引擎获取权重（模块化，不内嵌）
+                    const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                        this.ruleEngine.getCardWeight(card) :
+                        this.aiPlayer.getBasicCardValue(rank);
+
                     candidates.push({
                         cards: [card],
-                        type: cardType || { type: 'single', power: this.aiPlayer.getBasicCardValue(rank) }
+                        type: cardType || { type: 'single', power: cardWeight }
                     });
                 }
             }
@@ -1921,9 +1963,14 @@ class AIDecisionEngine {
                         console.warn('获取对子牌型失败:', error);
                     }
 
+                    // 使用规则引擎获取权重（模块化，不内嵌）
+                    const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                        this.ruleEngine.getCardWeight(pair[0]) :
+                        this.aiPlayer.getBasicCardValue(rank);
+
                     candidates.push({
                         cards: pair,
-                        type: cardType || { type: 'pair', power: this.aiPlayer.getBasicCardValue(rank) * 2 }
+                        type: cardType || { type: 'pair', power: cardWeight * 2 }
                     });
                 }
             }
@@ -1941,9 +1988,14 @@ class AIDecisionEngine {
                         console.warn('获取三张牌型失败:', error);
                     }
 
+                    // 使用规则引擎获取权重（模块化，不内嵌）
+                    const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                        this.ruleEngine.getCardWeight(triple[0]) :
+                        this.aiPlayer.getBasicCardValue(rank);
+
                     candidates.push({
                         cards: triple,
-                        type: cardType || { type: 'triple', power: this.aiPlayer.getBasicCardValue(rank) * 3 }
+                        type: cardType || { type: 'triple', power: cardWeight * 3 }
                     });
                 }
             }
@@ -1961,9 +2013,14 @@ class AIDecisionEngine {
                         console.warn('获取炸弹牌型失败:', error);
                     }
 
+                    // 使用规则引擎获取权重（模块化，不内嵌）
+                    const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                        this.ruleEngine.getCardWeight(bomb[0]) :
+                        this.aiPlayer.getBasicCardValue(rank);
+
                     candidates.push({
                         cards: bomb,
-                        type: cardType || { type: 'bomb', power: this.aiPlayer.getBasicCardValue(rank) * 4 }
+                        type: cardType || { type: 'bomb', power: cardWeight * 4 }
                     });
                 }
             }
@@ -2056,10 +2113,15 @@ class AIDecisionEngine {
                     console.warn('获取牌型失败:', error);
                 }
 
+                // 使用规则引擎获取权重（模块化，不内嵌）
+                const cardWeight = this.ruleEngine && this.ruleEngine.getCardWeight ?
+                    this.ruleEngine.getCardWeight(smallestCard) :
+                    this.aiPlayer.getBasicCardValue(smallestCard.rank);
+
                 return {
                     action: 'play',
                     cards: [smallestCard],
-                    type: cardType || { type: 'single', power: this.aiPlayer.getBasicCardValue(smallestCard.rank) },
+                    type: cardType || { type: 'single', power: cardWeight },
                     reason: 'fallback_first_play'
                 };
             }

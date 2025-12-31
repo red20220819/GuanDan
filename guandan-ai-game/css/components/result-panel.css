@@ -1,0 +1,488 @@
+/* ========================================
+   游戏结果与战绩面板样式
+   ======================================== */
+
+/* 模态框基础 - 提高层级确保在最上层 */
+.game-result-modal,
+.records-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: none;
+}
+
+.game-result-modal:not(.d-none),
+.records-modal:not(.d-none) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 毛玻璃背景遮罩 */
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: auto;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.95) 0%, rgba(52, 73, 94, 0.92) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.modal-close-btn {
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background var(--transition);
+}
+
+.modal-close-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    justify-content: center;
+}
+
+/* ========================================
+   游戏结束结果面板
+   ======================================== */
+
+/* 胜利结果展示 - 简化为一行 */
+.result-winner {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    line-height: 1.4;
+}
+
+.result-winner.winner-our {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.result-winner.winner-enemy {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+/* ========================================
+   队伍级数对比 - 新增
+   ======================================== */
+
+.result-teams-level {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 18px 20px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+}
+
+.team-level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    min-width: 90px;
+}
+
+.team-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.team-level-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.team-a .team-level-value {
+    color: #4CAF50;
+}
+
+.team-b .team-level-value {
+    color: #f44336;
+}
+
+.vs-divider {
+    font-size: 18px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+/* ========================================
+   玩家排名卡片 - 重新设计
+   ======================================== */
+
+.result-rankings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.player-result-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    transition: background var(--transition);
+}
+
+.player-result-card:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 玩家头像 */
+.player-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 玩家信息区域 */
+.player-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.player-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.player-name {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.player-rank-icon {
+    font-size: 16px;
+}
+
+.player-cards-count {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* 玩家类型样式（己方/敌方） */
+.player-result-card.ally {
+    border-left: 3px solid #4CAF50;
+}
+
+.player-result-card.enemy {
+    border-left: 3px solid #f44336;
+}
+
+/* 排名颜色 */
+.rank-1 { color: #FFD700; } /* 金色 - 头游 */
+.rank-2 { color: #C0C0C0; } /* 银色 - 二游 */
+.rank-3 { color: #CD7F32; } /* 铜色 - 三游 */
+.rank-4 { color: #8B4513; } /* 棕色 - 末游 */
+
+/* ========================================
+   历史战绩面板
+   ======================================== */
+
+/* 统计摘要 */
+.records-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    text-align: center;
+    padding: 18px 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+}
+
+.summary-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.summary-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+}
+
+/* 胜率颜色变化 */
+.summary-card.win-high .summary-value {
+    color: #4CAF50;
+}
+
+.summary-card.win-low .summary-value {
+    color: #f44336;
+}
+
+/* 战绩列表 */
+.records-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.records-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.records-list::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 3px;
+}
+
+.records-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+.records-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* 单条记录 */
+.record-item {
+    padding: 14px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background var(--transition);
+}
+
+.record-item:hover {
+    background: rgba(0,0,0,0.3);
+}
+
+.record-item.win {
+    border-left: 3px solid #4CAF50;
+}
+
+.record-item.lose {
+    border-left: 3px solid #f44336;
+}
+
+.record-main {
+    flex: 1;
+}
+
+.record-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.record-date {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+}
+
+.record-result {
+    text-align: right;
+}
+
+.record-levels {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.record-item.win .record-levels {
+    color: #4CAF50;
+}
+
+.record-item.lose .record-levels {
+    color: #f44336;
+}
+
+/* 空状态 */
+.records-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255,255,255,0.4);
+    font-size: 14px;
+}
+
+/* ========================================
+   932x430 移动端适配
+   ======================================== */
+
+@media screen and (width: 932px) and (height: 430px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 12px 15px;
+    }
+
+    /* 胜负信息 - 更紧凑 */
+    .result-winner {
+        font-size: 16px;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+    }
+
+    /* 队伍级数 - 紧凑 */
+    .result-teams-level {
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 12px 15px;
+    }
+
+    .team-level {
+        padding: 8px 14px;
+        min-width: 70px;
+    }
+
+    .team-name {
+        font-size: 12px;
+    }
+
+    .team-level-value {
+        font-size: 16px;
+    }
+
+    .vs-divider {
+        font-size: 16px;
+    }
+
+    /* 玩家卡片 - 紧凑 */
+    .result-rankings {
+        gap: 8px;
+    }
+
+    .player-result-card {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .player-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .player-name {
+        font-size: 13px;
+    }
+
+    .player-rank-icon {
+        font-size: 14px;
+    }
+
+    .player-cards-count {
+        font-size: 11px;
+    }
+
+    /* 战绩面板适配 */
+    .records-summary {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .summary-card {
+        padding: 12px 8px;
+    }
+
+    .summary-value {
+        font-size: 20px;
+    }
+
+    .summary-label {
+        font-size: 10px;
+    }
+
+    .records-list {
+        max-height: 200px;
+    }
+
+    .record-item {
+        padding: 10px;
+    }
+
+    .record-title {
+        font-size: 12px;
+    }
+
+    .record-levels {
+        font-size: 14px;
+    }
+}

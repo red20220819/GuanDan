@@ -459,7 +459,7 @@
 
     /* 出牌区域位置 - 932x430专用（可独立调整） */
     --north-plays-top: -55%;
-    --north-plays-left: calc(50% - 90px);
+    --north-plays-left: calc(50% - 60px);
     --north-plays-right: auto;
     --north-plays-bottom: auto;
 
@@ -469,13 +469,13 @@
     --south-plays-bottom: 20px;
 
     --west-plays-top: 25%;
-    --west-plays-left: -130px;
+    --west-plays-left: -100px;
     --west-plays-right: auto;
     --west-plays-bottom: auto;
 
     --east-plays-top: 25%;
     --east-plays-left: auto;
-    --east-plays-right: -130px;
+    --east-plays-right: -100px;
     --east-plays-bottom: auto;
 
     /* Z-index - 932x430专用 */
@@ -491,7 +491,7 @@
     --action-btn-font-size: 30px;         /* 文字大小 - 独立控制 */
     --action-btn-font-weight: 1000;       /* 字体粗细 */
     --action-btn-border-radius: 32px;     /* 圆角 */
-    --action-btn-gap: 30px;               /* 按钮间隔 */
+    --action-btn-gap: 20px;               /* 按钮间隔 */
     --action-btn-letter-spacing: 0.6em;     /* 文字间距 */
     --action-btn-text-offset: 18px;       /* 文字左右位置 */
 
