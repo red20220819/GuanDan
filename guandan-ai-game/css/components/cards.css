@@ -36,6 +36,21 @@
   /* 性能优化 */
   will-change: transform;
   backface-visibility: hidden;
+
+  /* 触摸事件支持 - 启用划选手牌功能 */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 手牌区域 - 确保触摸事件正确传递 */
+.player-hand-cards,
+#southCards {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* =======================================

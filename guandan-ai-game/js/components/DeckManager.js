@@ -85,14 +85,27 @@ class DeckManager {
     }
 
     /**
+     * 数字级数转换为牌面rank
+     * 2-10 对应 '2'-'10', 11='J', 12='Q', 13='K', 14='A'
+     */
+    levelNumToRank(levelNum) {
+        const levelRankMap = {
+            2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10',
+            11: 'J', 12: 'Q', 13: 'K', 14: 'A'
+        };
+        return levelRankMap[levelNum] || levelNum.toString();
+    }
+
+    /**
      * 更新万能牌（逢人配）
      */
     updateJokerCard() {
+        const levelRank = this.levelNumToRank(this.currentLevel);
         this.jokerCard = {
             suit: '♥',
-            rank: this.currentLevel.toString(),
-            display: this.currentLevel + '♥',
-            value: this.getCardValue(this.currentLevel.toString()),
+            rank: levelRank,
+            display: levelRank + '♥',
+            value: this.getCardValue(levelRank),
             isJoker: true
         };
     }
@@ -110,7 +123,7 @@ class DeckManager {
      * 检查是否为万能牌
      */
     isJokerCard(card) {
-        return card.suit === '♥' && card.rank === this.currentLevel.toString();
+        return card.suit === '♥' && card.rank === this.levelNumToRank(this.currentLevel);
     }
 
     /**
@@ -273,7 +286,7 @@ class DeckManager {
             }
 
             // 统计级牌
-            if (card.rank === this.currentLevel.toString()) {
+            if (card.rank === this.levelNumToRank(this.currentLevel)) {
                 stats.levelCards++;
             }
 

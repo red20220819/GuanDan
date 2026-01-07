@@ -169,7 +169,7 @@
   gap: var(--space-3);
 }
 
-/* 北方玩家（对手） */
+/* 北方玩家（队友） */
 .player-north {
   position: absolute;
   top: 5%;
@@ -197,7 +197,7 @@
   z-index: 10;
 }
 
-/* 西方玩家（队友） */
+/* 西方玩家（对手） */
 .player-west {
   position: absolute;
   top: 50%;

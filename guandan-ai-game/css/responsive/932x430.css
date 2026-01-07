@@ -175,6 +175,16 @@
     background: rgba(231, 76, 60, 0.8) !important;
   }
 
+  /* 队友角标 - 绿色 */
+  .team-badge.teammate-badge {
+    background: rgba(76, 175, 80, 0.9) !important;
+  }
+
+  /* 对手角标 - 红色 */
+  .team-badge.opponent-badge {
+    background: rgba(244, 67, 54, 0.9) !important;
+  }
+
   /* ========================================
      出牌区域样式 - 使用CSS变量，可独立调整位置
      ======================================== */
@@ -353,6 +363,11 @@
   /* 南方玩家手牌紧凑显示 */
   .player-south .player-hand-cards {
     gap: 0 !important;
+    /* 启用划选手牌功能 */
+    touch-action: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
   }
 
   /* 南方玩家手牌 - 1.5倍大小 */
@@ -367,6 +382,11 @@
     max-width: 70px !important;
     max-height: 96px !important;
     margin-left: -44px !important;  /* 间距也相应调整 */
+    /* 启用划选手牌功能 */
+    touch-action: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
   }
 
   #southCards .player-card:first-child {

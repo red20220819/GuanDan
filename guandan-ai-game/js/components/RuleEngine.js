@@ -40,6 +40,18 @@ class RuleEngine {
     }
 
     /**
+     * 数字级数转换为牌面rank
+     * 2-10 对应 '2'-'10', 11='J', 12='Q', 13='K', 14='A'
+     */
+    levelNumToRank(levelNum) {
+        const levelRankMap = {
+            2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10',
+            11: 'J', 12: 'Q', 13: 'K', 14: 'A'
+        };
+        return levelRankMap[levelNum] || levelNum.toString();
+    }
+
+    /**
      * 设置当前级数
      */
     setLevel(level) {
@@ -58,6 +70,13 @@ class RuleEngine {
     }
 
     /**
+     * 获取当前级数的牌面rank
+     */
+    getCurrentLevelRank() {
+        return this.levelNumToRank(this.currentLevel);
+    }
+
+    /**
      * 检查是否为级牌（逢人配/万能牌）
      * 注意：这只识别红桃级牌（逢人配），不识别其他花色的级牌
      */
@@ -70,7 +89,7 @@ class RuleEngine {
      * 用于识别当前级别的所有牌，方便显示样式
      */
     isAnyLevelCard(card) {
-        return card.rank === this.currentLevel.toString();
+        return card.rank === this.levelNumToRank(this.currentLevel);
     }
 
     /**
@@ -78,7 +97,7 @@ class RuleEngine {
      * 万能牌，可以替代任意牌
      */
     isWildCard(card) {
-        if (card.suit === '♥' && card.rank === this.currentLevel.toString()) {
+        if (card.suit === '♥' && card.rank === this.levelNumToRank(this.currentLevel)) {
             return true;
         }
         return false;
@@ -416,8 +435,8 @@ class RuleEngine {
             }
         }
 
-        // 连对（3对以上连续对子）
-        if (count >= 6 && count % 2 === 0) {
+        // 连对（3-5对连续对子，即6-10张牌）
+        if (count >= 6 && count <= 10 && count % 2 === 0) {
             // 先检查天然连对
             const pairStraight = this.checkPairStraight(cards);
             if (pairStraight) {
@@ -609,21 +628,54 @@ class RuleEngine {
     }
 
     /**
+     * 获取牌的原始点数权重（用于连续牌型：顺子、连对、钢板）
+     * 在这些牌型中，级牌使用其原始点数而非权重101
+     */
+    getCardWeightForSequence(card) {
+        // 王牌权重
+        if (card.rank === 'small' || card.rank === '小王') {
+            return 102;
+        }
+        if (card.rank === 'big' || card.rank === '大王') {
+            return 103;
+        }
+
+        // 级牌使用原始点数（如7就是7，不是101）
+        if (this.isAnyLevelCard(card)) {
+            // 将级牌rank转换为数字
+            const rankToNum = {
+                '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+                'J': 11, 'Q': 12, 'K': 13, 'A': 14
+            };
+            return rankToNum[card.rank] || 0;
+        }
+
+        // 普通牌权重
+        return this.cardWeights[card.rank] || 0;
+    }
+
+    /**
      * 检查顺子（不含逢人配）
+     * 级牌可以参与，使用其原始点数
      */
     checkStraight(cards) {
         if (cards.length < 5) return null;
 
-        // 排序
-        const sorted = [...cards].sort((a, b) => this.getCardWeight(a) - this.getCardWeight(b));
+        // 排序（使用连续牌型权重）
+        const sorted = [...cards].sort((a, b) => this.getCardWeightForSequence(a) - this.getCardWeightForSequence(b));
 
         // 检查所有牌是否符合顺子要求
         for (let i = 0; i < sorted.length; i++) {
             const card = sorted[i];
-            const weight = this.getCardWeight(card);
+            const weight = this.getCardWeightForSequence(card);
 
-            // 2、王牌和所有级牌（包括逢人配）不能参与天然顺子
-            if (card.suit === 'joker' || this.isAnyLevelCard(card) || card.rank === '2') {
+            // 王牌不能参与天然顺子
+            if (card.suit === 'joker') {
+                return null;
+            }
+
+            // 2不能参与顺子
+            if (card.rank === '2') {
                 return null;
             }
 
@@ -635,8 +687,8 @@ class RuleEngine {
 
         // 检查连续性
         for (let i = 1; i < sorted.length; i++) {
-            const prevWeight = this.getCardWeight(sorted[i - 1]);
-            const currWeight = this.getCardWeight(sorted[i]);
+            const prevWeight = this.getCardWeightForSequence(sorted[i - 1]);
+            const currWeight = this.getCardWeightForSequence(sorted[i]);
 
             if (currWeight !== prevWeight + 1) {
                 return null;
@@ -644,33 +696,32 @@ class RuleEngine {
         }
 
         return {
-            highCard: this.getCardWeight(sorted[sorted.length - 1])
+            highCard: this.getCardWeightForSequence(sorted[sorted.length - 1])
         };
     }
 
     /**
      * 检查含逢人配的顺子
-     * 逢人配可以代任意非王牌参与顺子
+     * 逢人配（红桃级牌）可以代任意非王牌参与顺子
+     * 其他花色级牌可以作为普通牌参与顺子
      */
     checkStraightWithWildCard(cards) {
         if (cards.length < 5) return null;
 
         // 分离普通牌、逢人配、王牌
         const normalCards = cards.filter(c => !this.isLevelCard(c) && c.suit !== 'joker');
-        const wildCards = cards.filter(c => this.isLevelCard(c));  // 逢人配
+        const wildCards = cards.filter(c => this.isLevelCard(c));  // 逢人配（红桃级牌）
         const jokers = cards.filter(c => c.suit === 'joker');
 
         // 王牌不能参与顺子
         if (jokers.length > 0) return null;
 
-        // 过滤掉不能参与顺子的普通牌（2和其他花色的级牌）
+        // 过滤掉不能参与顺子的普通牌（只有2不能参与）
         const validNormalCards = normalCards.filter(c => {
             // 2不能参与顺子
             if (c.rank === '2') return false;
-            // 其他花色的级牌不能参与顺子
-            if (this.isAnyLevelCard(c)) return false;
-            // 必须在3-A范围内
-            const weight = this.getCardWeight(c);
+            // 必须在3-A范围内（使用连续牌型权重）
+            const weight = this.getCardWeightForSequence(c);
             return weight >= 3 && weight <= 14;
         });
 
@@ -680,22 +731,23 @@ class RuleEngine {
         // 必须至少5张
         if (totalCards < 5) return null;
 
-        // 获取普通牌的权重
-        const weights = validNormalCards.map(c => this.getCardWeight(c)).sort((a, b) => a - b);
+        // 获取普通牌的权重（已排序，使用连续牌型权重）
+        const baseWeights = validNormalCards.map(c => this.getCardWeightForSequence(c)).sort((a, b) => a - b);
 
         // 用逢人配填补缺失的牌，尝试组成顺子
         // 遍历所有可能的顺子起始位置
         for (let start = 3; start <= 14; start++) {
+            // 复制一份权重数组用于本次检查
+            const weights = [...baseWeights];
             let wildUsed = 0;
-            let valid = true;
 
             for (let i = 0; i < totalCards; i++) {
                 const needed = start + i;
 
                 // 检查是否有这张牌
-                if (weights.includes(needed)) {
+                const idx = weights.indexOf(needed);
+                if (idx !== -1) {
                     // 有这张牌，移除已使用的
-                    const idx = weights.indexOf(needed);
                     weights.splice(idx, 1);
                 } else {
                     // 没有这张牌，使用逢人配
@@ -710,21 +762,18 @@ class RuleEngine {
                     wildUsed: wildUsed
                 };
             }
-
-            // 重置weights
-            weights.length = 0;
-            weights.push(...validNormalCards.map(c => this.getCardWeight(c)).sort((a, b) => a - b));
         }
 
         return null;
     }
 
     /**
-     * 检查连对（掼蛋规则：必须是恰好3对，即6张牌）
+     * 检查连对（掼蛋规则：3-5对连续对子，即6-10张牌）
+     * 级牌可以参与，使用其原始点数
      */
     checkPairStraight(cards) {
-        // 连对必须是恰好3对（6张牌）
-        if (cards.length !== 6) return null;
+        // 连对必须是3-5对（6-10张牌）
+        if (cards.length < 6 || cards.length > 10 || cards.length % 2 !== 0) return null;
 
         // 先按点数分组
         const rankGroups = {};
@@ -742,14 +791,14 @@ class RuleEngine {
                 return null;
             }
 
-            // 检查是否为非法牌（2、王牌、所有级牌）
+            // 检查是否为非法牌（2、王牌）
             const card = rankGroups[rank][0];
-            if (card.suit === 'joker' || this.isAnyLevelCard(card) || card.rank === '2') {
+            if (card.suit === 'joker' || card.rank === '2') {
                 return null;
             }
 
-            // 连对只能使用3-A的牌
-            const weight = this.getCardWeight(card);
+            // 连对只能使用3-A的牌（使用连续牌型权重）
+            const weight = this.getCardWeightForSequence(card);
             if (weight < 3 || weight > 14) {
                 return null;
             }
@@ -757,12 +806,12 @@ class RuleEngine {
             pairs.push(rank);
         }
 
-        // 检查连续性
-        pairs.sort((a, b) => this.getCardWeight({rank: a}) - this.getCardWeight({rank: b}));
+        // 检查连续性（使用连续牌型权重）
+        pairs.sort((a, b) => this.getCardWeightForSequence({rank: a}) - this.getCardWeightForSequence({rank: b}));
 
         for (let i = 1; i < pairs.length; i++) {
-            const prevWeight = this.getCardWeight({rank: pairs[i - 1]});
-            const currWeight = this.getCardWeight({rank: pairs[i]});
+            const prevWeight = this.getCardWeightForSequence({rank: pairs[i - 1]});
+            const currWeight = this.getCardWeightForSequence({rank: pairs[i]});
 
             if (currWeight !== prevWeight + 1) {
                 return null;
@@ -770,34 +819,33 @@ class RuleEngine {
         }
 
         return {
-            highCard: this.getCardWeight({rank: pairs[pairs.length - 1]})
+            highCard: this.getCardWeightForSequence({rank: pairs[pairs.length - 1]})
         };
     }
 
     /**
      * 检查含逢人配的连对
-     * 连对必须是恰好3对（6张牌），逢人配可以代任意牌
+     * 连对是3-5对连续对子（6-10张牌），逢人配可以代任意牌
+     * 其他花色级牌可以作为普通牌参与连对
      */
     checkPairStraightWithWildCard(cards) {
-        // 连对必须是恰好6张牌
-        if (cards.length !== 6) return null;
+        // 连对必须是6-10张牌（3-5对）
+        if (cards.length < 6 || cards.length > 10 || cards.length % 2 !== 0) return null;
 
         // 分离普通牌、逢人配、王牌
         const normalCards = cards.filter(c => !this.isLevelCard(c) && c.suit !== 'joker');
-        const wildCards = cards.filter(c => this.isLevelCard(c));  // 逢人配
+        const wildCards = cards.filter(c => this.isLevelCard(c));  // 逢人配（红桃级牌）
         const jokers = cards.filter(c => c.suit === 'joker');
 
         // 王牌不能参与连对
         if (jokers.length > 0) return null;
 
-        // 过滤掉不能参与连对的普通牌
+        // 过滤掉不能参与连对的普通牌（只有2不能参与）
         const validNormalCards = normalCards.filter(c => {
             // 2不能参与连对
             if (c.rank === '2') return false;
-            // 其他花色的级牌不能参与连对
-            if (this.isAnyLevelCard(c)) return false;
-            // 必须在3-A范围内
-            const weight = this.getCardWeight(c);
+            // 必须在3-A范围内（使用连续牌型权重）
+            const weight = this.getCardWeightForSequence(c);
             return weight >= 3 && weight <= 14;
         });
 
@@ -807,11 +855,16 @@ class RuleEngine {
             rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
         });
 
-        // 尝试所有可能的3连对组合（从3-5到Q-A）
-        for (let start = 3; start <= 12; start++) {
-            let wildUsed = 0;
+        // 计算需要的对数（3-5对）
+        const pairCount = cards.length / 2;
 
-            for (let i = 0; i < 3; i++) {
+        // 尝试所有可能的连对组合
+        // 起始点数从3开始，最大到14-pairCount+1（保证不超出A）
+        for (let start = 3; start <= 14 - pairCount + 1; start++) {
+            let wildUsed = 0;
+            let valid = true;
+
+            for (let i = 0; i < pairCount; i++) {
                 const rankStr = this.weightToRank(start + i);
                 const haveCount = rankCounts[rankStr] || 0;
 
@@ -823,11 +876,17 @@ class RuleEngine {
                     wildUsed += 1;
                 }
                 // haveCount === 2 不需要逢人配
+
+                // 检查逢人配数量是否足够
+                if (wildUsed > wildCards.length) {
+                    valid = false;
+                    break;
+                }
             }
 
-            if (wildUsed <= wildCards.length) {
+            if (valid && wildUsed <= wildCards.length) {
                 return {
-                    highCard: start + 2,
+                    highCard: start + pairCount - 1,
                     wildUsed: wildUsed
                 };
             }
@@ -869,14 +928,14 @@ class RuleEngine {
                 return null;
             }
 
-            // 检查是否为非法牌（2、王牌、所有级牌）
+            // 检查是否为非法牌（2、王牌）
             const card = rankGroups[rank][0];
-            if (card.suit === 'joker' || this.isAnyLevelCard(card) || card.rank === '2') {
+            if (card.suit === 'joker' || card.rank === '2') {
                 return null;
             }
 
-            // 钢板只能使用3-A的牌
-            const weight = this.getCardWeight(card);
+            // 钢板只能使用3-A的牌（使用连续牌型权重）
+            const weight = this.getCardWeightForSequence(card);
             if (weight < 3 || weight > 14) {
                 return null;
             }
@@ -884,12 +943,12 @@ class RuleEngine {
             triples.push(rank);
         }
 
-        // 检查连续性
-        triples.sort((a, b) => this.getCardWeight({rank: a}) - this.getCardWeight({rank: b}));
+        // 检查连续性（使用连续牌型权重）
+        triples.sort((a, b) => this.getCardWeightForSequence({rank: a}) - this.getCardWeightForSequence({rank: b}));
 
         for (let i = 1; i < triples.length; i++) {
-            const prevWeight = this.getCardWeight({rank: triples[i - 1]});
-            const currWeight = this.getCardWeight({rank: triples[i]});
+            const prevWeight = this.getCardWeightForSequence({rank: triples[i - 1]});
+            const currWeight = this.getCardWeightForSequence({rank: triples[i]});
 
             if (currWeight !== prevWeight + 1) {
                 return null;
@@ -897,33 +956,32 @@ class RuleEngine {
         }
 
         return {
-            highCard: this.getCardWeight({rank: triples[triples.length - 1]})
+            highCard: this.getCardWeightForSequence({rank: triples[triples.length - 1]})
         };
     }
 
     /**
      * 检查含逢人配的钢板
      * 钢板是2个或更多连续三张，逢人配可以代任意牌
+     * 其他花色级牌可以作为普通牌参与钢板
      */
     checkTripleStraightWithWildCard(cards) {
         if (cards.length < 6 || cards.length % 3 !== 0) return null;
 
         // 分离普通牌、逢人配、王牌
         const normalCards = cards.filter(c => !this.isLevelCard(c) && c.suit !== 'joker');
-        const wildCards = cards.filter(c => this.isLevelCard(c));  // 逢人配
+        const wildCards = cards.filter(c => this.isLevelCard(c));  // 逢人配（红桃级牌）
         const jokers = cards.filter(c => c.suit === 'joker');
 
         // 王牌不能参与钢板
         if (jokers.length > 0) return null;
 
-        // 过滤掉不能参与钢板的普通牌
+        // 过滤掉不能参与钢板的普通牌（只有2不能参与）
         const validNormalCards = normalCards.filter(c => {
             // 2不能参与钢板
             if (c.rank === '2') return false;
-            // 其他花色的级牌不能参与钢板
-            if (this.isAnyLevelCard(c)) return false;
-            // 必须在3-A范围内
-            const weight = this.getCardWeight(c);
+            // 必须在3-A范围内（使用连续牌型权重）
+            const weight = this.getCardWeightForSequence(c);
             return weight >= 3 && weight <= 14;
         });
 
@@ -933,7 +991,9 @@ class RuleEngine {
         // 统计每个点数的牌数量
         const rankCounts = {};
         validNormalCards.forEach(c => {
-            rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
+            // 对于级牌，使用其实际点数（不是权重101）
+            const rank = c.rank;
+            rankCounts[rank] = (rankCounts[rank] || 0) + 1;
         });
 
         // 尝试所有可能的钢板组合

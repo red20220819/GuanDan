@@ -1,5 +1,72 @@
 # 开发日志 (CHANGELOG)
 
+## [2026-01-03] 提示系统优化
+
+### 问题描述
+提示系统优先级不正确，会拆对子/三张来出单张，而不是优先使用已有的单张牌。
+
+**用户反馈示例**：
+- 对方出单张3，手牌有7, 44 → 提示了4（拆了对子），应该提示7
+- 对方出单张3，手牌有7, 4444 → 提示了4（拆了四张），应该提示7
+
+### 修复内容
+
+#### 1. 逻辑优化
+**文件**: `index-modern.html` (第4764-4836行)
+
+在 `findAllPossiblePlays` 函数中添加智能判断逻辑：
+
+1. **检测可用单张**：检查是否有单张牌能管住上家的牌
+2. **标记策略**：如果有可用单张，将以下牌标记为"已用于其他牌型"：
+   - 对子(2张)：全部标记，不拆对子
+   - 三张(3张)：标记2张，保留最后1张
+   - 四张或更多：全部标记，不拆单张（全部保留给炸弹）
+
+#### 2. 代码实现
+```javascript
+// 检查是否有单张能管住上家
+let hasUsableSingle = false;
+if (lastPlay && lastPlay.cards && lastPlay.cards.length === 1) {
+    const lastType = this.rules.getCardType(lastPlay.cards);
+    if (lastType && lastType.type === 'single') {
+        const lastWeight = this.rules.getCardWeight(lastPlay.cards[0]);
+        for (let rank in rankGroups) {
+            if (rankGroups[rank].length === 1) {
+                const weight = this.rules.getCardWeight(rankGroups[rank][0]);
+                if (weight > lastWeight) {
+                    hasUsableSingle = true;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// 根据hasUsableSingle决定是否拆对子/三张/四张
+if (count >= 4) {
+    if (hasUsableSingle) {
+        // 全部标记为已使用，不拆出单张
+        rankGroups[rank].forEach(card =>
+            usedInOtherTypes.add(card.id || `${card.rank}${card.suit}`)
+        );
+    }
+    // ...
+}
+```
+
+### 预期行为
+| 场景 | 手牌 | 对方出牌 | 应提示 |
+|------|------|----------|--------|
+| 有单张 + 对子 | 7, 8, 9, 44 | 单张3 | 7（不拆44） |
+| 有单张 + 四张 | 7, 4444 | 单张3 | 7（不拆4444） |
+| 只有对子 | 44 | 单张3 | 4（必须拆对子） |
+| 只有四张 | 4444 | 单张3 | 4（必须拆四张） |
+
+### 待测试
+- 刷新页面后测试各种场景是否符合预期
+
+---
+
 ## [2025-01-XX] 记分牌UI优化
 
 ### 改进内容
