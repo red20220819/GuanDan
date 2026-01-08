@@ -6,15 +6,6 @@
 
 @media screen and (min-width: 900px) and (max-width: 960px) and (min-height: 400px) and (max-height: 460px) {
   /* ========================================
-     覆盖基础变量 - 使用html选择器而不是:root
-     ======================================== */
-
-  html {
-    --card-base-width: 42px !important;
-    --card-base-height: 57px !important;
-  }
-
-  /* ========================================
      全局设置 - 允许出牌区域自由移动
      ======================================== */
 
@@ -69,12 +60,6 @@
     margin: 0 !important;
     padding: 0 !important;
     z-index: 1000 !important;
-  }
-
-  /* 南方玩家手牌区域 - 留出头像空间 */
-  .player-south .player-hand-cards {
-    margin-left: 100px !important;  /* 为头像留出空间 */
-    gap: 0 !important;
   }
 
   /* ========================================
@@ -362,6 +347,7 @@
 
   /* 南方玩家手牌紧凑显示 */
   .player-south .player-hand-cards {
+    margin-left: 100px !important;  /* 为头像留出空间 */
     gap: 0 !important;
     /* 启用划选手牌功能 */
     touch-action: none !important;
